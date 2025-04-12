@@ -26,6 +26,9 @@ public class ProductRequestDto {
     @Schema(description = "Indica se il prodotto è attivo o meno", example = "true")
     private Boolean active;
 
+    public ProductRequestDto() {
+    }
+
     // Costruttore, Getters e Setters
     public ProductRequestDto(String sku, String ean13, Integer weight, Long category, String retailPrice,
             Boolean active) {

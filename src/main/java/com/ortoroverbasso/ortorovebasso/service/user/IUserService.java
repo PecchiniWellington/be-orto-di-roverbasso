@@ -1,11 +1,14 @@
 package com.ortoroverbasso.ortorovebasso.service.user;
 
-import com.ortoroverbasso.ortorovebasso.model.User;
+import java.util.List;
+
+import com.ortoroverbasso.ortorovebasso.dto.User.UserRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.User.UserResponseDto;
 
 public interface IUserService {
-    User createUser(User user);
+    List<UserResponseDto> getAllUsers();
 
-    User getAllUsers();
+    UserResponseDto createUser(UserRequestDto dto);
 
-    User getUserById(Long id);
+    UserResponseDto getUserById(Long id);
 }

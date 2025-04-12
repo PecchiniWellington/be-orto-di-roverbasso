@@ -1,9 +1,11 @@
 package com.ortoroverbasso.ortorovebasso.service.product;
 
-import com.ortoroverbasso.ortorovebasso.model.Product;
+import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
 
 public interface IProductService {
 
-    Product createProduct(Product product);
+    ProductResponseDto createProduct(ProductRequestDto product);
+
     // Qui aggiungerò altri metodi come updateProduct(), getProductById(), ecc.
 }

@@ -2,6 +2,9 @@ package com.ortoroverbasso.ortorovebasso.service.product.impl;
 
 import org.springframework.stereotype.Service;
 
+import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
+import com.ortoroverbasso.ortorovebasso.mapper.ProductMapper;
 import com.ortoroverbasso.ortorovebasso.model.Product;
 import com.ortoroverbasso.ortorovebasso.repository.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
@@ -16,8 +19,10 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public Product createProduct(Product product) {
-        return productRepository.save(product);
+    public ProductResponseDto createProduct(ProductRequestDto productRequestDto) {
+        Product product = ProductMapper.toEntity(productRequestDto);
+        Product savedProduct = productRepository.save(product);
+        return ProductMapper.toResponseDto(savedProduct);
     }
 
     // qui implementerò altri metodi richiesti dall'interfaccia IProductService

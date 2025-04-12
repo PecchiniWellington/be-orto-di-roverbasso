@@ -14,7 +14,7 @@ import com.ortoroverbasso.ortorovebasso.repository.UserRepository;
 import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
 
 @Service
-public class UserServiceImpl extends IUserService {
+public class UserServiceImpl implements IUserService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
@@ -24,6 +24,7 @@ public class UserServiceImpl extends IUserService {
     this.passwordEncoder = passwordEncoder;
   }
 
+  @Override
   public List<UserResponseDto> getAllUsers() {
     return userRepository.findAll()
         .stream()
@@ -31,12 +32,18 @@ public class UserServiceImpl extends IUserService {
         .collect(Collectors.toList());
   }
 
+  @Override
   public UserResponseDto createUser(UserRequestDto dto) {
     User user = UserMapper.toEntity(dto);
     String encrypted = passwordEncoder.encode(user.getPassword());
     user.setPassword(encrypted);
     User saved = userRepository.save(user);
     return UserMapper.toResponseDto(saved);
+  }
+
+  @Override
+  public UserResponseDto getUserById(Long id) {
+    throw new UnsupportedOperationException("Unimplemented method 'getUserById'");
   }
 
 }
