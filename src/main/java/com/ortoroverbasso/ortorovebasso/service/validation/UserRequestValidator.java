@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.validator;
+package com.ortoroverbasso.ortorovebasso.service.validation;
 
 import java.util.HashMap;
 import java.util.Map;

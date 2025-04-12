@@ -6,7 +6,7 @@ import java.util.Random;
 import org.springframework.stereotype.Service;
 
 import com.github.javafaker.Faker;
-import com.ortoroverbasso.ortorovebasso.model.Product;
+import com.ortoroverbasso.ortorovebasso.model.product.Product;
 import com.ortoroverbasso.ortorovebasso.repository.ProductRepository;
 
 @Service

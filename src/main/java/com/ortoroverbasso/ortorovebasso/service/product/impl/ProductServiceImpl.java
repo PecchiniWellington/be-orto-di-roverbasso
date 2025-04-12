@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.mapper.ProductMapper;
-import com.ortoroverbasso.ortorovebasso.model.Product;
+import com.ortoroverbasso.ortorovebasso.model.product.Product;
 import com.ortoroverbasso.ortorovebasso.repository.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
 

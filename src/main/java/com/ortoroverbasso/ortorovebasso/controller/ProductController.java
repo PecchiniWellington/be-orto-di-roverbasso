@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
-import com.ortoroverbasso.ortorovebasso.mapper.ProductMapper;
-import com.ortoroverbasso.ortorovebasso.model.Product;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
 
 @RestController
@@ -23,8 +21,6 @@ public class ProductController {
 
     @PostMapping
     public ProductResponseDto createProduct(@RequestBody ProductRequestDto dto) {
-        Product product = ProductMapper.toEntity(dto);
-        Product savedProduct = productService.createProduct(product);
-        return ProductMapper.toResponseDto(savedProduct);
+        return productService.createProduct(dto);
     }
 }

@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ortoroverbasso.ortorovebasso.dto.User.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.User.UserResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.user.impl.UserServiceImpl;
-import com.ortoroverbasso.ortorovebasso.validator.UserRequestValidator;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -36,7 +35,6 @@ public class UserController {
   @ApiResponse(responseCode = "400", description = "Errore di validazione multipla")
   @PostMapping
   public UserResponseDto create(@RequestBody UserRequestDto dto) {
-    UserRequestValidator.validate(dto);
     return userService.createUser(dto);
   }
 

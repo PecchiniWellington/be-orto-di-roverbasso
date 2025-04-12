@@ -1,5 +1,5 @@
 
-package com.ortoroverbasso.ortorovebasso.model;
+package com.ortoroverbasso.ortorovebasso.model.product;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

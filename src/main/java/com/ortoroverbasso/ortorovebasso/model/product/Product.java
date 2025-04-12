@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.model;
+package com.ortoroverbasso.ortorovebasso.model.product;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
