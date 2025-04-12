@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import exception.MultiFieldValidationException;
+import com.ortoroverbasso.ortorovebasso.exception.MultiFieldValidationException;
 
 @RestControllerAdvice
 public class ValidationExceptionHandler {
@@ -16,7 +16,6 @@ public class ValidationExceptionHandler {
   public ResponseEntity<Map<String, Map<String, String>>> handleMultiple(MultiFieldValidationException ex) {
     return new ResponseEntity<>(
         Map.of("errors", ex.getErrors()),
-        HttpStatus.BAD_REQUEST
-    );
+        HttpStatus.BAD_REQUEST);
   }
 }

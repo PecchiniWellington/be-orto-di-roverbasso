@@ -52,3 +52,8 @@ build/
 # Application properties or YAML configurations
 application.properties
 application.yml
+
+
+# Remove run-dev.sh
+run-dev.sh
+run-production.sh

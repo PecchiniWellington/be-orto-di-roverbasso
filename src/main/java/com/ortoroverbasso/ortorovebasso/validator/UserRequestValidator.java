@@ -4,8 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ortoroverbasso.ortorovebasso.dto.User.UserRequestDto;
-
-import exception.MultiFieldValidationException;
+import com.ortoroverbasso.ortorovebasso.exception.MultiFieldValidationException;
 
 public class UserRequestValidator {
 

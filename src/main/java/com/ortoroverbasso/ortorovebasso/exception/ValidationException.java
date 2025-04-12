@@ -1,4 +1,4 @@
-package exception;
+package com.ortoroverbasso.ortorovebasso.exception;
 
 public class ValidationException extends RuntimeException {
 

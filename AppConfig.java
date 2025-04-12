@@ -28,7 +28,5 @@ public class AppConfig {
         System.out.println("DB_DRIVER: " + dbDriver);
         System.out.println("SSL Mode: " + dbSslMode);
 
-        // Puoi utilizzare questi parametri per configurare la connessione al database
-        // (se necessario)
     }
 }

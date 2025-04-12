@@ -1,4 +1,4 @@
-package exception;
+package com.ortoroverbasso.ortorovebasso.exception;
 
 import java.util.Map;
 
