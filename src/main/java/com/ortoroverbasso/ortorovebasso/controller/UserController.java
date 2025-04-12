@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ortoroverbasso.ortorovebasso.dto.User.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.User.UserResponseDto;
-import com.ortoroverbasso.ortorovebasso.service.UserService;
+import com.ortoroverbasso.ortorovebasso.service.user.impl.UserServiceImpl;
 import com.ortoroverbasso.ortorovebasso.validator.UserRequestValidator;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,9 +20,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 @RequestMapping("/api/users")
 public class UserController {
 
-  private final UserService userService;
+  private final UserServiceImpl userService;
 
-  public UserController(UserService userService) {
+  public UserController(UserServiceImpl userService) {
     this.userService = userService;
   }
 
@@ -33,10 +33,7 @@ public class UserController {
   }
 
   @Operation(summary = "Crea un nuovo utente")
-  @ApiResponse(
-    responseCode = "400",
-    description = "Errore di validazione multipla"
-  )
+  @ApiResponse(responseCode = "400", description = "Errore di validazione multipla")
   @PostMapping
   public UserResponseDto create(@RequestBody UserRequestDto dto) {
     UserRequestValidator.validate(dto);

@@ -9,15 +9,15 @@ import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.mapper.ProductMapper;
 import com.ortoroverbasso.ortorovebasso.model.Product;
-import com.ortoroverbasso.ortorovebasso.service.product.ProductService;
+import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
 
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private final ProductService productService;
+    private final IProductService productService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(IProductService productService) {
         this.productService = productService;
     }
 

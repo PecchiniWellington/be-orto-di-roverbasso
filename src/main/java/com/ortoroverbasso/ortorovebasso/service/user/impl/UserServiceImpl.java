@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.service;
+package com.ortoroverbasso.ortorovebasso.service.user.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,16 +11,15 @@ import com.ortoroverbasso.ortorovebasso.dto.User.UserResponseDto;
 import com.ortoroverbasso.ortorovebasso.mapper.UserMapper;
 import com.ortoroverbasso.ortorovebasso.model.User;
 import com.ortoroverbasso.ortorovebasso.repository.UserRepository;
-
-
+import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
 
 @Service
-public class UserService {
+public class UserServiceImpl extends IUserService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
 
-  public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+  public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
   }
