@@ -13,7 +13,8 @@ public class UserResponseDto {
   @Schema(description = "Email dell'utente", example = "francesco@email.com")
   private String email;
 
-  public UserResponseDto() {}
+  public UserResponseDto() {
+  }
 
   public UserResponseDto(Long id, String name, String email) {
     this.id = id;

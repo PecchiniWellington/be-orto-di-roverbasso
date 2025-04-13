@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(scanBasePackages = "com.ortoroverbasso.ortorovebasso")
 @EnableJpaRepositories("com.ortoroverbasso.ortorovebasso.repository")
-@EntityScan("com.ortoroverbasso.ortorovebasso.model")
+@EntityScan("com.ortoroverbasso.ortorovebasso.entity")
 public class OrtorovebassoApplication {
 
 	public static void main(String[] args) {

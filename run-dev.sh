@@ -6,5 +6,6 @@ export DB_PASSWORD=npg_7gLUmy3CRQDO
 export DB_DRIVER=org.postgresql.Driver
 export DB_SSL_MODE=require
 
+#mvn clean install
 # Esegui l'app con Maven
 mvn spring-boot:run

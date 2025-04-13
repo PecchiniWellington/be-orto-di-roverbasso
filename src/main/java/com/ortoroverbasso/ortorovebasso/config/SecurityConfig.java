@@ -26,26 +26,28 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
         .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // Crea sessione solo quando necessario
-            .invalidSessionUrl("/login") // URL di reindirizzamento se la sessione scade
+            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+        /* .invalidSessionUrl("/login") */
         )
         .headers(headers -> headers
             .httpStrictTransportSecurity(hsts -> hsts
                 .includeSubDomains(true)
                 .maxAgeInSeconds(31536000))) // Abilita HSTS per proteggere l'uso di HTTPS
-        .authorizeHttpRequests(requests -> requests
-            .requestMatchers("/").permitAll()
-            .requestMatchers("/admin").hasRole("ADMIN")
-            .requestMatchers("/dashboard").hasRole("ADMIN")
-            .requestMatchers("/profile").authenticated()
-            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            .anyRequest().authenticated())
         .formLogin(login -> login
             .loginPage("/login")
             .permitAll())
         .logout(logout -> logout
             .logoutUrl("/logout")
             .permitAll())
+        .authorizeHttpRequests(requests -> requests
+            .requestMatchers("/").permitAll()
+            .requestMatchers("/api/**").permitAll()
+            .requestMatchers("/admin").hasRole("ADMIN")
+            .requestMatchers("/dashboard").hasRole("ADMIN")
+            .requestMatchers("/profile").authenticated()
+            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+        /* .anyRequest().authenticated() */)
+
         .exceptionHandling(handling -> handling
             .accessDeniedPage("/access-denied"));
     /*

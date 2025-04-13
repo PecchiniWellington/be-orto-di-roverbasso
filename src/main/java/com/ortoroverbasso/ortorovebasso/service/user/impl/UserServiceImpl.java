@@ -24,25 +24,33 @@ public class UserServiceImpl implements IUserService {
 
   @Override
   public UserResponseDto createUser(UserRequestDto dto) {
+    // Validazione
     UserRequestValidator.validate(dto);
 
+    // Conversione da DTO a entità
     User user = UserMapper.toEntity(dto);
+
+    // Salvataggio nel database
     User savedUser = userRepository.save(user);
+
+    // Conversione da entità a DTO per la risposta
     return UserMapper.toResponseDto(savedUser);
   }
 
   @Override
   public List<UserResponseDto> getAllUsers() {
+    // Recupero tutti gli utenti dal database
     return userRepository.findAll()
         .stream()
-        .map(UserMapper::toResponseDto)
+        .map(UserMapper::toResponseDto) // Conversione da entità a DTO
         .collect(Collectors.toList());
   }
 
   @Override
   public UserResponseDto getUserById(Long id) {
+    // Recupero un utente per ID, se non trovato lancia un'eccezione
     return userRepository.findById(id)
-        .map(UserMapper::toResponseDto)
+        .map(UserMapper::toResponseDto) // Conversione da entità a DTO
         .orElseThrow(() -> new RuntimeException("User not found"));
   }
 
