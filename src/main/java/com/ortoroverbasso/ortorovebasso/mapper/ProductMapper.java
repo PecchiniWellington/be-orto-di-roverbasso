@@ -2,7 +2,7 @@ package com.ortoroverbasso.ortorovebasso.mapper;
 
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
-import com.ortoroverbasso.ortorovebasso.model.product.Product;
+import com.ortoroverbasso.ortorovebasso.entity.product.Product;
 
 public class ProductMapper {
 

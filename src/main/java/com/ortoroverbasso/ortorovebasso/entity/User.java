@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.model;
+package com.ortoroverbasso.ortorovebasso.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,7 +18,8 @@ public class User {
   private String email;
   private String password;
 
-  public User() {}
+  public User() {
+  }
 
   public User(Long id, String name, String email, String password) {
     this.id = id;

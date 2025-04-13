@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.ortoroverbasso.ortorovebasso.dto.User.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.User.UserResponseDto;
+import com.ortoroverbasso.ortorovebasso.entity.User;
 import com.ortoroverbasso.ortorovebasso.mapper.UserMapper;
-import com.ortoroverbasso.ortorovebasso.model.User;
 import com.ortoroverbasso.ortorovebasso.repository.UserRepository;
 import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
 import com.ortoroverbasso.ortorovebasso.service.validation.UserRequestValidator;

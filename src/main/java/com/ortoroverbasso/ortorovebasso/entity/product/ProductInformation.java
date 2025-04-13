@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.model.product;
+package com.ortoroverbasso.ortorovebasso.entity.product;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
