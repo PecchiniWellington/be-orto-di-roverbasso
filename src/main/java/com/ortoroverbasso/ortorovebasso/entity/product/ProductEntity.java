@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "products")
-public class Product {
+public class ProductEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,7 +54,7 @@ public class Product {
     private Double canon;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PriceLargeQuantity> priceLargeQuantities = new ArrayList<>();
+    private List<PriceLargeQuantityEntity> priceLargeQuantities = new ArrayList<>();
 
     public Long getManufacturer() {
         return manufacturer;
@@ -296,11 +296,11 @@ public class Product {
         this.dateUpdCategories = dateUpdCategories;
     }
 
-    public List<PriceLargeQuantity> getPriceLargeQuantities() {
+    public List<PriceLargeQuantityEntity> getPriceLargeQuantities() {
         return priceLargeQuantities;
     }
 
-    public void setPriceLargeQuantities(List<PriceLargeQuantity> priceLargeQuantities) {
+    public void setPriceLargeQuantities(List<PriceLargeQuantityEntity> priceLargeQuantities) {
         this.priceLargeQuantities = priceLargeQuantities;
     }
 

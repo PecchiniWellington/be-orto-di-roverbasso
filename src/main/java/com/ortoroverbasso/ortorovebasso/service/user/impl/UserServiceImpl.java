@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.ortoroverbasso.ortorovebasso.dto.User.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.User.UserResponseDto;
-import com.ortoroverbasso.ortorovebasso.entity.User;
+import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 import com.ortoroverbasso.ortorovebasso.mapper.UserMapper;
 import com.ortoroverbasso.ortorovebasso.repository.UserRepository;
 import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
@@ -28,10 +28,10 @@ public class UserServiceImpl implements IUserService {
     UserRequestValidator.validate(dto);
 
     // Conversione da DTO a entità
-    User user = UserMapper.toEntity(dto);
+    UserEntity user = UserMapper.toEntity(dto);
 
     // Salvataggio nel database
-    User savedUser = userRepository.save(user);
+    UserEntity savedUser = userRepository.save(user);
 
     // Conversione da entità a DTO per la risposta
     return UserMapper.toResponseDto(savedUser);

@@ -6,7 +6,7 @@ import java.util.Random;
 import org.springframework.stereotype.Service;
 
 import com.github.javafaker.Faker;
-import com.ortoroverbasso.ortorovebasso.entity.product.Product;
+import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.repository.ProductRepository;
 
 @Service
@@ -22,7 +22,7 @@ public class ProductSeederService {
 
     public void seedProducts(int count) {
         for (int i = 0; i < count; i++) {
-            Product p = new Product();
+            ProductEntity p = new ProductEntity();
             p.setId(faker.number().randomNumber());
             p.setManufacturer(faker.number().randomNumber());
             p.setSku(faker.code().isbn10());

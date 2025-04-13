@@ -2,13 +2,13 @@ package com.ortoroverbasso.ortorovebasso.mapper;
 
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
-import com.ortoroverbasso.ortorovebasso.entity.product.Product;
+import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
 public class ProductMapper {
 
     // Converte ProductRequestDto in un'entità Product
-    public static Product toEntity(ProductRequestDto dto) {
-        Product product = new Product();
+    public static ProductEntity toEntity(ProductRequestDto dto) {
+        ProductEntity product = new ProductEntity();
         product.setSku(dto.getSku());
         product.setWeight(dto.getWeight());
         product.setCategory(dto.getCategory());
@@ -18,7 +18,7 @@ public class ProductMapper {
     }
 
     // Converte Product in ProductResponseDto
-    public static ProductResponseDto toResponseDto(Product product) {
+    public static ProductResponseDto toResponseDto(ProductEntity product) {
         return new ProductResponseDto(
                 product.getId(),
                 product.getSku(),

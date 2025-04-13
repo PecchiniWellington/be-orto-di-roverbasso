@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
-import com.ortoroverbasso.ortorovebasso.entity.product.Product;
+import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.mapper.ProductMapper;
 import com.ortoroverbasso.ortorovebasso.repository.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
@@ -22,14 +22,14 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public ProductResponseDto createProduct(ProductRequestDto productRequestDto) {
-        Product product = ProductMapper.toEntity(productRequestDto);
-        Product savedProduct = productRepository.save(product);
+        ProductEntity product = ProductMapper.toEntity(productRequestDto);
+        ProductEntity savedProduct = productRepository.save(product);
         return ProductMapper.toResponseDto(savedProduct);
     }
 
     @Override
     public List<ProductResponseDto> getAllProducts() {
-        List<Product> products = productRepository.findAll();
+        List<ProductEntity> products = productRepository.findAll();
         return products.stream()
                 .map(ProductMapper::toResponseDto)
                 .toList();

@@ -5,13 +5,13 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.ortoroverbasso.ortorovebasso.entity.product.Product;
+import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
-    List<Product> findByCategory(Long category);
+    List<ProductEntity> findByCategory(Long category);
 
-    List<Product> findBySkuContainingIgnoreCase(String sku);
+    List<ProductEntity> findBySkuContainingIgnoreCase(String sku);
 
 }
