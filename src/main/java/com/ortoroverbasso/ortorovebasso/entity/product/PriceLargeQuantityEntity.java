@@ -28,7 +28,6 @@ public class PriceLargeQuantityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Integer quantity;
     private Double price;
 

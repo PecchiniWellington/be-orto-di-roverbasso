@@ -11,5 +11,4 @@ public interface IProductService {
 
     List<ProductResponseDto> getAllProducts();
 
-    // Qui aggiungerò altri metodi come updateProduct(), getProductById(), ecc.
 }

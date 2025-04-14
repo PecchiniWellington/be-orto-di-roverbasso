@@ -1,7 +1,13 @@
 package com.ortoroverbasso.ortorovebasso.dto.Product;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProductResponseDto {
 
     @Schema(description = "ID del prodotto", example = "1")
@@ -22,67 +28,4 @@ public class ProductResponseDto {
     @Schema(description = "Indica se il prodotto è attivo o meno", example = "true")
     private Boolean active;
 
-    // Costruttore, Getters e Setters
-    public ProductResponseDto(
-            Long id,
-            String sku,
-            String retailPrice,
-            Long category,
-            Integer weight,
-            Boolean active) {
-        this.id = id;
-        this.sku = sku;
-        this.retailPrice = retailPrice;
-        this.category = category;
-        this.weight = weight;
-        this.active = active;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getSku() {
-        return sku;
-    }
-
-    public void setSku(String sku) {
-        this.sku = sku;
-    }
-
-    public String getRetailPrice() {
-        return retailPrice;
-    }
-
-    public void setRetailPrice(String retailPrice) {
-        this.retailPrice = retailPrice;
-    }
-
-    public Long getCategory() {
-        return category;
-    }
-
-    public void setCategory(Long category) {
-        this.category = category;
-    }
-
-    public Integer getWeight() {
-        return weight;
-    }
-
-    public void setWeight(Integer weight) {
-        this.weight = weight;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
 }
