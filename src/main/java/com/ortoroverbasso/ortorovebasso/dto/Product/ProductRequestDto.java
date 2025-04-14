@@ -26,22 +26,44 @@ public class ProductRequestDto {
     @Schema(description = "Indica se il prodotto è attivo o meno", example = "true")
     private Boolean active;
 
-    // Costruttore vuoto
+    // Additional fields for ProductInformation
+    @Schema(description = "Nome del prodotto", example = "Prodotto XYZ")
+    private String name;
+
+    @Schema(description = "Descrizione del prodotto", example = "Descrizione del prodotto XYZ")
+    private String description;
+
+    @Schema(description = "URL del prodotto", example = "http://example.com/prodotto-xyz")
+    private String url;
+
+    @Schema(description = "Codice ISO del prodotto", example = "IT")
+    private String isoCode;
+
+    @Schema(description = "Data di aggiornamento della descrizione", example = "2025-04-14T14:00:00")
+    private String dateUpdDescription;
+
+    // Default constructor
     public ProductRequestDto() {
     }
 
-    // Costruttore con tutti i campi
+    // Constructor with all fields
     public ProductRequestDto(String sku, String ean13, Integer weight, Long category, String retailPrice,
-            Boolean active) {
+            Boolean active, String name, String description, String url, String isoCode, String dateUpdDescription) {
         this.sku = sku;
         this.ean13 = ean13;
         this.weight = weight;
         this.category = category;
         this.retailPrice = retailPrice;
         this.active = active;
+        this.name = name;
+        this.description = description;
+        this.url = url;
+        this.isoCode = isoCode;
+        this.dateUpdDescription = dateUpdDescription;
     }
 
-    // Getter e Setter
+    // Getters and Setters for all fields
+
     public String getSku() {
         return sku;
     }
@@ -88,5 +110,46 @@ public class ProductRequestDto {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    // Additional getters and setters for ProductInformation
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getIsoCode() {
+        return isoCode;
+    }
+
+    public void setIsoCode(String isoCode) {
+        this.isoCode = isoCode;
+    }
+
+    public String getDateUpdDescription() {
+        return dateUpdDescription;
+    }
+
+    public void setDateUpdDescription(String dateUpdDescription) {
+        this.dateUpdDescription = dateUpdDescription;
     }
 }

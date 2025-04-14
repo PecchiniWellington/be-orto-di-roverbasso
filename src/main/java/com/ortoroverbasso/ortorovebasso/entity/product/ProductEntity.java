@@ -6,6 +6,7 @@ import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -57,9 +58,13 @@ public class ProductEntity {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PriceLargeQuantityEntity> priceLargeQuantities = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sku", referencedColumnName = "sku", insertable = false, updatable = false)
     private ProductInformationEntity productInformation;
+
+    public ProductInformationEntity getProductInformation() {
+        return productInformation != null ? productInformation : new ProductInformationEntity();
+    }
 
     // Default constructor
     public ProductEntity() {
@@ -382,10 +387,6 @@ public class ProductEntity {
 
     public void setPriceLargeQuantities(List<PriceLargeQuantityEntity> priceLargeQuantities) {
         this.priceLargeQuantities = priceLargeQuantities;
-    }
-
-    public ProductInformationEntity getProductInformation() {
-        return productInformation;
     }
 
     public void setProductInformation(ProductInformationEntity productInformation) {

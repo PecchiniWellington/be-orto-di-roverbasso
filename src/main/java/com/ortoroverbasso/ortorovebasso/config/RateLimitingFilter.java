@@ -10,12 +10,11 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 
-@WebFilter("/*")
+@WebFilter("/admin")
 public class RateLimitingFilter implements Filter {
 
-    // Esempio di variabili per il rate limit
-    private static final int MAX_REQUESTS = 100; // Max 100 richieste
-    private static final long TIME_FRAME = 60 * 1000; // Periodo di tempo di 1 minuto
+    private static final int MAX_REQUESTS = 100;
+    private static final long TIME_FRAME = 60 * 1000;
 
     private static long lastRequestTime = System.currentTimeMillis();
     private static int requestCount = 0;
@@ -31,13 +30,11 @@ public class RateLimitingFilter implements Filter {
 
         long currentTime = System.currentTimeMillis();
 
-        // Resetta il contatore dopo il periodo di tempo definito
         if (currentTime - lastRequestTime > TIME_FRAME) {
             requestCount = 0;
             lastRequestTime = currentTime;
         }
 
-        // Aumenta il contatore delle richieste
         requestCount++;
 
         if (requestCount > MAX_REQUESTS) {
@@ -45,7 +42,6 @@ public class RateLimitingFilter implements Filter {
             return;
         }
 
-        // Se il rate limit non è stato superato, passa al filtro successivo
         chain.doFilter(request, response);
     }
 

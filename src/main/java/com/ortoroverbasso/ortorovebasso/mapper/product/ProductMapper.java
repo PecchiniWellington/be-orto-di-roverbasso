@@ -1,5 +1,8 @@
 package com.ortoroverbasso.ortorovebasso.mapper.product;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.ProductInformation.ProductInformationResponseDto;
@@ -17,6 +20,7 @@ public class ProductMapper {
         return product;
     }
 
+    // Method to convert ProductEntity to ProductResponseDto
     public static ProductResponseDto toResponseDto(ProductEntity product) {
         ProductInformationResponseDto productInfoDto = new ProductInformationResponseDto(
                 product.getProductInformation().getId(),
@@ -35,5 +39,12 @@ public class ProductMapper {
                 product.getWeight(),
                 product.getActive() == 1,
                 productInfoDto);
+    }
+
+    // Method to convert List<ProductEntity> to List<ProductResponseDto>
+    public static List<ProductResponseDto> toResponseDto(List<ProductEntity> products) {
+        return products.stream()
+                .map(ProductMapper::toResponseDto) // Convert each ProductEntity to ProductResponseDto
+                .collect(Collectors.toList());
     }
 }
