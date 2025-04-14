@@ -11,4 +11,8 @@ public interface IProductService {
 
     List<ProductResponseDto> getAllProducts();
 
+    ProductResponseDto getProductBySku(String sku);
+
+    ProductResponseDto getProductInformationBySku(String sku);
+
 }

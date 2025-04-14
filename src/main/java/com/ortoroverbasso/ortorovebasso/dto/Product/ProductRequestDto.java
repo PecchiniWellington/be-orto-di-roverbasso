@@ -2,13 +2,7 @@ package com.ortoroverbasso.ortorovebasso.dto.Product;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class ProductRequestDto {
 
     @Schema(description = "SKU del prodotto", example = "ABC123")
@@ -32,4 +26,67 @@ public class ProductRequestDto {
     @Schema(description = "Indica se il prodotto è attivo o meno", example = "true")
     private Boolean active;
 
+    // Costruttore vuoto
+    public ProductRequestDto() {
+    }
+
+    // Costruttore con tutti i campi
+    public ProductRequestDto(String sku, String ean13, Integer weight, Long category, String retailPrice,
+            Boolean active) {
+        this.sku = sku;
+        this.ean13 = ean13;
+        this.weight = weight;
+        this.category = category;
+        this.retailPrice = retailPrice;
+        this.active = active;
+    }
+
+    // Getter e Setter
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
+    public String getEan13() {
+        return ean13;
+    }
+
+    public void setEan13(String ean13) {
+        this.ean13 = ean13;
+    }
+
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Integer weight) {
+        this.weight = weight;
+    }
+
+    public Long getCategory() {
+        return category;
+    }
+
+    public void setCategory(Long category) {
+        this.category = category;
+    }
+
+    public String getRetailPrice() {
+        return retailPrice;
+    }
+
+    public void setRetailPrice(String retailPrice) {
+        this.retailPrice = retailPrice;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 }

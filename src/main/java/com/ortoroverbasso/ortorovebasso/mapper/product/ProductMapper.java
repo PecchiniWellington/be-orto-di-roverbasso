@@ -1,12 +1,12 @@
-package com.ortoroverbasso.ortorovebasso.mapper;
+package com.ortoroverbasso.ortorovebasso.mapper.product;
 
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.ProductInformation.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
 public class ProductMapper {
 
-    // Converte ProductRequestDto in un'entità Product
     public static ProductEntity toEntity(ProductRequestDto dto) {
         ProductEntity product = new ProductEntity();
         product.setSku(dto.getSku());
@@ -17,14 +17,23 @@ public class ProductMapper {
         return product;
     }
 
-    // Converte Product in ProductResponseDto
     public static ProductResponseDto toResponseDto(ProductEntity product) {
+        ProductInformationResponseDto productInfoDto = new ProductInformationResponseDto(
+                product.getProductInformation().getId(),
+                product.getProductInformation().getSku(),
+                product.getProductInformation().getName(),
+                product.getProductInformation().getDescription(),
+                product.getProductInformation().getUrl(),
+                product.getProductInformation().getIsoCode(),
+                product.getProductInformation().getDateUpdDescription());
+
         return new ProductResponseDto(
                 product.getId(),
                 product.getSku(),
                 product.getRetailPrice(),
                 product.getCategory(),
                 product.getWeight(),
-                product.getActive() == 1);
+                product.getActive() == 1,
+                productInfoDto);
     }
 }

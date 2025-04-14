@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.controller;
+package com.ortoroverbasso.ortorovebasso.controller.product;
 
 import java.util.List;
 

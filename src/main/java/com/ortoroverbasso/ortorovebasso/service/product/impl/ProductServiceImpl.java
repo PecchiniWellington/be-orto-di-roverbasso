@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
-import com.ortoroverbasso.ortorovebasso.mapper.ProductMapper;
-import com.ortoroverbasso.ortorovebasso.repository.ProductRepository;
+import com.ortoroverbasso.ortorovebasso.mapper.product.ProductMapper;
+import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
 
 @Service
@@ -33,6 +33,18 @@ public class ProductServiceImpl implements IProductService {
         return products.stream()
                 .map(ProductMapper::toResponseDto)
                 .toList();
+    }
+
+    @Override
+    public ProductResponseDto getProductBySku(String sku) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getProductBySku'");
+    }
+
+    @Override
+    public ProductResponseDto getProductInformationBySku(String sku) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getProductInformationBySku'");
     }
 
     // qui implementerò altri metodi richiesti dall'interfaccia IProductService

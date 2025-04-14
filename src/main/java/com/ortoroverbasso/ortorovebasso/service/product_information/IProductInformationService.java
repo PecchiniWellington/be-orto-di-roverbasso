@@ -2,9 +2,12 @@ package com.ortoroverbasso.ortorovebasso.service.product_information;
 
 import java.util.List;
 
+import com.ortoroverbasso.ortorovebasso.dto.ProductInformation.ProductInformationRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.ProductInformation.ProductInformationResponseDto;
 
-public interface IProductInformation {
+public interface IProductInformationService {
+
+    ProductInformationResponseDto getProductInformationBySku(String sku);
 
     ProductInformationResponseDto getProductInformationById(Long id);
 
@@ -12,7 +15,7 @@ public interface IProductInformation {
 
     List<ProductInformationResponseDto> getProductInformationByProductId(Long productId);
 
-    ProductInformationResponseDto createProductInformation(ProductInformationResponseDto productInformation);
+    ProductInformationResponseDto createProductInformation(ProductInformationRequestDto productInformation);
 
     ProductInformationResponseDto updateProductInformation(Long id, ProductInformationResponseDto productInformation);
 

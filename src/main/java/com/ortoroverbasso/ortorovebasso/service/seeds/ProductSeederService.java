@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.github.javafaker.Faker;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
-import com.ortoroverbasso.ortorovebasso.repository.ProductRepository;
+import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 
 @Service
 public class ProductSeederService {
@@ -23,7 +23,7 @@ public class ProductSeederService {
     public void seedProducts(int count) {
         for (int i = 0; i < count; i++) {
             ProductEntity p = new ProductEntity();
-            p.setId(faker.number().randomNumber());
+            // Non impostare manualmente l'id
             p.setManufacturer(faker.number().randomNumber());
             p.setSku(faker.code().isbn10());
             p.setEan13(faker.code().ean13());
@@ -32,7 +32,7 @@ public class ProductSeederService {
             p.setWidth(random.nextInt(100));
             p.setDepth(random.nextInt(100));
             p.setDateUpd(LocalDateTime.now());
-            p.setCategory((long) random.nextInt(10));
+            p.setCategory((long) random.nextInt(10)); // Ok, passa un Long
             p.setDateUpdDescription(LocalDateTime.now());
             p.setDateUpdImages(LocalDateTime.now());
             p.setDateUpdStock(LocalDateTime.now());
@@ -60,4 +60,5 @@ public class ProductSeederService {
             productRepository.save(p);
         }
     }
+
 }

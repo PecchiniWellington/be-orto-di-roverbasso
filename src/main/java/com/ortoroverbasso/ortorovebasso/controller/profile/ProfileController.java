@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.controller;
+package com.ortoroverbasso.ortorovebasso.controller.profile;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
