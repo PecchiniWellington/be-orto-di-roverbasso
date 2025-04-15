@@ -2,6 +2,8 @@ package com.ortoroverbasso.ortorovebasso.service.user;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
 
@@ -10,7 +12,7 @@ public interface IUserService {
 
     UserResponseDto getUserById(Long id);
 
-    UserResponseDto createUser(UserRequestDto user);
+    ResponseEntity<UserResponseDto> createUser(UserRequestDto userRequest);
 
     UserResponseDto updateUser(Long id, UserRequestDto user);
 

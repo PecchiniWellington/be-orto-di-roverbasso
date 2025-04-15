@@ -2,19 +2,27 @@ package com.ortoroverbasso.ortorovebasso.service.user.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
+import com.ortoroverbasso.ortorovebasso.exception.UserNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.user.UserMapper;
 import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
 import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserServiceImpl implements IUserService {
 
     private final UserRepository userRepository;
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -29,17 +37,23 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public UserResponseDto getUserById(Long id) {
-        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         return UserMapper.toResponseDto(userEntity);
     }
 
     @Override
+    @Transactional
     public UserResponseDto deleteUser(Long id) {
-        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        logger.info("Attempting to delete user with ID: {}", id);
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         userRepository.delete(userEntity);
 
         // Crea il DTO e imposta un messaggio
         UserResponseDto responseDto = UserMapper.toResponseDto(userEntity);
+
+        logger.info("User with ID {} and name {} has been deleted.", userEntity.getId(), userEntity.getName());
         responseDto.setMessage(
                 "User with ID " + userEntity.getId() + " and name " + userEntity.getName() + " has been deleted.");
         return responseDto;
@@ -51,19 +65,23 @@ public class UserServiceImpl implements IUserService {
         throw new UnsupportedOperationException("Unimplemented method 'getUserByEmail'");
     }
 
+    @Transactional
     @Override
-    public UserResponseDto createUser(UserRequestDto user) {
-        UserEntity userEntity = UserMapper.toEntity(user);
-        userEntity.setId(null); // Ensure the ID is null for a new entity
+    public ResponseEntity<UserResponseDto> createUser(UserRequestDto userRequest) {
+        UserEntity userEntity = UserMapper.toEntity(userRequest);
+        userEntity = userRepository.save(userEntity);
 
-        UserEntity savedUser = userRepository.save(userEntity);
+        // Crea il DTO di risposta
+        UserResponseDto responseDto = UserMapper.toResponseDto(userEntity);
 
-        return UserMapper.toResponseDto(savedUser);
+        // Restituisci ResponseEntity con il DTO e status code 201 (CREATED)
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     @Override
     public UserResponseDto updateUser(Long id, UserRequestDto user) {
-        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         userEntity.setName(user.getName());
         userEntity.setEmail(user.getEmail());
         userEntity.setPassword(user.getPassword());

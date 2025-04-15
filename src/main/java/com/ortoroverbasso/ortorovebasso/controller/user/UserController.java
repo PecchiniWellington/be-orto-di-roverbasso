@@ -2,6 +2,7 @@ package com.ortoroverbasso.ortorovebasso.controller.user;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,9 +31,9 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @PostMapping()
-    public UserResponseDto createUser(@RequestBody UserRequestDto entity) {
-        return userService.createUser(entity);
+    @PostMapping
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto userRequest) {
+        return userService.createUser(userRequest);
     }
 
     @GetMapping("/{id}")
