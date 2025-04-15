@@ -8,4 +8,5 @@ import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 @Repository
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     ProductEntity findBySku(String sku);
+
 }

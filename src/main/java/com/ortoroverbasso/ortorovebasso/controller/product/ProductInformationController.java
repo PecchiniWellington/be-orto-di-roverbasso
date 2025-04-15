@@ -41,4 +41,5 @@ public class ProductInformationController {
                 .createProductInformation(productInformationRequestDto);
         return productInformationResponseDto;
     }
+
 }

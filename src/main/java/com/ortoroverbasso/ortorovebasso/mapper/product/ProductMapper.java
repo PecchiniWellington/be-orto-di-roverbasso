@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
-import com.ortoroverbasso.ortorovebasso.dto.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
 public class ProductMapper {
@@ -22,14 +21,6 @@ public class ProductMapper {
 
     // Method to convert ProductEntity to ProductResponseDto
     public static ProductResponseDto toResponseDto(ProductEntity product) {
-        ProductInformationResponseDto productInfoDto = new ProductInformationResponseDto(
-                product.getProductInformation().getId(),
-                product.getProductInformation().getSku(),
-                product.getProductInformation().getName(),
-                product.getProductInformation().getDescription(),
-                product.getProductInformation().getUrl(),
-                product.getProductInformation().getIsoCode(),
-                product.getProductInformation().getDateUpdDescription());
 
         return new ProductResponseDto(
                 product.getId(),
@@ -37,8 +28,7 @@ public class ProductMapper {
                 product.getRetailPrice(),
                 product.getCategory(),
                 product.getWeight(),
-                product.getActive() == 1,
-                productInfoDto);
+                product.getActive() == 1);
     }
 
     // Method to convert List<ProductEntity> to List<ProductResponseDto>

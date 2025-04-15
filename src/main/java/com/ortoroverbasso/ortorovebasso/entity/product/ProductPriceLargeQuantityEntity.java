@@ -1,7 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.entity.product;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11,7 +10,7 @@ import jakarta.persistence.Table;
 
 @Table(name = "price_large_quantity")
 @Entity
-public class PriceLargeQuantityEntity {
+public class ProductPriceLargeQuantityEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,16 +18,20 @@ public class PriceLargeQuantityEntity {
     private Integer quantity;
     private Double price;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "product_id")
     private ProductEntity product;
 
+    @ManyToOne
+    @JoinColumn(name = "pricing_info_id")
+    private ProductPricingInfoEntity productPricingInfo;
+
     // Default constructor
-    public PriceLargeQuantityEntity() {
+    public ProductPriceLargeQuantityEntity() {
     }
 
     // All-args constructor
-    public PriceLargeQuantityEntity(Long id, Integer quantity, Double price, ProductEntity product) {
+    public ProductPriceLargeQuantityEntity(Long id, Integer quantity, Double price, ProductEntity product) {
         this.id = id;
         this.quantity = quantity;
         this.price = price;
@@ -76,7 +79,7 @@ public class PriceLargeQuantityEntity {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        PriceLargeQuantityEntity that = (PriceLargeQuantityEntity) o;
+        ProductPriceLargeQuantityEntity that = (ProductPriceLargeQuantityEntity) o;
 
         if (id != null ? !id.equals(that.id) : that.id != null)
             return false;

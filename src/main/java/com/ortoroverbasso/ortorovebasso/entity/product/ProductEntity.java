@@ -55,30 +55,62 @@ public class ProductEntity {
     private String partNumber;
     private Double canon;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PriceLargeQuantityEntity> priceLargeQuantities = new ArrayList<>();
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sku", referencedColumnName = "sku", insertable = false, updatable = false)
-    private ProductInformationEntity productInformation;
+    private ProductPricingInfoEntity productPricingInfo; // Collegamento tramite SKU
 
-    public ProductInformationEntity getProductInformation() {
-        return productInformation != null ? productInformation : new ProductInformationEntity();
+    // Getter e setter
+    public ProductPricingInfoEntity getProductPricingInfo() {
+        return productPricingInfo;
     }
+
+    public void setProductPricingInfo(ProductPricingInfoEntity productPricingInfo) {
+        this.productPricingInfo = productPricingInfo;
+    }
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductPriceLargeQuantityEntity> priceLargeQuantities = new ArrayList<>();
 
     // Default constructor
     public ProductEntity() {
     }
 
     // All-args constructor
-    public ProductEntity(Long id, Long manufacturer, String sku, String ean13, Integer weight, Integer height,
-            Integer width, Integer depth, LocalDateTime dateUpd, Long category, LocalDateTime dateUpdDescription,
-            LocalDateTime dateUpdImages, LocalDateTime dateUpdStock, String wholesalePrice, String retailPrice,
-            Long taxonomy, LocalDateTime dateAdd, String video, Integer active, Boolean attributes, Boolean categories,
-            Boolean images, Integer taxRate, Integer taxId, Double inShopsPrice, String condition, String logisticClass,
-            Boolean tags, LocalDateTime dateUpdProperties, LocalDateTime dateUpdCategories, String intrastat,
-            String partNumber, Double canon, List<PriceLargeQuantityEntity> priceLargeQuantities,
-            ProductInformationEntity productInformation) {
+    public ProductEntity(
+            Long id,
+            Long manufacturer,
+            String sku,
+            String ean13,
+            Integer weight,
+            Integer height,
+            Integer width,
+            Integer depth,
+            LocalDateTime dateUpd,
+            Long category,
+            LocalDateTime dateUpdDescription,
+            LocalDateTime dateUpdImages,
+            LocalDateTime dateUpdStock,
+            String wholesalePrice,
+            String retailPrice,
+            Long taxonomy,
+            LocalDateTime dateAdd,
+            String video,
+            Integer active,
+            Boolean attributes,
+            Boolean categories,
+            Boolean images,
+            Integer taxRate,
+            Integer taxId,
+            Double inShopsPrice,
+            String condition,
+            String logisticClass,
+            Boolean tags,
+            LocalDateTime dateUpdProperties,
+            LocalDateTime dateUpdCategories,
+            String intrastat,
+            String partNumber,
+            Double canon,
+            List<ProductPriceLargeQuantityEntity> priceLargeQuantities) {
         this.id = id;
         this.manufacturer = manufacturer;
         this.sku = sku;
@@ -113,7 +145,6 @@ public class ProductEntity {
         this.partNumber = partNumber;
         this.canon = canon;
         this.priceLargeQuantities = priceLargeQuantities;
-        this.productInformation = productInformation;
     }
 
     // Getters and setters for all fields
@@ -381,15 +412,12 @@ public class ProductEntity {
         this.canon = canon;
     }
 
-    public List<PriceLargeQuantityEntity> getPriceLargeQuantities() {
+    public List<ProductPriceLargeQuantityEntity> getPriceLargeQuantities() {
         return priceLargeQuantities;
     }
 
-    public void setPriceLargeQuantities(List<PriceLargeQuantityEntity> priceLargeQuantities) {
+    public void setPriceLargeQuantities(List<ProductPriceLargeQuantityEntity> priceLargeQuantities) {
         this.priceLargeQuantities = priceLargeQuantities;
     }
 
-    public void setProductInformation(ProductInformationEntity productInformation) {
-        this.productInformation = productInformation;
-    }
 }

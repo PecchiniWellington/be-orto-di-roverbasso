@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Table(name = "product_information")
@@ -24,9 +23,6 @@ public class ProductInformationEntity {
     private String isoCode;
     private String dateUpdDescription;
 
-    @OneToOne(mappedBy = "productInformation")
-    private ProductEntity product;
-
     // Default constructor
     public ProductInformationEntity() {
     }
@@ -41,7 +37,6 @@ public class ProductInformationEntity {
         this.url = url;
         this.isoCode = isoCode;
         this.dateUpdDescription = dateUpdDescription;
-        this.product = product;
     }
 
     // Getters and Setters
@@ -101,14 +96,6 @@ public class ProductInformationEntity {
         this.dateUpdDescription = dateUpdDescription;
     }
 
-    public ProductEntity getProduct() {
-        return product;
-    }
-
-    public void setProduct(ProductEntity product) {
-        this.product = product;
-    }
-
     // toString method
     @Override
     public String toString() {
@@ -120,7 +107,6 @@ public class ProductInformationEntity {
                 ", url='" + url + '\'' +
                 ", isoCode='" + isoCode + '\'' +
                 ", dateUpdDescription='" + dateUpdDescription + '\'' +
-                ", product=" + product +
                 '}';
     }
 
@@ -128,12 +114,13 @@ public class ProductInformationEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o)
-            return true;
+            return true; // Se sono lo stesso oggetto, restituisci true.
         if (o == null || getClass() != o.getClass())
-            return false;
+            return false; // Se l'oggetto è null o non è della stessa classe, restituisci false.
 
         ProductInformationEntity that = (ProductInformationEntity) o;
 
+        // Confronta tutti i campi significativi
         if (id != null ? !id.equals(that.id) : that.id != null)
             return false;
         if (sku != null ? !sku.equals(that.sku) : that.sku != null)
@@ -149,7 +136,8 @@ public class ProductInformationEntity {
         if (dateUpdDescription != null ? !dateUpdDescription.equals(that.dateUpdDescription)
                 : that.dateUpdDescription != null)
             return false;
-        return product != null ? product.equals(that.product) : that.product == null;
+
+        return true;
     }
 
     @Override
@@ -161,7 +149,6 @@ public class ProductInformationEntity {
         result = 31 * result + (url != null ? url.hashCode() : 0);
         result = 31 * result + (isoCode != null ? isoCode.hashCode() : 0);
         result = 31 * result + (dateUpdDescription != null ? dateUpdDescription.hashCode() : 0);
-        result = 31 * result + (product != null ? product.hashCode() : 0);
         return result;
     }
 }

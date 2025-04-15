@@ -1,7 +1,5 @@
 package com.ortoroverbasso.ortorovebasso.dto.product;
 
-import com.ortoroverbasso.ortorovebasso.dto.product_information.ProductInformationResponseDto;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class ProductResponseDto {
@@ -24,17 +22,18 @@ public class ProductResponseDto {
     @Schema(description = "Indica se il prodotto è attivo o meno", example = "true")
     private Boolean active;
 
-    private ProductInformationResponseDto productInformation;
-    @Schema(description = "Informazioni aggiuntive sul prodotto")
-    private ProductInformationResponseDto productInformationSchema;
-
     // Costruttore vuoto
     public ProductResponseDto() {
     }
 
     // Costruttore con tutti i campi
-    public ProductResponseDto(Long id, String sku, String retailPrice, Long category, Integer weight, Boolean active,
-            ProductInformationResponseDto productInformation) {
+    public ProductResponseDto(
+            Long id,
+            String sku,
+            String retailPrice,
+            Long category,
+            Integer weight,
+            Boolean active) {
         this.id = id;
         this.sku = sku;
         this.retailPrice = retailPrice;
@@ -92,11 +91,4 @@ public class ProductResponseDto {
         this.active = active;
     }
 
-    public ProductInformationResponseDto getProductInformation() {
-        return productInformation;
-    }
-
-    public void setProductInformation(ProductInformationResponseDto productInformation) {
-        this.productInformation = productInformation;
-    }
 }
