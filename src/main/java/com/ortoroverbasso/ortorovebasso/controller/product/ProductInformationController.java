@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ortoroverbasso.ortorovebasso.dto.ProductInformation.ProductInformationRequestDto;
-import com.ortoroverbasso.ortorovebasso.dto.ProductInformation.ProductInformationResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product_information.ProductInformationRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.product_information.IProductInformationService;
 
 @RestController

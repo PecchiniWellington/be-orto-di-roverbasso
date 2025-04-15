@@ -2,8 +2,8 @@ package com.ortoroverbasso.ortorovebasso.service.product_information;
 
 import java.util.List;
 
-import com.ortoroverbasso.ortorovebasso.dto.ProductInformation.ProductInformationRequestDto;
-import com.ortoroverbasso.ortorovebasso.dto.ProductInformation.ProductInformationResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product_information.ProductInformationRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.product_information.ProductInformationResponseDto;
 
 public interface IProductInformationService {
 

@@ -117,10 +117,13 @@
 		</dependency>
 
 
+
 	</dependencies>
 
 	<build>
 		<plugins>
+
+
 			<plugin>
 				<groupId>io.github.deweyjose</groupId>
 				<artifactId>graphqlcodegen-maven-plugin</artifactId>

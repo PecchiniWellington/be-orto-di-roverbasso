@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.dto.Product;
+package com.ortoroverbasso.ortorovebasso.dto.product;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;

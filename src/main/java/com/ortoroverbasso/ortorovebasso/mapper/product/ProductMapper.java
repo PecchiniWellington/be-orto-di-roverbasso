@@ -3,9 +3,9 @@ package com.ortoroverbasso.ortorovebasso.mapper.product;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
-import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
-import com.ortoroverbasso.ortorovebasso.dto.ProductInformation.ProductInformationResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
 public class ProductMapper {
@@ -44,7 +44,7 @@ public class ProductMapper {
     // Method to convert List<ProductEntity> to List<ProductResponseDto>
     public static List<ProductResponseDto> toResponseDto(List<ProductEntity> products) {
         return products.stream()
-                .map(ProductMapper::toResponseDto) // Convert each ProductEntity to ProductResponseDto
+                .map(ProductMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
 }

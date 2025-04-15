@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
-import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductInformationEntity;
 import com.ortoroverbasso.ortorovebasso.exception.ProductAlreadyExistsException;

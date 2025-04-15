@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.dto.ProductInformation;
+package com.ortoroverbasso.ortorovebasso.dto.product_information;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

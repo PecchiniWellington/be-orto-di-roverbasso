@@ -1,6 +1,6 @@
-package com.ortoroverbasso.ortorovebasso.dto.Product;
+package com.ortoroverbasso.ortorovebasso.dto.product;
 
-import com.ortoroverbasso.ortorovebasso.dto.ProductInformation.ProductInformationResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product_information.ProductInformationResponseDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

@@ -2,8 +2,8 @@ package com.ortoroverbasso.ortorovebasso.service.product;
 
 import java.util.List;
 
-import com.ortoroverbasso.ortorovebasso.dto.Product.ProductRequestDto;
-import com.ortoroverbasso.ortorovebasso.dto.Product.ProductResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 
 public interface IProductService {
 
