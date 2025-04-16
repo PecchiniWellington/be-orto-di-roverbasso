@@ -1,18 +1,14 @@
 package com.ortoroverbasso.ortorovebasso.entity.product;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
+import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
+
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -55,21 +51,7 @@ public class ProductEntity {
     private String partNumber;
     private Double canon;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sku", referencedColumnName = "sku", insertable = false, updatable = false)
-    private ProductPricingInfoEntity productPricingInfo; // Collegamento tramite SKU
-
     // Getter e setter
-    public ProductPricingInfoEntity getProductPricingInfo() {
-        return productPricingInfo;
-    }
-
-    public void setProductPricingInfo(ProductPricingInfoEntity productPricingInfo) {
-        this.productPricingInfo = productPricingInfo;
-    }
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductPriceLargeQuantityEntity> priceLargeQuantities = new ArrayList<>();
 
     // Default constructor
     public ProductEntity() {
@@ -110,7 +92,7 @@ public class ProductEntity {
             String intrastat,
             String partNumber,
             Double canon,
-            List<ProductPriceLargeQuantityEntity> priceLargeQuantities) {
+            List<ProductLargeQuantityPriceEntity> priceLargeQuantities) {
         this.id = id;
         this.manufacturer = manufacturer;
         this.sku = sku;
@@ -144,7 +126,6 @@ public class ProductEntity {
         this.intrastat = intrastat;
         this.partNumber = partNumber;
         this.canon = canon;
-        this.priceLargeQuantities = priceLargeQuantities;
     }
 
     // Getters and setters for all fields
@@ -410,14 +391,6 @@ public class ProductEntity {
 
     public void setCanon(Double canon) {
         this.canon = canon;
-    }
-
-    public List<ProductPriceLargeQuantityEntity> getPriceLargeQuantities() {
-        return priceLargeQuantities;
-    }
-
-    public void setPriceLargeQuantities(List<ProductPriceLargeQuantityEntity> priceLargeQuantities) {
-        this.priceLargeQuantities = priceLargeQuantities;
     }
 
 }

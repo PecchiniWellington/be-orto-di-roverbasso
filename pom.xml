@@ -127,10 +127,34 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		 <dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.8.2</version> <!-- Usa una versione aggiornata -->
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Dipendenza per JUnit 5 Engine -->
+		 <dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+
+
+		<!-- Dipendenza per Spring Boot Test (per i test di entità) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
 		<plugins>
+
 
 
 			<plugin>
@@ -172,6 +196,16 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+
+				<configuration>
+					<useModulePath>false</useModulePath>
+				</configuration>
+			</plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
