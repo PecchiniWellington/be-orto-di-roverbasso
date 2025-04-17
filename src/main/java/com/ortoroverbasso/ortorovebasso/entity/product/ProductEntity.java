@@ -3,12 +3,15 @@ package com.ortoroverbasso.ortorovebasso.entity.product;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.ortoroverbasso.ortorovebasso.entity.product.product_attributes.ProductAttributesEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -51,7 +54,8 @@ public class ProductEntity {
     private String partNumber;
     private Double canon;
 
-    // Getter e setter
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<ProductAttributesEntity> productAttributes;
 
     // Default constructor
     public ProductEntity() {
@@ -391,6 +395,14 @@ public class ProductEntity {
 
     public void setCanon(Double canon) {
         this.canon = canon;
+    }
+
+    public List<ProductAttributesEntity> getProductAttributes() {
+        return productAttributes;
+    }
+
+    public void setProductAttributes(List<ProductAttributesEntity> productAttributes) {
+        this.productAttributes = productAttributes;
     }
 
 }
