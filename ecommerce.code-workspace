@@ -33,7 +33,7 @@
       "statusBar.debuggingBackground": "#D32F2F", // colore se stai debuggando
       "statusBarItem.hoverBackground": "#66BB6A"
     },
-    "workbench.colorTheme": "Darcula (Android Studio)",
+    "workbench.colorTheme": "Monokai",
     "java.compile.nullAnalysis.mode": "disabled",
     "java.configuration.updateBuildConfiguration": "automatic"
   },

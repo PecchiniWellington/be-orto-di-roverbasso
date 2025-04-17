@@ -28,7 +28,10 @@
 	</scm>
 	<properties>
 		<java.version>23</java.version>
+		<maven.compiler.source>23</maven.compiler.source>
+		<maven.compiler.target>23</maven.compiler.target>
 	</properties>
+
 	<repositories>
 		<repository>
 			<id>jitpack.io</id>
@@ -76,10 +79,21 @@
 			<artifactId>jakarta.validation-api</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>jakarta.persistence</groupId>
+			<artifactId>jakarta.persistence-api</artifactId>
+			<version>3.0.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>6.0.0.Final</version> <!-- Assicurati che sia una versione compatibile -->
 		</dependency>
 
 		<dependency>
@@ -130,7 +144,6 @@
 		 <dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.8.2</version> <!-- Usa una versione aggiornata -->
 			<scope>test</scope>
 		</dependency>
 

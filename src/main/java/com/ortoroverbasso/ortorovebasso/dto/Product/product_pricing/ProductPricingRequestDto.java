@@ -3,9 +3,9 @@ package com.ortoroverbasso.ortorovebasso.dto.product.product_pricing;
 public class ProductPricingRequestDto {
     private Long id;
     private String sku;
-    private double wholesalePrice;
+    private String wholesalePrice;
     private double retailPrice;
-    private double inShopsPrice;
+    private Double inShopsPrice;
 
     public ProductPricingRequestDto() {
     }
@@ -13,9 +13,9 @@ public class ProductPricingRequestDto {
     public ProductPricingRequestDto(
             Long id,
             String sku,
-            double wholesalePrice,
+            String wholesalePrice,
             double retailPrice,
-            double inShopsPrice) {
+            Double inShopsPrice) {
         this.id = id;
         this.sku = sku;
         this.wholesalePrice = wholesalePrice;
@@ -39,11 +39,11 @@ public class ProductPricingRequestDto {
         this.sku = sku;
     }
 
-    public double getWholesalePrice() {
+    public String getWholesalePrice() {
         return wholesalePrice;
     }
 
-    public void setWholesalePrice(double wholesalePrice) {
+    public void setWholesalePrice(String wholesalePrice) {
         this.wholesalePrice = wholesalePrice;
     }
 
@@ -55,11 +55,11 @@ public class ProductPricingRequestDto {
         this.retailPrice = retailPrice;
     }
 
-    public double getInShopsPrice() {
+    public Double getInShopsPrice() {
         return inShopsPrice;
     }
 
-    public void setInShopsPrice(double inShopsPrice) {
+    public void setInShopsPrice(Double inShopsPrice) {
         this.inShopsPrice = inShopsPrice;
     }
 }

@@ -28,7 +28,10 @@ public class ProductMapper {
                 product.getRetailPrice(),
                 product.getCategory(),
                 product.getWeight(),
-                product.getActive() == 1);
+                product.getActive() == 1,
+                product.getWholesalePrice(),
+                product.getInShopsPrice());
+
     }
 
     // Method to convert List<ProductEntity> to List<ProductResponseDto>

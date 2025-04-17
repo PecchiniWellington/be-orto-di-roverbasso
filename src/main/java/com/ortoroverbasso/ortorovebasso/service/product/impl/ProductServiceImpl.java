@@ -83,7 +83,6 @@ public class ProductServiceImpl implements IProductService {
                     product.getWeight(),
                     product.getActive() == 1,
                     productPricingInfoEntity.getWholesalePrice(),
-                    productPricingInfoEntity.getRetailPrice(),
                     productPricingInfoEntity.getInShopsPrice());
 
         } catch (ProductNotFoundException e) {

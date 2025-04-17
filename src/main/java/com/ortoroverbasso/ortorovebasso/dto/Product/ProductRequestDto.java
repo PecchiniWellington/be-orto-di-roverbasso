@@ -42,11 +42,9 @@ public class ProductRequestDto {
     @Schema(description = "Data di aggiornamento della descrizione", example = "2025-04-14T14:00:00")
     private String dateUpdDescription;
 
-    // Default constructor
     public ProductRequestDto() {
     }
 
-    // Constructor with all fields
     public ProductRequestDto(String sku, String ean13, Integer weight, Long category, String retailPrice,
             Boolean active, String name, String description, String url, String isoCode, String dateUpdDescription) {
         this.sku = sku;

@@ -14,9 +14,9 @@ public class ProductPricingEntity {
     private Long id;
     @Column(unique = true)
     private String sku;
-    private double wholesalePrice;
+    private String wholesalePrice;
     private double retailPrice;
-    private double inShopsPrice;
+    private Double inShopsPrice;
 
     public ProductPricingEntity() {
     }
@@ -24,9 +24,9 @@ public class ProductPricingEntity {
     public ProductPricingEntity(
             Long id,
             String sku,
-            double wholesalePrice,
+            String wholesalePrice,
             double retailPrice,
-            double inShopsPrice) {
+            Double inShopsPrice) {
         this.id = id;
         this.sku = sku;
         this.wholesalePrice = wholesalePrice;
@@ -51,11 +51,11 @@ public class ProductPricingEntity {
         this.sku = sku;
     }
 
-    public double getWholesalePrice() {
+    public String getWholesalePrice() {
         return wholesalePrice;
     }
 
-    public void setWholesalePrice(double wholesalePrice) {
+    public void setWholesalePrice(String wholesalePrice) {
         this.wholesalePrice = wholesalePrice;
     }
 

@@ -22,28 +22,25 @@ public class ProductResponseDto {
     @Schema(description = "Indica se il prodotto è attivo o meno", example = "true")
     private Boolean active;
 
-    // Costruttore vuoto
-    public ProductResponseDto() {
-    }
-
     // Aggiungi i campi per i prezzi
-    private Double wholesalePrice;
-    private Double retailPriceFromPricing;
+    private String wholesalePrice;
     private Double inShopsPrice;
 
-    public ProductResponseDto(Long id, String sku, String retailPrice, Long category, Integer weight, boolean active) {
-        this.id = id;
-        this.sku = sku;
-        this.retailPrice = retailPrice;
-        this.category = category;
-        this.weight = weight;
-        this.active = active;
-    }
+    // Costruttore vuoto
+    /*
+     * public ProductResponseDto() {
+     * }
+     */
 
     public ProductResponseDto(
             Long id,
-            String sku, String retailPrice, Long category, Integer weight, boolean active,
-            Double wholesalePrice, Double retailPriceFromPricing, Double inShopsPrice) {
+            String sku,
+            String retailPrice,
+            Long category,
+            Integer weight,
+            boolean active,
+            String wholesalePrice,
+            Double inShopsPrice) {
         this.id = id;
         this.sku = sku;
         this.retailPrice = retailPrice;
@@ -51,7 +48,6 @@ public class ProductResponseDto {
         this.weight = weight;
         this.active = active;
         this.wholesalePrice = wholesalePrice;
-        this.retailPriceFromPricing = retailPriceFromPricing;
         this.inShopsPrice = inShopsPrice;
     }
 
@@ -102,6 +98,22 @@ public class ProductResponseDto {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public String getWholesalePrice() {
+        return wholesalePrice;
+    }
+
+    public void setWholesalePrice(String wholesalePrice) {
+        this.wholesalePrice = wholesalePrice;
+    }
+
+    public Double getInShopsPrice() {
+        return inShopsPrice;
+    }
+
+    public void setInShopsPrice(Double inShopsPrice) {
+        this.inShopsPrice = inShopsPrice;
     }
 
 }

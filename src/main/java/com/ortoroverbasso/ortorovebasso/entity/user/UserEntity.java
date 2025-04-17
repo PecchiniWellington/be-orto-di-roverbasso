@@ -68,7 +68,15 @@ public class UserEntity {
 
     // Tracciamento
     private String referralCode;
+
+    @ElementCollection
+    @CollectionTable(name = "user_activity_log", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "activity_log")
     private List<String> activityLog;
+
+    @ElementCollection
+    @CollectionTable(name = "user_purchase_history", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "purchase_history")
     private List<String> purchaseHistory;
 
     // Integrazione social
@@ -86,6 +94,10 @@ public class UserEntity {
     // Geolocalizzazione
     private String country;
     private String region;
+
+    @ElementCollection
+    @CollectionTable(name = "user_device_history", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "device_history")
     private List<String> deviceHistory;
 
     // Constructor
