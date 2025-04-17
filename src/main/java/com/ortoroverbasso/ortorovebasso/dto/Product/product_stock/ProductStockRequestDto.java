@@ -14,10 +14,8 @@ public class ProductStockRequestDto {
     // Costruttore con argomenti
     public ProductStockRequestDto(
             String sku,
-
             List<ProductStockDto> stocks) {
         this.sku = sku;
-
         this.stocks = stocks;
     }
 
