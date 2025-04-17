@@ -23,10 +23,11 @@ public class ProductController {
     private final IProductService productService;
     private final IProductLargeQuantityPriceService productPriceLargeQuantityService;
 
-    public ProductController(IProductService productService,
+    public ProductController(
+            IProductService productService,
             IProductLargeQuantityPriceService productPriceLargeQuantityService) {
-        this.productPriceLargeQuantityService = productPriceLargeQuantityService;
         this.productService = productService;
+        this.productPriceLargeQuantityService = productPriceLargeQuantityService;
     }
 
     @PostMapping
