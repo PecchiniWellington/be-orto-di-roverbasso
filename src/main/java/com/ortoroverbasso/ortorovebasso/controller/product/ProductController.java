@@ -2,9 +2,12 @@ package com.ortoroverbasso.ortorovebasso.controller.product;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,22 +16,19 @@ import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_pricing.ProductPricingRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
-import com.ortoroverbasso.ortorovebasso.service.product.product_large_quantity_price.IProductLargeQuantityPriceService;
+import com.ortoroverbasso.ortorovebasso.service.tags.IProductTagsService;
 
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private final IProductService productService;
-    private final IProductLargeQuantityPriceService productPriceLargeQuantityService;
-
-    public ProductController(
-            IProductService productService,
-            IProductLargeQuantityPriceService productPriceLargeQuantityService) {
-        this.productService = productService;
-        this.productPriceLargeQuantityService = productPriceLargeQuantityService;
-    }
+    @Autowired
+    private IProductService productService;
+    @Autowired
+    private IProductTagsService productTagsService;
 
     @PostMapping
     public ProductResponseDto createProduct(@RequestBody ProductRequestDto dto) {
@@ -51,6 +51,31 @@ public class ProductController {
             @PathVariable Long productId,
             @RequestBody ProductPricingRequestDto productPriceInfo) {
         return productService.createProductPriceInfo(productId, productPriceInfo);
+    }
+
+    @GetMapping("/{productId}/tags")
+    public ProductTagsResponseDto getProductTags(@PathVariable Long productId) {
+        return productTagsService.getProductTagsById(productId);
+    }
+
+    @PostMapping("/{productId}/tags")
+    public ProductTagsResponseDto createProductTag(
+            @PathVariable Long productId,
+            @RequestBody ProductTagsRequestDto productTagsRequestDto) {
+        return productTagsService.createProductTag(productTagsRequestDto);
+    }
+
+    @PutMapping("/{productId}/tags/{tagId}")
+    public ProductTagsResponseDto updateProductTag(
+            @PathVariable Long productId,
+            @PathVariable Long tagId,
+            @RequestBody ProductTagsRequestDto productTagsRequestDto) {
+        return productTagsService.updateProductTag(productId, productTagsRequestDto);
+    }
+
+    @DeleteMapping("/{productId}/tags/{tagId}")
+    public void deleteProductTag(@PathVariable Long productId, @PathVariable Long tagId) {
+        productTagsService.deleteProductTag(tagId);
     }
 
 }
