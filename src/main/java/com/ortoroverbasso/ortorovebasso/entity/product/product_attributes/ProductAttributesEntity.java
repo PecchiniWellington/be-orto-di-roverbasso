@@ -1,6 +1,7 @@
 package com.ortoroverbasso.ortorovebasso.entity.product.product_attributes;
 
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
+import com.ortoroverbasso.ortorovebasso.entity.product.product_variation.VariationEntity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,6 +25,10 @@ public class ProductAttributesEntity {
     @ManyToOne
     @JoinColumn(name = "product_id")
     private ProductEntity product;
+
+    @ManyToOne
+    @JoinColumn(name = "variation_id")
+    private VariationEntity variation;
 
     // Default constructor
     public ProductAttributesEntity() {
@@ -80,5 +85,14 @@ public class ProductAttributesEntity {
 
     public void setIsoCode(String isoCode) {
         this.isoCode = isoCode;
+    }
+
+    // Getter and Setter for variation
+    public VariationEntity getVariation() {
+        return variation;
+    }
+
+    public void setVariation(VariationEntity variation) {
+        this.variation = variation;
     }
 }
