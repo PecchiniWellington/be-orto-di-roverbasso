@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ortoroverbasso.ortorovebasso.dto.shipping.ProductCountryRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingCostByCountryResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingCostResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingServiceRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingServiceResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.shipping.IShippingServiceService;
@@ -21,14 +24,19 @@ import com.ortoroverbasso.ortorovebasso.service.shipping.IShippingServiceService
 @RequestMapping("/api/shipping-services")
 public class ShippingServiceController {
 
-    private final IShippingServiceService shippingService;
-
     @Autowired
-    public ShippingServiceController(IShippingServiceService shippingService) {
-        this.shippingService = shippingService;
+    private IShippingServiceService shippingService;
+
+    @PostMapping("/lowest-shipping-cost-by-country")
+    public ResponseEntity<List<ShippingCostResponseDto>> getLowestShippingCostByCountry(
+            @RequestBody ProductCountryRequestDto productCountryRequest) {
+
+        List<ShippingCostResponseDto> shippingCost = shippingService
+                .getLowestShippingCostByCountry(productCountryRequest);
+
+        return ResponseEntity.ok(shippingCost);
     }
 
-    // Crea un nuovo Shipping Service
     @PostMapping
     public ResponseEntity<ShippingServiceResponseDto> createShippingService(
             @RequestBody ShippingServiceRequestDto shippingServiceRequestDto) {
@@ -37,21 +45,18 @@ public class ShippingServiceController {
         return ResponseEntity.ok(createdShippingService);
     }
 
-    // Ottieni tutti i Shipping Services
     @GetMapping
     public ResponseEntity<List<ShippingServiceResponseDto>> getAllShippingServices() {
         List<ShippingServiceResponseDto> shippingServices = shippingService.getAllShippingServices();
         return ResponseEntity.ok(shippingServices);
     }
 
-    // Ottieni un Shipping Service per ID
     @GetMapping("/{id}")
     public ResponseEntity<ShippingServiceResponseDto> getShippingServiceById(@PathVariable Long id) {
         ShippingServiceResponseDto shippingServiceResponseDto = shippingService.getShippingServiceById(id);
         return ResponseEntity.ok(shippingServiceResponseDto);
     }
 
-    // Modifica un Shipping Service
     @PutMapping("/{id}")
     public ResponseEntity<ShippingServiceResponseDto> updateShippingService(@PathVariable Long id,
             @RequestBody ShippingServiceRequestDto shippingServiceRequestDto) {
@@ -60,10 +65,14 @@ public class ShippingServiceController {
         return ResponseEntity.ok(updatedShippingService);
     }
 
-    // Elimina un Shipping Service
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteShippingService(@PathVariable Long id) {
         shippingService.deleteShippingService(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/lowest-shipping-costs-by-country/{countryIsoCode}")
+    public List<ShippingCostByCountryResponseDto> getLowestShippingCostByCountry(@PathVariable String countryIsoCode) {
+        return shippingService.getLowestShippingCostByCountry(countryIsoCode);
     }
 }
