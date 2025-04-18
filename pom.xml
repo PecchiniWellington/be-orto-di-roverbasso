@@ -114,8 +114,15 @@
 
 		<dependency>
 			<groupId>io.sentry</groupId>
+			<artifactId>sentry</artifactId>
+			<version>5.5.0</version> <!-- Usa l'ultima versione disponibile -->
+		</dependency>
+
+
+		<dependency>
+			<groupId>io.sentry</groupId>
 			<artifactId>sentry-spring-boot-starter</artifactId>
-			<version>5.0.0</version>
+			<version>5.5.0</version>
 		</dependency>
 
 		<dependency>
@@ -222,6 +229,30 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+
+			<plugin>
+				<groupId>io.sentry</groupId>
+				<artifactId>sentry-maven-plugin</artifactId>
+				<version>0.4.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<debugSentryCli>true</debugSentryCli>
+
+					<org>wellintone</org>
+
+					<project>java-spring-boot</project>
+
+					<authToken>${env.SENTRY_AUTH_TOKEN}</authToken>
+				</configuration>
+				<executions>
+					<execution>
+					<goals>
+						<goal>uploadSourceBundle</goal>
+					</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
