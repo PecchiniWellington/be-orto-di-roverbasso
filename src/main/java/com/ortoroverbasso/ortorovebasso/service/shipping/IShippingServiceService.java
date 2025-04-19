@@ -2,6 +2,8 @@ package com.ortoroverbasso.ortorovebasso.service.shipping;
 
 import java.util.List;
 
+import com.ortoroverbasso.ortorovebasso.dto.orders.OrderRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.orders.OrderResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.ProductCountryRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingCostByCountryResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingCostResponseDto;
@@ -25,5 +27,9 @@ public interface IShippingServiceService {
     List<ShippingCostByCountryResponseDto> getLowestShippingCostByCountry(String countryIsoCode);
 
     ShippingCostEntity createShippingCost(String reference, Double cost, Long carrierId);
+
+    OrderResponseDto createOrder(OrderRequestDto orderRequestDto);
+
+    OrderResponseDto getOrderById(Long id);
 
 }
