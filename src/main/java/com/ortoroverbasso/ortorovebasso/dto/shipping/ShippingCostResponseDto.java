@@ -2,15 +2,25 @@ package com.ortoroverbasso.ortorovebasso.dto.shipping;
 
 public class ShippingCostResponseDto {
 
-    private double shippingCost;
+    private Double shippingCost;
     private CarrierResponseDto carrier;
 
+    // Default constructor
+    public ShippingCostResponseDto() {
+    }
+
+    // All-args constructor
+    public ShippingCostResponseDto(Double shippingCost, CarrierResponseDto carrier) {
+        this.shippingCost = shippingCost;
+        this.carrier = carrier;
+    }
+
     // Getters and Setters
-    public double getShippingCost() {
+    public Double getShippingCost() {
         return shippingCost;
     }
 
-    public void setShippingCost(double shippingCost) {
+    public void setShippingCost(Double shippingCost) {
         this.shippingCost = shippingCost;
     }
 

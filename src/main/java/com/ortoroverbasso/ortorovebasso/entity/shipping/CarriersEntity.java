@@ -1,22 +1,26 @@
-package com.ortoroverbasso.ortorovebasso.dto.shipping;
+package com.ortoroverbasso.ortorovebasso.entity.shipping;
 
-public class CarrierResponseDto {
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "carriers")
+public class CarriersEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String price;
 
-    public CarrierResponseDto() {
-
+    // Default constructor
+    public CarriersEntity() {
     }
 
-    public CarrierResponseDto(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    // Costruttore
-    public CarrierResponseDto(Long id, String name, String price) {
+    // All-args constructor
+    public CarriersEntity(Long id, String name, String price) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -46,4 +50,5 @@ public class CarrierResponseDto {
     public void setPrice(String price) {
         this.price = price;
     }
+
 }

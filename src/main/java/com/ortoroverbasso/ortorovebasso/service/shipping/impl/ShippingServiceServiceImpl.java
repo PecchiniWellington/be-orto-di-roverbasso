@@ -14,8 +14,12 @@ import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingCostByCountryRespon
 import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingCostResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingServiceRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingServiceResponseDto;
+import com.ortoroverbasso.ortorovebasso.entity.shipping.CarriersEntity;
+import com.ortoroverbasso.ortorovebasso.entity.shipping.ShippingCostEntity;
 import com.ortoroverbasso.ortorovebasso.entity.shipping.ShippingServiceEntity;
 import com.ortoroverbasso.ortorovebasso.mapper.shipping.ShippingServiceMapper;
+import com.ortoroverbasso.ortorovebasso.repository.shipping.CarriersRepository;
+import com.ortoroverbasso.ortorovebasso.repository.shipping.ShippingCostRepository;
 import com.ortoroverbasso.ortorovebasso.repository.shipping.ShippingServiceRepository;
 import com.ortoroverbasso.ortorovebasso.service.shipping.IShippingServiceService;
 
@@ -24,6 +28,10 @@ public class ShippingServiceServiceImpl implements IShippingServiceService {
 
     @Autowired
     private ShippingServiceRepository shippingServiceRepository;
+    @Autowired
+    private CarriersRepository carriersRepository;
+    @Autowired
+    private ShippingCostRepository shippingCostRepository;
 
     @Override
     public List<ShippingServiceResponseDto> getAllShippingServices() {
@@ -66,7 +74,7 @@ public class ShippingServiceServiceImpl implements IShippingServiceService {
 
         ShippingCostResponseDto response = new ShippingCostResponseDto();
         response.setShippingCost(4.56);
-        response.setCarrier(new CarrierResponseDto("123456", "GLS"));
+        response.setCarrier(new CarrierResponseDto(123456L, "GLS"));
 
         return Collections.singletonList(response);
     }
@@ -76,7 +84,7 @@ public class ShippingServiceServiceImpl implements IShippingServiceService {
 
         List<ShippingCostByCountryResponseDto> response = new ArrayList<>();
 
-        CarrierResponseDto carrier = new CarrierResponseDto("1234", "GLS");
+        CarrierResponseDto carrier = new CarrierResponseDto(1234L, "GLS");
 
         ShippingCostByCountryResponseDto shippingCost = new ShippingCostByCountryResponseDto(
                 "S12435678",
@@ -86,5 +94,18 @@ public class ShippingServiceServiceImpl implements IShippingServiceService {
         response.add(shippingCost);
 
         return response;
+    }
+
+    @Override
+    public ShippingCostEntity createShippingCost(String reference, Double cost, Long carrierId) {
+        // Recupero il carrier dal database
+        CarriersEntity carrier = carriersRepository.findById(carrierId)
+                .orElseThrow(() -> new RuntimeException("Carrier not found with id: " + carrierId));
+
+        // Creo il nuovo ShippingCostEntity
+        ShippingCostEntity shippingCost = new ShippingCostEntity(reference, cost, carrier);
+
+        // Salvo il nuovo ShippingCost nel database
+        return shippingCostRepository.save(shippingCost);
     }
 }

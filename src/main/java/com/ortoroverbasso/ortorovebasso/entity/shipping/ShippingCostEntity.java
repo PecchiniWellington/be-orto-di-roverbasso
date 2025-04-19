@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -15,20 +17,22 @@ public class ShippingCostEntity {
     private Long id;
 
     private String reference;
-    private String cost;
-    private String carrierId;
-    private String carrierName;
+    private Double cost;
+
+    // Relazione Many-to-One con CarriersEntity
+    @ManyToOne
+    @JoinColumn(name = "carrier_id", referencedColumnName = "id")
+    private CarriersEntity carrier;
 
     // Default constructor
     public ShippingCostEntity() {
     }
 
     // Constructor with parameters
-    public ShippingCostEntity(String reference, String cost, String carrierId, String carrierName) {
+    public ShippingCostEntity(String reference, Double cost, CarriersEntity carrier) {
         this.reference = reference;
         this.cost = cost;
-        this.carrierId = carrierId;
-        this.carrierName = carrierName;
+        this.carrier = carrier;
     }
 
     // Getters and Setters
@@ -48,27 +52,19 @@ public class ShippingCostEntity {
         this.reference = reference;
     }
 
-    public String getCost() {
+    public Double getCost() {
         return cost;
     }
 
-    public void setCost(String cost) {
+    public void setCost(Double cost) {
         this.cost = cost;
     }
 
-    public String getCarrierId() {
-        return carrierId;
+    public CarriersEntity getCarrier() {
+        return carrier;
     }
 
-    public void setCarrierId(String carrierId) {
-        this.carrierId = carrierId;
-    }
-
-    public String getCarrierName() {
-        return carrierName;
-    }
-
-    public void setCarrierName(String carrierName) {
-        this.carrierName = carrierName;
+    public void setCarrier(CarriersEntity carrier) {
+        this.carrier = carrier;
     }
 }
