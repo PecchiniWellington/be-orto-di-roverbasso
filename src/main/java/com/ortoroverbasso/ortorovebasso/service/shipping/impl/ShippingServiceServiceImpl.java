@@ -8,19 +8,15 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ortoroverbasso.ortorovebasso.dto.orders.OrderRequestDto;
-import com.ortoroverbasso.ortorovebasso.dto.orders.OrderResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.CarrierResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.ProductCountryRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingCostByCountryResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingCostResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingServiceRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.ShippingServiceResponseDto;
-import com.ortoroverbasso.ortorovebasso.entity.order.OrderEntity;
 import com.ortoroverbasso.ortorovebasso.entity.shipping.CarriersEntity;
 import com.ortoroverbasso.ortorovebasso.entity.shipping.ShippingCostEntity;
 import com.ortoroverbasso.ortorovebasso.entity.shipping.ShippingServiceEntity;
-import com.ortoroverbasso.ortorovebasso.mapper.orders.OrderMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.shipping.ShippingServiceMapper;
 import com.ortoroverbasso.ortorovebasso.repository.orders.OrderRepository;
 import com.ortoroverbasso.ortorovebasso.repository.shipping.CarriersRepository;
@@ -116,17 +112,4 @@ public class ShippingServiceServiceImpl implements IShippingServiceService {
         return shippingCostRepository.save(shippingCost);
     }
 
-    @Override
-    public OrderResponseDto createOrder(OrderRequestDto orderRequestDto) {
-        OrderEntity orderEntity = OrderMapper.toEntity(orderRequestDto);
-        orderEntity = orderRepository.save(orderEntity);
-        return OrderMapper.toResponse(orderEntity);
-    }
-
-    @Override
-    public OrderResponseDto getOrderById(Long id) {
-        OrderEntity orderEntity = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-        return OrderMapper.toResponse(orderEntity);
-    }
 }
