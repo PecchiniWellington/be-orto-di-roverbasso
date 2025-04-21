@@ -10,7 +10,7 @@ import com.ortoroverbasso.ortorovebasso.repository.upload_invoice.UploadInvoiceR
 import com.ortoroverbasso.ortorovebasso.service.upload_invoice.IUploadInvoiceService;
 
 @Service
-public class OrderServiceImpl implements IUploadInvoiceService {
+public class UploadInvoiceServiceImpl implements IUploadInvoiceService {
 
     @Autowired
     private UploadInvoiceRepository invoiceRepository;

@@ -32,8 +32,6 @@ public class ShippingServiceController {
     @Autowired
     private IShippingServiceService shippingServiceService;
 
-    // Mappiamo la richiesta per ottenere il costo di spedizione più basso per un
-    // prodotto e un paese
     @PostMapping("/lowest-shipping-cost-by-country")
     public ResponseEntity<List<ShippingCostResponseDto>> getLowestShippingCostByCountry(
             @RequestBody ProductCountryRequestDto productCountryRequest) {
@@ -42,7 +40,6 @@ public class ShippingServiceController {
         return ResponseEntity.ok(shippingCost);
     }
 
-    // Metodo per creare un nuovo servizio di spedizione
     @PostMapping
     public ResponseEntity<ShippingServiceResponseDto> createShippingService(
             @RequestBody ShippingServiceRequestDto shippingServiceRequestDto) {
@@ -51,21 +48,18 @@ public class ShippingServiceController {
         return ResponseEntity.ok(createdShippingService);
     }
 
-    // Metodo per ottenere tutti i servizi di spedizione
     @GetMapping
     public ResponseEntity<List<ShippingServiceResponseDto>> getAllShippingServices() {
         List<ShippingServiceResponseDto> shippingServices = shippingService.getAllShippingServices();
         return ResponseEntity.ok(shippingServices);
     }
 
-    // Metodo per ottenere un servizio di spedizione specifico
     @GetMapping("/{id}")
     public ResponseEntity<ShippingServiceResponseDto> getShippingServiceById(@PathVariable Long id) {
         ShippingServiceResponseDto shippingServiceResponseDto = shippingService.getShippingServiceById(id);
         return ResponseEntity.ok(shippingServiceResponseDto);
     }
 
-    // Metodo per aggiornare un servizio di spedizione
     @PutMapping("/{id}")
     public ResponseEntity<ShippingServiceResponseDto> updateShippingService(@PathVariable Long id,
             @RequestBody ShippingServiceRequestDto shippingServiceRequestDto) {
@@ -74,30 +68,25 @@ public class ShippingServiceController {
         return ResponseEntity.ok(updatedShippingService);
     }
 
-    // Metodo per eliminare un servizio di spedizione
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteShippingService(@PathVariable Long id) {
         shippingService.deleteShippingService(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Metodo per ottenere il costo di spedizione più basso per paese
     @GetMapping("/lowest-shipping-costs-by-country/{countryIsoCode}")
     public List<ShippingCostByCountryResponseDto> getLowestShippingCostByCountry(@PathVariable String countryIsoCode) {
         return shippingService.getLowestShippingCostByCountry(countryIsoCode);
     }
 
-    // Metodo per creare un nuovo ShippingCost
     @PostMapping("/create-shipping-cost")
     public ShippingCostResponseDto createShippingCost(
             @RequestParam String reference,
             @RequestParam Double cost,
             @RequestParam Long carrierId) {
 
-        // Creiamo il nuovo ShippingCostEntity
         ShippingCostEntity shippingCostEntity = shippingServiceService.createShippingCost(reference, cost, carrierId);
 
-        // Mappiamo l'entity nel DTO per la risposta
         return ShippingCostMapper.toResponse(shippingCostEntity);
     }
 }
