@@ -53,12 +53,21 @@ public class ProductEntity {
     private String intrastat;
     private String partNumber;
     private Double canon;
+    private String reference;
+    private Integer quantity;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<ProductAttributesEntity> productAttributes;
 
     // Default constructor
     public ProductEntity() {
+    }
+
+    public ProductEntity(String reference,
+            Integer quantity) {
+        this.reference = reference;
+        this.quantity = quantity;
+
     }
 
     // All-args constructor
@@ -96,7 +105,9 @@ public class ProductEntity {
             String intrastat,
             String partNumber,
             Double canon,
-            List<ProductLargeQuantityPriceEntity> priceLargeQuantities) {
+            List<ProductLargeQuantityPriceEntity> priceLargeQuantities,
+            String reference,
+            Integer quantity) {
         this.id = id;
         this.manufacturer = manufacturer;
         this.sku = sku;
@@ -130,6 +141,8 @@ public class ProductEntity {
         this.intrastat = intrastat;
         this.partNumber = partNumber;
         this.canon = canon;
+        this.reference = reference;
+        this.quantity = quantity;
     }
 
     // Getters and setters for all fields
@@ -403,6 +416,22 @@ public class ProductEntity {
 
     public void setProductAttributes(List<ProductAttributesEntity> productAttributes) {
         this.productAttributes = productAttributes;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
 }

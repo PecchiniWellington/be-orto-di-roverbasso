@@ -26,11 +26,21 @@ public class ProductResponseDto {
     private String wholesalePrice;
     private Double inShopsPrice;
 
+    private String reference;
+    private Integer quantity;
+
     // Costruttore vuoto
-    /*
-     * public ProductResponseDto() {
-     * }
-     */
+
+    public ProductResponseDto() {
+    }
+
+    public ProductResponseDto(
+            String reference,
+            Integer quantity) {
+        this.reference = reference;
+        this.quantity = quantity;
+
+    }
 
     public ProductResponseDto(
             Long id,
@@ -116,4 +126,19 @@ public class ProductResponseDto {
         this.inShopsPrice = inShopsPrice;
     }
 
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
 }

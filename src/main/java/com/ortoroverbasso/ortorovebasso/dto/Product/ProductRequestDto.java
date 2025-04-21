@@ -42,7 +42,18 @@ public class ProductRequestDto {
     @Schema(description = "Data di aggiornamento della descrizione", example = "2025-04-14T14:00:00")
     private String dateUpdDescription;
 
+    private String reference;
+    private Integer quantity;
+
     public ProductRequestDto() {
+    }
+
+    public ProductRequestDto(
+            String reference,
+            Integer quantity) {
+        this.reference = reference;
+        this.quantity = quantity;
+
     }
 
     public ProductRequestDto(String sku, String ean13, Integer weight, Long category, String retailPrice,
@@ -150,4 +161,21 @@ public class ProductRequestDto {
     public void setDateUpdDescription(String dateUpdDescription) {
         this.dateUpdDescription = dateUpdDescription;
     }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
 }

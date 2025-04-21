@@ -19,6 +19,10 @@ public class CarriersEntity {
     public CarriersEntity() {
     }
 
+    public CarriersEntity(String name) {
+        this.name = name;
+    }
+
     // All-args constructor
     public CarriersEntity(Long id, String name, String price) {
         this.id = id;
