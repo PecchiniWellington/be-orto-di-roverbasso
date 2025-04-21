@@ -1,6 +1,8 @@
 package com.ortoroverbasso.ortorovebasso.service.tracking.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,7 +20,18 @@ public class TrackingServiceImpl implements ITrackingService {
 
     @Override
     public TrackingResponseDto trackOrders(TrackingRequestDto trackingRequest) {
-        // Invio la richiesta POST e ricevo la risposta
         return restTemplate.postForObject(TRACKING_API_URL, trackingRequest, TrackingResponseDto.class);
+    }
+
+    public TrackingResponseDto getTrackingOrder(TrackingRequestDto requestDto) {
+        String url = TRACKING_API_URL.replace("{format}", "json");
+
+        ResponseEntity<TrackingResponseDto[]> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                new org.springframework.http.HttpEntity<>(requestDto),
+                TrackingResponseDto[].class);
+
+        return response.getBody()[0];
     }
 }
