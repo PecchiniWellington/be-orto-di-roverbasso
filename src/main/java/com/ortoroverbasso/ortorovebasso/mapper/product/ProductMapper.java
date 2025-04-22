@@ -62,6 +62,7 @@ public class ProductMapper {
 
         public static ProductEntity fromResponseToEntity(ProductResponseDto dto) {
                 ProductEntity product = new ProductEntity();
+                product.setId(dto.getId());
                 product.setSku(dto.getSku());
                 product.setWeight(dto.getWeight());
                 product.setCategory(dto.getCategory());
@@ -86,7 +87,8 @@ public class ProductMapper {
                                 .map(priceEntity -> new ProductLargeQuantityPriceRequestDto(
                                                 priceEntity.getId(),
                                                 priceEntity.getQuantity(),
-                                                priceEntity.getPrice()))
+                                                priceEntity.getPrice(),
+                                                product.getId()))
                                 .collect(Collectors.toList());
 
                 return new ProductRequestDto(

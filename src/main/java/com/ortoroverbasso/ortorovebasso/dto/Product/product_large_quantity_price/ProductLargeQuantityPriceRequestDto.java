@@ -2,11 +2,25 @@ package com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_pric
 
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
+import jakarta.validation.constraints.NotNull;
+
 public class ProductLargeQuantityPriceRequestDto {
     private Long id;
-    private Integer quantity;
-    private Double price;
     private ProductEntity product;
+
+    @NotNull(message = "ProductId is required")
+    private Long productId;
+
+    @NotNull(message = "Quantity is required")
+    private Integer quantity;
+
+    @NotNull(message = "Price is required")
+    private Double price;
+
+    /*
+     * @NotNull(message = "Product Variation is required")
+     * private Long productVariationId;
+     */
 
     // Default constructor
     public ProductLargeQuantityPriceRequestDto() {
@@ -16,10 +30,12 @@ public class ProductLargeQuantityPriceRequestDto {
     public ProductLargeQuantityPriceRequestDto(
             Long id,
             Integer quantity,
-            Double price) {
+            Double price,
+            Long productId) {
         this.id = id;
         this.quantity = quantity;
         this.price = price;
+        this.productId = productId;
 
     }
 
@@ -54,5 +70,13 @@ public class ProductLargeQuantityPriceRequestDto {
 
     public void setProduct(ProductEntity product) {
         this.product = product;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 }

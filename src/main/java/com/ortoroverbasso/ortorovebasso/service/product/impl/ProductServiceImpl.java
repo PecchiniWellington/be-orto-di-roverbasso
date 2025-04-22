@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.service.product.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,22 +53,21 @@ public class ProductServiceImpl implements IProductService {
 
         ProductEntity product = ProductMapper.toEntity(dto);
 
-        // Estrai tutti gli id dai dto
-        List<Long> ids = dto.getPriceLargeQuantities().stream()
-                .map(ProductLargeQuantityPriceRequestDto::getId)
-                .collect(Collectors.toList());
+        if (dto.getPriceLargeQuantities() == null) {
+            product.setPriceLargeQuantities(new ArrayList<>());
+        } else {
+            List<Long> ids = dto.getPriceLargeQuantities().stream()
+                    .map(ProductLargeQuantityPriceRequestDto::getId)
+                    .collect(Collectors.toList());
 
-        // Trova tutte le entità corrispondenti a questi id
-        List<ProductLargeQuantityPriceEntity> prices = productLargeQuantityPriceRepository.findAllById(ids);
+            List<ProductLargeQuantityPriceEntity> prices = productLargeQuantityPriceRepository.findAllById(ids);
 
-        // Verifica che il numero di entità trovate corrisponda al numero di id
-        if (prices.size() != ids.size()) {
-            // Se non sono stati trovati tutti gli oggetti, solleva un'eccezione
-            throw new EntityNotFoundException("Some ProductLargeQuantityPriceEntity not found");
+            if (prices.size() != ids.size()) {
+                throw new EntityNotFoundException("Some ProductLargeQuantityPriceEntity not found");
+            }
+
+            product.setPriceLargeQuantities(prices);
         }
-
-        // Aggiungi i prezzi trovati all'entità prodotto
-        product.setPriceLargeQuantities(prices);
 
         product = productRepository.save(product);
 

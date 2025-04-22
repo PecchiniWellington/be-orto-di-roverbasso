@@ -23,7 +23,7 @@ public class ProductLargeQuantityPriceEntity {
     private ProductVariationEntity productVariation;
 
     @ManyToOne
-    @JoinColumn(name = "product_id") // Foreign key per il prodotto
+    @JoinColumn(name = "product_id")
     private ProductEntity product;
 
     public ProductLargeQuantityPriceEntity() {

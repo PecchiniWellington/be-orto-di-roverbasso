@@ -18,10 +18,13 @@ import com.ortoroverbasso.ortorovebasso.dto.GenericResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_pricing.ProductPricingRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
+import com.ortoroverbasso.ortorovebasso.service.product.product_large_quantity_price.IProductLargeQuantityPriceService;
 import com.ortoroverbasso.ortorovebasso.service.tags.IProductTagsService;
 
 @RestController
@@ -32,6 +35,8 @@ public class ProductController {
     private IProductService productService;
     @Autowired
     private IProductTagsService productTagsService;
+    @Autowired
+    private IProductLargeQuantityPriceService productLargeQuantityPriceService;
 
     @PostMapping
     public ProductResponseDto createProduct(@RequestBody ProductRequestDto dto) {
@@ -91,6 +96,24 @@ public class ProductController {
     @DeleteMapping("/{productId}/tags/{tagId}")
     public void deleteProductTag(@PathVariable Long productId, @PathVariable Long tagId) {
         productTagsService.deleteProductTag(tagId);
+    }
+
+    @GetMapping("/product-large-quantity-prices/all")
+    public List<ProductLargeQuantityPriceResponseDto> getProductLargeQuantityPrice() {
+        return productLargeQuantityPriceService.getProductLargeQuantityPrice();
+    }
+
+    @GetMapping("/{productId}/product-large-quantity-prices")
+    public List<ProductLargeQuantityPriceResponseDto> getProductLargeQuantityPriceByProductId(
+            @PathVariable Long productId) {
+        return productLargeQuantityPriceService.getProductLargeQuantityPriceByProductId(productId);
+    }
+
+    @PostMapping("/product-large-quantity-prices")
+    public ProductLargeQuantityPriceResponseDto createProductLargeQuantityPrice(
+            @RequestBody ProductLargeQuantityPriceRequestDto productPriceLargeQuantityRequestDto) {
+        return productLargeQuantityPriceService.createProductPriceLargeQuantity(
+                productPriceLargeQuantityRequestDto);
     }
 
 }

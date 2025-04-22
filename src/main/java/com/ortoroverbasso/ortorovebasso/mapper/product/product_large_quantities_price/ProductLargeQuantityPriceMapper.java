@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
+import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
 
 public class ProductLargeQuantityPriceMapper {
@@ -14,6 +15,11 @@ public class ProductLargeQuantityPriceMapper {
         product.setId(dto.getId());
         product.setQuantity(dto.getQuantity());
         product.setPrice(dto.getPrice());
+
+        ProductEntity productEntity = new ProductEntity();
+        productEntity.setId(dto.getProductId());
+
+        product.setProduct(productEntity);
 
         return product;
     }
