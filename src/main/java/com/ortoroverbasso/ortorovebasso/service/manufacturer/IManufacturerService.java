@@ -15,6 +15,12 @@ public interface IManufacturerService {
 
     ManufacturerResponseDto updateManufacturer(Long id, ManufacturerRequestDto dto);
 
+    ManufacturerResponseDto getManufacturerProducts(Long id);
+
     void deleteManufacturer(Long id);
+
+    void associateProductsToManufacturer(Long manufacturerId, List<Long> productIds);
+
+    void disassociateProductsFromManufacturer(Long manufacturerId, List<Long> productIds);
 
 }

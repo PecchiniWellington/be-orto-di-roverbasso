@@ -1,5 +1,9 @@
 package com.ortoroverbasso.ortorovebasso.dto.manufacturer;
 
+import java.util.List;
+
+import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
+
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,6 +16,7 @@ public class ManufacturerResponseDto {
     private String name;
     private String urlImage;
     private Integer reference;
+    private List<ProductResponseDto> products;
 
     public ManufacturerResponseDto() {
     }
@@ -20,11 +25,13 @@ public class ManufacturerResponseDto {
             Long id,
             String name,
             String urlImage,
-            Integer reference) {
+            Integer reference,
+            List<ProductResponseDto> products) {
         this.id = id;
         this.name = name;
         this.urlImage = urlImage;
         this.reference = reference;
+        this.products = products;
     }
 
     public Long getId() {
@@ -57,5 +64,13 @@ public class ManufacturerResponseDto {
 
     public void setReference(Integer reference) {
         this.reference = reference;
+    }
+
+    public List<ProductResponseDto> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<ProductResponseDto> products) {
+        this.products = products;
     }
 }
