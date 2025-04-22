@@ -37,35 +37,26 @@ public class ProductLargeQuantityPriceServiceImpl implements IProductLargeQuanti
     public ProductLargeQuantityPriceResponseDto createProductPriceLargeQuantity(
             @Valid ProductLargeQuantityPriceRequestDto priceLargeQuantityRequestDto) {
 
-        // Recupera il prodotto dal servizio
         ProductResponseDto product = productService.getProductById(priceLargeQuantityRequestDto.getProductId());
 
-        // Verifica che il prodotto esista nel database
         if (product == null) {
             throw new ProductNotFoundException(priceLargeQuantityRequestDto.getProductId());
         }
 
-        // Converte il ProductResponseDto in ProductEntity (associato al prodotto)
         ProductEntity p = ProductMapper.fromResponseToEntity(product);
 
-        // Verifica che il prodotto esista nel database
         if (p.getId() == null) {
-            // Se il prodotto non esiste (ID nullo), solleva un'eccezione
             throw new ProductNotFoundException(
                     priceLargeQuantityRequestDto.getProductId());
         }
 
-        // Mappa il DTO a ProductLargeQuantityPriceEntity
         ProductLargeQuantityPriceEntity priceLargeQuantityEntity = ProductLargeQuantityPriceMapper
                 .toEntity(priceLargeQuantityRequestDto);
 
-        // Associa il prodotto esistente all'entità di prezzo
         priceLargeQuantityEntity.setProduct(p);
 
-        // Salva l'entità di prezzo nel database
         ProductLargeQuantityPriceEntity savedPrice = priceLargeQuantityRepository.save(priceLargeQuantityEntity);
 
-        // Restituisci la risposta dopo aver salvato
         return ProductLargeQuantityPriceMapper.toResponseDto(savedPrice);
     }
 
@@ -97,6 +88,36 @@ public class ProductLargeQuantityPriceServiceImpl implements IProductLargeQuanti
         return prices.stream()
                 .map(ProductLargeQuantityPriceMapper::toResponseDto)
                 .toList();
+    }
+
+    @Override
+    public ProductLargeQuantityPriceResponseDto updateProductPriceLargeQuantity(
+            ProductLargeQuantityPriceRequestDto productPriceLargeQuantityRequestDto) {
+
+        ProductLargeQuantityPriceEntity existingPrice = priceLargeQuantityRepository
+                .findById(productPriceLargeQuantityRequestDto.getId())
+                .orElseThrow(() -> new ProductNotFoundException(
+                        productPriceLargeQuantityRequestDto.getId()));
+
+        existingPrice.setQuantity(productPriceLargeQuantityRequestDto.getQuantity());
+        existingPrice.setPrice(productPriceLargeQuantityRequestDto.getPrice());
+
+        ProductLargeQuantityPriceEntity savedPrice = priceLargeQuantityRepository.save(existingPrice);
+
+        return ProductLargeQuantityPriceMapper.toResponseDto(savedPrice);
+    }
+
+    @Override
+    public String deleteProductPriceLargeQuantity(Long priceId) {
+
+        ProductLargeQuantityPriceEntity existingPrice = priceLargeQuantityRepository
+                .findById(priceId)
+                .orElseThrow(() -> new ProductNotFoundException(priceId));
+
+        priceLargeQuantityRepository.delete(existingPrice);
+
+        return "Product price large quantity with ID " + priceId
+                + " deleted successfully.";
     }
 
 }

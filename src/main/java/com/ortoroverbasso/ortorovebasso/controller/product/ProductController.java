@@ -116,4 +116,15 @@ public class ProductController {
                 productPriceLargeQuantityRequestDto);
     }
 
+    @PutMapping("/product-large-quantity-prices")
+    public ProductLargeQuantityPriceResponseDto updateProductLargeQuantityPrice(
+            @RequestBody ProductLargeQuantityPriceRequestDto productPriceLargeQuantityRequestDto) {
+        return productLargeQuantityPriceService.updateProductPriceLargeQuantity(
+                productPriceLargeQuantityRequestDto);
+    }
+
+    @DeleteMapping("/product-large-quantity-prices/{priceId}")
+    public String deleteProductLargeQuantityPrice(@PathVariable Long priceId) {
+        return productLargeQuantityPriceService.deleteProductPriceLargeQuantity(priceId);
+    }
 }

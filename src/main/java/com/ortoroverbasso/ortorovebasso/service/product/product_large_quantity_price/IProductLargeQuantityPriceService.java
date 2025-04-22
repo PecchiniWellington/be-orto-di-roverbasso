@@ -14,4 +14,8 @@ public interface IProductLargeQuantityPriceService {
     ProductLargeQuantityPriceResponseDto createProductPriceLargeQuantity(
             ProductLargeQuantityPriceRequestDto productPriceLargeQuantityRequestDto);
 
+    ProductLargeQuantityPriceResponseDto updateProductPriceLargeQuantity(
+            ProductLargeQuantityPriceRequestDto productPriceLargeQuantityRequestDto);
+
+    String deleteProductPriceLargeQuantity(Long priceId);
 }
