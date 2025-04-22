@@ -2,10 +2,12 @@ package com.ortoroverbasso.ortorovebasso.service.product.product_large_quantity_
 
 import org.springframework.stereotype.Service;
 
+import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
+import com.ortoroverbasso.ortorovebasso.mapper.product.ProductMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_large_quantities_price.ProductLargeQuantityPriceMapper;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_large_quantity_price.ProductLargeQuantityPriceRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
@@ -29,12 +31,13 @@ public class ProductLargeQuantityPriceServiceImpl implements IProductLargeQuanti
             Long productId,
             ProductLargeQuantityPriceRequestDto priceLargeQuantityRequestDto) {
 
-        ProductEntity productEntity = productService.getProductById(productId);
+        ProductResponseDto product = productService.getProductById(productId);
+        ProductEntity p = ProductMapper.fromResponseToEntity(product);
 
         ProductLargeQuantityPriceEntity priceLargeQuantityEntity = ProductLargeQuantityPriceMapper
                 .toEntity(priceLargeQuantityRequestDto);
 
-        /* priceLargeQuantityEntity.setProduct(productEntity); */
+        priceLargeQuantityEntity.setProduct(p);
 
         ProductLargeQuantityPriceEntity savedPrice = priceLargeQuantityRepository.save(priceLargeQuantityEntity);
 

@@ -13,11 +13,14 @@ public class ProductLargeQuantityPriceRequestDto {
     }
 
     // Parameterized constructor
-    public ProductLargeQuantityPriceRequestDto(Long id, Integer quantity, Double price, ProductEntity product) {
+    public ProductLargeQuantityPriceRequestDto(
+            Long id,
+            Integer quantity,
+            Double price) {
         this.id = id;
         this.quantity = quantity;
         this.price = price;
-        this.product = product;
+
     }
 
     // Getters and Setters

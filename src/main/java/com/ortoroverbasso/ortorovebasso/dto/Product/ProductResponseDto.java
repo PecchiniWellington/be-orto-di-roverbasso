@@ -1,5 +1,9 @@
 package com.ortoroverbasso.ortorovebasso.dto.product;
 
+import java.util.List;
+
+import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class ProductResponseDto {
@@ -20,7 +24,7 @@ public class ProductResponseDto {
     private Integer weight;
 
     @Schema(description = "Indica se il prodotto è attivo o meno", example = "true")
-    private Boolean active;
+    private Integer active;
 
     // Aggiungi i campi per i prezzi
     private String wholesalePrice;
@@ -28,6 +32,8 @@ public class ProductResponseDto {
 
     private String reference;
     private Integer quantity;
+
+    private List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities;
 
     // Costruttore vuoto
 
@@ -48,9 +54,10 @@ public class ProductResponseDto {
             String retailPrice,
             Long category,
             Integer weight,
-            boolean active,
+            Integer active,
             String wholesalePrice,
-            Double inShopsPrice) {
+            Double inShopsPrice,
+            List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities) {
         this.id = id;
         this.sku = sku;
         this.retailPrice = retailPrice;
@@ -59,6 +66,7 @@ public class ProductResponseDto {
         this.active = active;
         this.wholesalePrice = wholesalePrice;
         this.inShopsPrice = inShopsPrice;
+        this.priceLargeQuantities = priceLargeQuantities;
     }
 
     // Getter e Setter
@@ -102,11 +110,11 @@ public class ProductResponseDto {
         this.weight = weight;
     }
 
-    public Boolean getActive() {
+    public Integer getActive() {
         return active;
     }
 
-    public void setActive(Boolean active) {
+    public void setActive(Integer active) {
         this.active = active;
     }
 
@@ -140,5 +148,13 @@ public class ProductResponseDto {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public List<ProductLargeQuantityPriceResponseDto> getPriceLargeQuantities() {
+        return priceLargeQuantities;
+    }
+
+    public void setPriceLargeQuantities(List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities) {
+        this.priceLargeQuantities = priceLargeQuantities;
     }
 }

@@ -59,6 +59,9 @@ public class ProductEntity {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<ProductAttributesEntity> productAttributes;
 
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<ProductLargeQuantityPriceEntity> priceLargeQuantities;
+
     // Default constructor
     public ProductEntity() {
     }
@@ -432,6 +435,14 @@ public class ProductEntity {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public List<ProductLargeQuantityPriceEntity> getPriceLargeQuantities() {
+        return priceLargeQuantities;
+    }
+
+    public void setPriceLargeQuantities(List<ProductLargeQuantityPriceEntity> priceLargeQuantities) {
+        this.priceLargeQuantities = priceLargeQuantities;
     }
 
 }

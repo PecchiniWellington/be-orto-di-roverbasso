@@ -2,23 +2,31 @@ package com.ortoroverbasso.ortorovebasso.service.product.impl;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.ortoroverbasso.ortorovebasso.dto.GenericResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_pricing.ProductPricingRequestDto;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_informations.ProductInformationEntity;
+import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_pricing.ProductPricingEntity;
 import com.ortoroverbasso.ortorovebasso.exception.ProductNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.product.ProductMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_information.ProductInformationMapper;
 import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_information.ProductInformationRepository;
+import com.ortoroverbasso.ortorovebasso.repository.product.product_large_quantity_price.ProductLargeQuantityPriceRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_pricing_repository.ProductPricingRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ProductServiceImpl implements IProductService {
@@ -26,19 +34,40 @@ public class ProductServiceImpl implements IProductService {
     private final ProductRepository productRepository;
     private final ProductInformationRepository productInformationRepository;
     private final ProductPricingRepository productPricingInfoRepository;
+    private final ProductLargeQuantityPriceRepository productLargeQuantityPriceRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository,
+    public ProductServiceImpl(
+            ProductRepository productRepository,
             ProductInformationRepository productInformationRepository,
-            ProductPricingRepository productPricingInfoRepository) {
+            ProductPricingRepository productPricingInfoRepository,
+            ProductLargeQuantityPriceRepository productLargeQuantityPriceRepository) {
         this.productPricingInfoRepository = productPricingInfoRepository;
         this.productRepository = productRepository;
         this.productInformationRepository = productInformationRepository;
+        this.productLargeQuantityPriceRepository = productLargeQuantityPriceRepository;
     }
 
     @Override
     public ProductResponseDto createProduct(ProductRequestDto dto) {
 
         ProductEntity product = ProductMapper.toEntity(dto);
+
+        // Estrai tutti gli id dai dto
+        List<Long> ids = dto.getPriceLargeQuantities().stream()
+                .map(ProductLargeQuantityPriceRequestDto::getId)
+                .collect(Collectors.toList());
+
+        // Trova tutte le entità corrispondenti a questi id
+        List<ProductLargeQuantityPriceEntity> prices = productLargeQuantityPriceRepository.findAllById(ids);
+
+        // Verifica che il numero di entità trovate corrisponda al numero di id
+        if (prices.size() != ids.size()) {
+            // Se non sono stati trovati tutti gli oggetti, solleva un'eccezione
+            throw new EntityNotFoundException("Some ProductLargeQuantityPriceEntity not found");
+        }
+
+        // Aggiungi i prezzi trovati all'entità prodotto
+        product.setPriceLargeQuantities(prices);
 
         product = productRepository.save(product);
 
@@ -48,15 +77,17 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public List<ProductResponseDto> getAllProducts() {
         List<ProductEntity> products = productRepository.findAll();
-        return ProductMapper.toResponseDto(products);
+        return ProductMapper.toResponseListDto(products);
     }
 
     @Override
-    public ProductEntity getProductById(Long productId) {
+    public ProductResponseDto getProductById(Long productId) {
         ProductEntity product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException(
                 "Product not found with ID: " + productId));
 
-        throw new RuntimeException("Product not found with Id: " + productId);
+        ProductResponseDto p = ProductMapper.toResponseDto(product);
+
+        return p;
     }
 
     @Override
@@ -71,9 +102,14 @@ public class ProductServiceImpl implements IProductService {
             productPricingInfoEntity.setRetailPrice(productPriceInfo.getRetailPrice());
             productPricingInfoEntity.setInShopsPrice(productPriceInfo.getInShopsPrice());
 
-            /* productPricingInfoEntity.setProduct(product); */
-
             productPricingInfoRepository.save(productPricingInfoEntity);
+
+            List<ProductLargeQuantityPriceResponseDto> priceDtos = product.getPriceLargeQuantities().stream()
+                    .map(priceEntity -> new ProductLargeQuantityPriceResponseDto(
+                            priceEntity.getId(),
+                            priceEntity.getQuantity(),
+                            priceEntity.getPrice()))
+                    .collect(Collectors.toList());
 
             return new ProductResponseDto(
                     product.getId(),
@@ -81,9 +117,10 @@ public class ProductServiceImpl implements IProductService {
                     product.getRetailPrice(),
                     product.getCategory(),
                     product.getWeight(),
-                    product.getActive() == 1,
+                    product.getActive(),
                     productPricingInfoEntity.getWholesalePrice(),
-                    productPricingInfoEntity.getInShopsPrice());
+                    productPricingInfoEntity.getInShopsPrice(),
+                    priceDtos);
 
         } catch (ProductNotFoundException e) {
             throw e;
@@ -106,6 +143,20 @@ public class ProductServiceImpl implements IProductService {
             return Collections.emptyList();
         }
 
+    }
+
+    @Override
+    public GenericResponseDto deleteProduct(Long productId) {
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId));
+
+        // Elimina le informazioni di prodotto associate
+        productInformationRepository.deleteById(product.getId());
+
+        // Elimina il prodotto
+        productRepository.delete(product);
+
+        return new GenericResponseDto(200, "Prodotto eliminato con successo. ID: " + productId);
     }
 
 }

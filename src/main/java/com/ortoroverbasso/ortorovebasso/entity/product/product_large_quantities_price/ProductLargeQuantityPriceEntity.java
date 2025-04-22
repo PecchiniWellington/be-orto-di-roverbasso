@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price;
 
+import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_variation.ProductVariationEntity;
 
 import jakarta.persistence.Entity;
@@ -20,6 +21,10 @@ public class ProductLargeQuantityPriceEntity {
     @ManyToOne
     @JoinColumn(name = "product_variation_id")
     private ProductVariationEntity productVariation;
+
+    @ManyToOne
+    @JoinColumn(name = "product_id") // Foreign key per il prodotto
+    private ProductEntity product;
 
     public ProductLargeQuantityPriceEntity() {
 
@@ -61,5 +66,13 @@ public class ProductLargeQuantityPriceEntity {
 
     public void setProductVariation(ProductVariationEntity productVariation) {
         this.productVariation = productVariation;
+    }
+
+    public ProductEntity getProduct() {
+        return product;
+    }
+
+    public void setProduct(ProductEntity product) {
+        this.product = product;
     }
 }
