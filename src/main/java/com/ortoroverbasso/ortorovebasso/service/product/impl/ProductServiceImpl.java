@@ -111,6 +111,8 @@ public class ProductServiceImpl implements IProductService {
                             priceEntity.getPrice()))
                     .collect(Collectors.toList());
 
+            Long manufacturerId = product.getManufacturer() != null ? product.getManufacturer().getId() : null;
+
             return new ProductResponseDto(
                     product.getId(),
                     product.getSku(),
@@ -120,6 +122,7 @@ public class ProductServiceImpl implements IProductService {
                     product.getActive(),
                     productPricingInfoEntity.getWholesalePrice(),
                     productPricingInfoEntity.getInShopsPrice(),
+                    manufacturerId,
                     priceDtos);
 
         } catch (ProductNotFoundException e) {

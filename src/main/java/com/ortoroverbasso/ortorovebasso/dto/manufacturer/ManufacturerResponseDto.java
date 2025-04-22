@@ -6,6 +6,13 @@ import jakarta.persistence.Id;
 
 public class ManufacturerResponseDto {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String urlImage;
+    private Integer reference;
+
     public ManufacturerResponseDto() {
     }
 
@@ -19,13 +26,6 @@ public class ManufacturerResponseDto {
         this.urlImage = urlImage;
         this.reference = reference;
     }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String name;
-    private String urlImage;
-    private Integer reference;
 
     public Long getId() {
         return id;

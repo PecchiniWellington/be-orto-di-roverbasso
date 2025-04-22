@@ -33,6 +33,8 @@ public class ProductResponseDto {
     private String reference;
     private Integer quantity;
 
+    private Long manufacturer;
+
     private List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities;
 
     // Costruttore vuoto
@@ -57,6 +59,7 @@ public class ProductResponseDto {
             Integer active,
             String wholesalePrice,
             Double inShopsPrice,
+            Long manufacturer,
             List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities) {
         this.id = id;
         this.sku = sku;
@@ -66,6 +69,7 @@ public class ProductResponseDto {
         this.active = active;
         this.wholesalePrice = wholesalePrice;
         this.inShopsPrice = inShopsPrice;
+        this.manufacturer = manufacturer;
         this.priceLargeQuantities = priceLargeQuantities;
     }
 
@@ -156,5 +160,13 @@ public class ProductResponseDto {
 
     public void setPriceLargeQuantities(List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities) {
         this.priceLargeQuantities = priceLargeQuantities;
+    }
+
+    public Long getManufacturer() {
+        return manufacturer;
+    }
+
+    public void setManufacturer(Long manufacturer) {
+        this.manufacturer = manufacturer;
     }
 }

@@ -11,17 +11,19 @@ public class ManufacturerMapper {
             return null;
         }
         ManufacturerEntity entity = new ManufacturerEntity();
+        entity.setId(requestDto.getId());
         entity.setName(requestDto.getName());
         entity.setUrlImage(requestDto.getUrlImage());
         entity.setReference(requestDto.getReference());
         return entity;
     }
 
-    public static ManufacturerResponseDto toResponse(ManufacturerEntity entity) {
+    public static ManufacturerResponseDto toResponseDto(ManufacturerEntity entity) {
         if (entity == null) {
             return null;
         }
         ManufacturerResponseDto response = new ManufacturerResponseDto();
+        response.setId(entity.getId());
         response.setName(entity.getName());
         response.setUrlImage(entity.getUrlImage());
         response.setReference(entity.getReference());

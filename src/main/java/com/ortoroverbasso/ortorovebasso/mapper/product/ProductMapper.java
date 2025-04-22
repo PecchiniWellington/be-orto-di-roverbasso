@@ -41,12 +41,15 @@ public class ProductMapper {
         }
 
         public static ProductResponseDto toResponseDto(ProductEntity product) {
+
                 List<ProductLargeQuantityPriceResponseDto> priceDtos = product.getPriceLargeQuantities().stream()
                                 .map(priceEntity -> new ProductLargeQuantityPriceResponseDto(
                                                 priceEntity.getId(),
                                                 priceEntity.getQuantity(),
                                                 priceEntity.getPrice()))
                                 .collect(Collectors.toList());
+
+                Long manufacturerId = product.getManufacturer() != null ? product.getManufacturer().getId() : null;
 
                 return new ProductResponseDto(
                                 product.getId(),
@@ -57,7 +60,9 @@ public class ProductMapper {
                                 product.getActive(),
                                 product.getWholesalePrice(),
                                 product.getInShopsPrice(),
+                                manufacturerId,
                                 priceDtos);
+
         }
 
         public static ProductEntity fromResponseToEntity(ProductResponseDto dto) {

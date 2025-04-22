@@ -2,8 +2,11 @@ package com.ortoroverbasso.ortorovebasso.controller.manufacturer;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,8 +31,23 @@ public class ManufacturerController {
         return manufacturerService.createManufacturer(dto);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public List<ManufacturerResponseDto> getAllManufacturers() {
         return manufacturerService.getAllManufacturers();
+    }
+
+    @GetMapping("/{id}")
+    public ManufacturerResponseDto getManufacturerById(@PathVariable Long id) {
+        return manufacturerService.getManufacturerById(id);
+    }
+
+    @PutMapping("/{id}")
+    public ManufacturerResponseDto updateManufacturer(@PathVariable Long id, @RequestBody ManufacturerRequestDto dto) {
+        return manufacturerService.updateManufacturer(id, dto);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteManufacturer(@PathVariable Long id) {
+        manufacturerService.deleteManufacturer(id);
     }
 }

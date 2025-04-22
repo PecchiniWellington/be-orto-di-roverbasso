@@ -1,9 +1,15 @@
 package com.ortoroverbasso.ortorovebasso.entity.manufacturer;
 
+import java.util.List;
+
+import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class ManufacturerEntity {
@@ -18,6 +24,9 @@ public class ManufacturerEntity {
     // Default constructor
     public ManufacturerEntity() {
     }
+
+    @OneToMany(mappedBy = "manufacturer", fetch = FetchType.LAZY)
+    private List<ProductEntity> products;
 
     // All-args constructor
     public ManufacturerEntity(
@@ -62,5 +71,13 @@ public class ManufacturerEntity {
 
     public void setReference(Integer reference) {
         this.reference = reference;
+    }
+
+    public List<ProductEntity> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<ProductEntity> products) {
+        this.products = products;
     }
 }

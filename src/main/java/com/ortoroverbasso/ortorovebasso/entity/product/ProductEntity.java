@@ -3,6 +3,7 @@ package com.ortoroverbasso.ortorovebasso.entity.product;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.ortoroverbasso.ortorovebasso.entity.manufacturer.ManufacturerEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_attributes.ProductAttributesEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
 
@@ -11,6 +12,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -21,7 +24,6 @@ public class ProductEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long manufacturer;
     private String sku;
     private String ean13;
     private Integer weight;
@@ -62,6 +64,10 @@ public class ProductEntity {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<ProductLargeQuantityPriceEntity> priceLargeQuantities;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manufacturer_id", referencedColumnName = "id")
+    private ManufacturerEntity manufacturer;
+
     // Default constructor
     public ProductEntity() {
     }
@@ -76,7 +82,7 @@ public class ProductEntity {
     // All-args constructor
     public ProductEntity(
             Long id,
-            Long manufacturer,
+            ManufacturerEntity manufacturer,
             String sku,
             String ean13,
             Integer weight,
@@ -157,11 +163,11 @@ public class ProductEntity {
         this.id = id;
     }
 
-    public Long getManufacturer() {
+    public ManufacturerEntity getManufacturer() {
         return manufacturer;
     }
 
-    public void setManufacturer(Long manufacturer) {
+    public void setManufacturer(ManufacturerEntity manufacturer) {
         this.manufacturer = manufacturer;
     }
 
