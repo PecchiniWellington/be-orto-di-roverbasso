@@ -21,6 +21,6 @@ public interface IManufacturerService {
 
     void associateProductsToManufacturer(Long manufacturerId, List<Long> productIds);
 
-    void disassociateProductsFromManufacturer(Long manufacturerId, List<Long> productIds);
+    void dissociateProductsFromManufacturer(Long manufacturerId, List<Long> productIds);
 
 }

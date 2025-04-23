@@ -1,12 +1,13 @@
 package com.ortoroverbasso.ortorovebasso.entity.tags;
 
+import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
+
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -17,23 +18,13 @@ public class ProductTagsEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String sku;
+    @ManyToOne
+    @JoinColumn(name = "product_id", referencedColumnName = "id")
+    private ProductEntity product;
 
-    // Relazione OneToOne con TagsEntity
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tag_id")
+    @ManyToOne
+    @JoinColumn(name = "tag_id", referencedColumnName = "id")
     private TagsEntity tag;
-
-    // Default constructor
-    public ProductTagsEntity() {
-    }
-
-    // All-args constructor
-    public ProductTagsEntity(Long id, String sku, TagsEntity tag) {
-        this.id = id;
-        this.sku = sku;
-        this.tag = tag;
-    }
 
     // Getters and Setters
     public Long getId() {
@@ -44,12 +35,12 @@ public class ProductTagsEntity {
         this.id = id;
     }
 
-    public String getSku() {
-        return sku;
+    public ProductEntity getProduct() {
+        return product;
     }
 
-    public void setSku(String sku) {
-        this.sku = sku;
+    public void setProduct(ProductEntity product) {
+        this.product = product;
     }
 
     public TagsEntity getTag() {

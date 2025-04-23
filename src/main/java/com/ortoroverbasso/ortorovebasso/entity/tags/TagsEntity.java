@@ -32,7 +32,11 @@ public class TagsEntity {
     }
 
     // All-args constructor
-    public TagsEntity(Long id, String name, String linkRewrite, String language) {
+    public TagsEntity(
+            Long id,
+            String name,
+            String linkRewrite,
+            String language) {
         this.id = id;
         this.name = name;
         this.linkRewrite = linkRewrite;

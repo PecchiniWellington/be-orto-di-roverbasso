@@ -26,6 +26,9 @@ public class ProductResponseDto {
     @Schema(description = "Indica se il prodotto è attivo o meno", example = "true")
     private Integer active;
 
+    @Schema(description = "Se true allora ha un tag associato", example = "true")
+    private Boolean tags;
+
     // Aggiungi i campi per i prezzi
     private String wholesalePrice;
     private Double inShopsPrice;
@@ -59,6 +62,7 @@ public class ProductResponseDto {
             Integer active,
             String wholesalePrice,
             Double inShopsPrice,
+            Boolean tags,
             Long manufacturer,
             List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities) {
         this.id = id;
@@ -69,6 +73,7 @@ public class ProductResponseDto {
         this.active = active;
         this.wholesalePrice = wholesalePrice;
         this.inShopsPrice = inShopsPrice;
+        this.tags = tags;
         this.manufacturer = manufacturer;
         this.priceLargeQuantities = priceLargeQuantities;
     }
@@ -136,6 +141,14 @@ public class ProductResponseDto {
 
     public void setInShopsPrice(Double inShopsPrice) {
         this.inShopsPrice = inShopsPrice;
+    }
+
+    public Boolean getTags() {
+        return tags;
+    }
+
+    public void setTags(Boolean tags) {
+        this.tags = tags;
     }
 
     public String getReference() {

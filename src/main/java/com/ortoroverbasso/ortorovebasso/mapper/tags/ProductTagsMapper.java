@@ -2,31 +2,40 @@ package com.ortoroverbasso.ortorovebasso.mapper.tags;
 
 import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.tags.TagsResponseDto;
+import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.tags.ProductTagsEntity;
 import com.ortoroverbasso.ortorovebasso.entity.tags.TagsEntity;
 
 public class ProductTagsMapper {
 
-    // Mapper da Entity a DTO
-    public static ProductTagsResponseDto toResponse(ProductTagsEntity productTagsEntity) {
-        ProductTagsResponseDto productTagsResponseDto = new ProductTagsResponseDto();
-        productTagsResponseDto.setId(productTagsEntity.getId());
-        productTagsResponseDto.setSku(productTagsEntity.getSku());
+    public static ProductTagsResponseDto toResponseDto(ProductTagsEntity productTagsEntity) {
+        if (productTagsEntity == null) {
+            return null;
+        }
 
-        productTagsResponseDto.setTag(TagsMapper.toDto(productTagsEntity.getTag()));
+        TagsResponseDto tagResponseDto = new TagsResponseDto(
+                productTagsEntity.getTag().getId(),
+                productTagsEntity.getTag().getName(),
+                productTagsEntity.getTag().getLinkRewrite(),
+                productTagsEntity.getTag().getLanguage());
 
-        return productTagsResponseDto;
+        return new ProductTagsResponseDto(
+                productTagsEntity.getProduct().getId(),
+                productTagsEntity.getProduct().getSku(),
+                tagResponseDto);
     }
 
-    // Mapper da DTO a Entity
-    public static ProductTagsEntity toEntity(ProductTagsRequestDto productTagsRequestDto) {
-        ProductTagsEntity productTagsEntity = new ProductTagsEntity();
-        productTagsEntity.setId(productTagsRequestDto.getId());
-        productTagsEntity.setSku(productTagsRequestDto.getSku());
+    public static ProductTagsEntity toEntity(ProductTagsRequestDto dto, ProductEntity product, TagsEntity tag) {
+        if (dto == null || product == null || tag == null) {
+            return null;
+        }
 
-        TagsEntity tagsEntity = TagsMapper.toEntity(productTagsRequestDto.getTag());
-        productTagsEntity.setTag(tagsEntity);
+        ProductTagsEntity entity = new ProductTagsEntity();
+        entity.setProduct(product);
+        entity.setTag(tag);
 
-        return productTagsEntity;
+        return entity;
     }
+
 }

@@ -4,17 +4,10 @@ public class ProductTagsResponseDto {
 
     private Long id;
     private String sku;
-    private TagsResponseDto tag; // Utilizziamo il DTO di Tags
+    private TagsResponseDto tag;
 
-    // Default constructor
-    public ProductTagsResponseDto() {
-    }
-
-    // All-args constructor
-    public ProductTagsResponseDto(
-            Long id,
-            String sku,
-            TagsResponseDto tag) {
+    // Constructor
+    public ProductTagsResponseDto(Long id, String sku, TagsResponseDto tag) {
         this.id = id;
         this.sku = sku;
         this.tag = tag;

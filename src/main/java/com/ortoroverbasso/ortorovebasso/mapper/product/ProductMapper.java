@@ -32,8 +32,6 @@ public class ProductMapper {
                 return product;
         }
 
-        // Metodo per convertire List<ProductEntity> in List<ProductResponseDto>
-
         public static List<ProductResponseDto> toResponseListDto(List<ProductEntity> products) {
                 return products.stream()
                                 .map(ProductMapper::toResponseDto)
@@ -60,6 +58,7 @@ public class ProductMapper {
                                 product.getActive(),
                                 product.getWholesalePrice(),
                                 product.getInShopsPrice(),
+                                product.getTags(),
                                 manufacturerId,
                                 priceDtos);
 

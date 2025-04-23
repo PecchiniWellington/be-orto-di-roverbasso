@@ -21,6 +21,7 @@ import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductI
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_pricing.ProductPricingRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsAssociationRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
@@ -85,14 +86,6 @@ public class ProductController {
         return productTagsService.createProductTag(productTagsRequestDto);
     }
 
-    @PutMapping("/{productId}/tags/{tagId}")
-    public ProductTagsResponseDto updateProductTag(
-            @PathVariable Long productId,
-            @PathVariable Long tagId,
-            @RequestBody ProductTagsRequestDto productTagsRequestDto) {
-        return productTagsService.updateProductTag(productId, productTagsRequestDto);
-    }
-
     @DeleteMapping("/{productId}/tags/{tagId}")
     public void deleteProductTag(@PathVariable Long productId, @PathVariable Long tagId) {
         productTagsService.deleteProductTag(tagId);
@@ -126,5 +119,21 @@ public class ProductController {
     @DeleteMapping("/product-large-quantity-prices/{priceId}")
     public String deleteProductLargeQuantityPrice(@PathVariable Long priceId) {
         return productLargeQuantityPriceService.deleteProductPriceLargeQuantity(priceId);
+    }
+
+    @PostMapping("/{productId}/associate-tags")
+    public ResponseEntity<String> associateTagsToProduct(
+            @PathVariable Long productId,
+            @RequestBody ProductTagsAssociationRequestDto request) {
+        productTagsService.associateTagsToProduct(productId, request.getTagIds());
+        return ResponseEntity.ok("Tags successfully associated with the product");
+    }
+
+    @PostMapping("/{productId}/dissociate-tags")
+    public ResponseEntity<String> disassociateTagsFromProduct(
+            @PathVariable Long productId,
+            @RequestBody ProductTagsAssociationRequestDto request) {
+        productTagsService.disassociateTagsFromProduct(productId, request.getTagIds());
+        return ResponseEntity.ok("Tags successfully dissociated from the product");
     }
 }

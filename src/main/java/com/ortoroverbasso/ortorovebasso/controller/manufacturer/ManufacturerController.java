@@ -68,10 +68,10 @@ public class ManufacturerController {
     }
 
     @PatchMapping("/{id}/disassociate-products")
-    public ResponseEntity<String> disassociateProductsFromManufacturer(
+    public ResponseEntity<String> dissociateProductsFromManufacturer(
             @PathVariable Long id,
             @RequestBody ManufacturerProductAssociationRequestDto request) {
-        manufacturerService.disassociateProductsFromManufacturer(id, request.getProductIds());
+        manufacturerService.dissociateProductsFromManufacturer(id, request.getProductIds());
         return ResponseEntity.ok("Products successfully disassociated from the manufacturer");
     }
 

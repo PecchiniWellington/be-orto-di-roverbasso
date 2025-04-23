@@ -177,7 +177,7 @@ public class ManufacturerServiceImpl implements IManufacturerService {
     }
 
     @Override
-    public void disassociateProductsFromManufacturer(Long manufacturerId, List<Long> productIds) {
+    public void dissociateProductsFromManufacturer(Long manufacturerId, List<Long> productIds) {
         ManufacturerEntity manufacturer = manufacturerRepository.findById(manufacturerId)
                 .orElseThrow(() -> new EntityNotFoundException("Manufacturer not found"));
 

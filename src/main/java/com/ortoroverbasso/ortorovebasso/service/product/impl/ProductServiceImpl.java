@@ -25,6 +25,7 @@ import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_information.ProductInformationRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_large_quantity_price.ProductLargeQuantityPriceRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_pricing_repository.ProductPricingRepository;
+import com.ortoroverbasso.ortorovebasso.repository.tags.ProductTagsRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -36,16 +37,19 @@ public class ProductServiceImpl implements IProductService {
     private final ProductInformationRepository productInformationRepository;
     private final ProductPricingRepository productPricingInfoRepository;
     private final ProductLargeQuantityPriceRepository productLargeQuantityPriceRepository;
+    private final ProductTagsRepository productTagsRepository;
 
     public ProductServiceImpl(
             ProductRepository productRepository,
             ProductInformationRepository productInformationRepository,
             ProductPricingRepository productPricingInfoRepository,
-            ProductLargeQuantityPriceRepository productLargeQuantityPriceRepository) {
+            ProductLargeQuantityPriceRepository productLargeQuantityPriceRepository,
+            ProductTagsRepository productTagsRepository) {
         this.productPricingInfoRepository = productPricingInfoRepository;
         this.productRepository = productRepository;
         this.productInformationRepository = productInformationRepository;
         this.productLargeQuantityPriceRepository = productLargeQuantityPriceRepository;
+        this.productTagsRepository = productTagsRepository;
     }
 
     @Override
@@ -82,10 +86,19 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public ProductResponseDto getProductById(Long productId) {
-        ProductEntity product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException(
-                "Product not found with ID: " + productId));
+        // Recupera il prodotto dal database
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
 
+        // Verifica se il prodotto ha dei tag associati
+        boolean hasTags = productTagsRepository.existsByProductId(productId); // Verifica se esiste almeno un tag
+                                                                              // associato al prodotto
+
+        // Crea il DTO di risposta
         ProductResponseDto p = ProductMapper.toResponseDto(product);
+
+        // Imposta il valore di 'tags' nel DTO in base alla presenza di tag associati
+        p.setTags(hasTags);
 
         return p;
     }
@@ -122,6 +135,7 @@ public class ProductServiceImpl implements IProductService {
                     product.getActive(),
                     productPricingInfoEntity.getWholesalePrice(),
                     productPricingInfoEntity.getInShopsPrice(),
+                    product.getTags(),
                     manufacturerId,
                     priceDtos);
 

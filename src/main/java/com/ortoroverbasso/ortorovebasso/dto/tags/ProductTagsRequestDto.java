@@ -1,47 +1,35 @@
 package com.ortoroverbasso.ortorovebasso.dto.tags;
 
+import java.util.List;
+
 public class ProductTagsRequestDto {
 
-    private Long id;
-    private String sku;
-    private TagsRequestDto tag; // Utilizziamo il DTO di Tags
+    private Long productId;
+    private List<Long> tagIds;
 
-    // Default constructor
+    // Costruttori
     public ProductTagsRequestDto() {
     }
 
-    // All-args constructor
-    public ProductTagsRequestDto(
-            Long id,
-            String sku,
-            TagsRequestDto tag) {
-        this.id = id;
-        this.sku = sku;
-        this.tag = tag;
+    public ProductTagsRequestDto(Long productId, List<Long> tagIds) {
+        this.productId = productId;
+        this.tagIds = tagIds;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
+    // Getter e Setter
+    public Long getProductId() {
+        return productId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 
-    public String getSku() {
-        return sku;
+    public List<Long> getTagIds() {
+        return tagIds;
     }
 
-    public void setSku(String sku) {
-        this.sku = sku;
-    }
-
-    public TagsRequestDto getTag() {
-        return tag;
-    }
-
-    public void setTag(TagsRequestDto tag) {
-        this.tag = tag;
+    public void setTagIds(List<Long> tagIds) {
+        this.tagIds = tagIds;
     }
 }

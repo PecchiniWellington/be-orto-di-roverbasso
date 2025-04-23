@@ -1,15 +1,20 @@
 package com.ortoroverbasso.ortorovebasso.service.tags.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsResponseDto;
-import com.ortoroverbasso.ortorovebasso.dto.tags.TagsRequestDto;
+import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.tags.ProductTagsEntity;
 import com.ortoroverbasso.ortorovebasso.entity.tags.TagsEntity;
 import com.ortoroverbasso.ortorovebasso.mapper.tags.ProductTagsMapper;
+import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.repository.tags.ProductTagsRepository;
+import com.ortoroverbasso.ortorovebasso.repository.tags.TagsRepository;
 import com.ortoroverbasso.ortorovebasso.service.tags.IProductTagsService;
 
 @Service
@@ -17,57 +22,74 @@ public class ProductTagsServiceImpl implements IProductTagsService {
 
     @Autowired
     private ProductTagsRepository productTagsRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private TagsRepository tagsRepository;
 
     @Override
     public ProductTagsResponseDto getProductTagsById(Long id) {
         ProductTagsEntity productTagsEntity = productTagsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ProductTag not found"));
-        return ProductTagsMapper.toResponse(productTagsEntity);
+        return ProductTagsMapper.toResponseDto(productTagsEntity);
     }
 
     @Override
     public ProductTagsResponseDto createProductTag(ProductTagsRequestDto productTagsRequestDto) {
-        ProductTagsEntity productTagsEntity = ProductTagsMapper.toEntity(productTagsRequestDto);
-        productTagsEntity = productTagsRepository.save(productTagsEntity);
-        return ProductTagsMapper.toResponse(productTagsEntity);
+        ProductEntity product = productRepository.findById(productTagsRequestDto.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        List<ProductTagsEntity> productTagsEntities = new ArrayList<>();
+
+        for (Long tagId : productTagsRequestDto.getTagIds()) {
+            TagsEntity tag = tagsRepository.findById(tagId)
+                    .orElseThrow(() -> new RuntimeException("Tag not found"));
+
+            ProductTagsEntity productTagsEntity = ProductTagsMapper.toEntity(productTagsRequestDto, product, tag);
+            productTagsEntities.add(productTagsEntity);
+        }
+
+        productTagsRepository.saveAll(productTagsEntities);
+
+        return ProductTagsMapper.toResponseDto(productTagsEntities.get(0)); // restituisce il primo elemento per esempio
+    }
+
+    @Override
+    public void associateTagsToProduct(Long productId, List<Long> tagIds) {
+        System.out.println("Associating tags to product with ID: " + productId);
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        System.out.println("Product found: " + product.getSku());
+        List<ProductTagsEntity> productTagsEntities = new ArrayList<>();
+
+        for (Long tagId : tagIds) {
+            TagsEntity tag = tagsRepository.findById(tagId)
+                    .orElseThrow(() -> new RuntimeException("Tag not found"));
+
+            ProductTagsEntity productTagsEntity = ProductTagsMapper.toEntity(new ProductTagsRequestDto(), product, tag);
+            productTagsEntities.add(productTagsEntity);
+        }
+
+        productTagsRepository.saveAll(productTagsEntities);
+    }
+
+    @Override
+    public void disassociateTagsFromProduct(Long productId, List<Long> tagIds) {
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        for (Long tagId : tagIds) {
+            ProductTagsEntity productTagsEntity = productTagsRepository.findByProductAndTagId(product, tagId)
+                    .orElseThrow(() -> new RuntimeException("Association not found"));
+
+            productTagsRepository.delete(productTagsEntity);
+        }
     }
 
     @Override
     public void deleteProductTag(Long id) {
         productTagsRepository.deleteById(id);
-    }
-
-    @Override
-    public ProductTagsResponseDto updateProductTag(Long productId, ProductTagsRequestDto productTagsRequestDto) {
-        ProductTagsEntity productTagsEntity = productTagsRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("ProductTag not found"));
-
-        TagsEntity tagEntity = productTagsEntity.getTag();
-
-        if (productTagsRequestDto.getSku() != null) {
-            productTagsEntity.setSku(productTagsRequestDto.getSku());
-        }
-
-        TagsRequestDto tagDto = productTagsRequestDto.getTag();
-
-        if (tagDto != null) {
-            if (tagDto.getId() != null) {
-                tagEntity.setId(tagDto.getId());
-            }
-            if (tagDto.getName() != null) {
-                tagEntity.setName(tagDto.getName());
-            }
-            if (tagDto.getLinkRewrite() != null) {
-                tagEntity.setLinkRewrite(tagDto.getLinkRewrite());
-            }
-            if (tagDto.getLanguage() != null) {
-                tagEntity.setLanguage(tagDto.getLanguage());
-            }
-        }
-
-        productTagsRepository.save(productTagsEntity);
-
-        return ProductTagsMapper.toResponse(productTagsEntity);
     }
 
 }
