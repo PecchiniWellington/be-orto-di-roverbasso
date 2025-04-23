@@ -51,4 +51,31 @@ public class TaxonomyService implements ITaxonomyService {
 
         return TaxonomyMapper.toDto(savedEntity);
     }
+
+    @Override
+    public TaxonomyResponseDto updateTaxonomy(Long id, TaxonomyRequestDto dto) {
+        TaxonomyEntity entity = taxonomyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Taxonomy not found"));
+
+        entity.setName(dto.getName());
+        entity.setUrl(dto.getUrl());
+        entity.setParentTaxonomy(dto.getParentTaxonomy());
+        entity.setUrlImages(dto.getUrlImages());
+        entity.setIsoCode(dto.getIsoCode());
+
+        Date currentDate = new Date();
+        entity.setDateUpd(currentDate);
+
+        TaxonomyEntity updatedEntity = taxonomyRepository.save(entity);
+
+        return TaxonomyMapper.toDto(updatedEntity);
+    }
+
+    @Override
+    public void deleteTaxonomy(Long id) {
+        TaxonomyEntity entity = taxonomyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Taxonomy not found"));
+
+        taxonomyRepository.delete(entity);
+    }
 }

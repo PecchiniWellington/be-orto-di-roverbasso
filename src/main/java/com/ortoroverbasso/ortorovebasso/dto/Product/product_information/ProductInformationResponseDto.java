@@ -30,8 +30,14 @@ public class ProductInformationResponseDto {
     }
 
     // Costruttore con tutti i campi
-    public ProductInformationResponseDto(Long id, String sku, String name, String description, String url,
-            String isoCode, String dateUpdDescription) {
+    public ProductInformationResponseDto(
+            Long id,
+            String sku,
+            String name,
+            String description,
+            String url,
+            String isoCode,
+            String dateUpdDescription) {
         this.id = id;
         this.sku = sku;
         this.name = name;

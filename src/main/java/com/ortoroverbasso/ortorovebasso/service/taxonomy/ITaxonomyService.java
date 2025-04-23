@@ -11,4 +11,8 @@ public interface ITaxonomyService {
     TaxonomyResponseDto getTaxonomyById(Long id);
 
     TaxonomyResponseDto createTaxonomy(TaxonomyRequestDto dto);
+
+    TaxonomyResponseDto updateTaxonomy(Long id, TaxonomyRequestDto dto);
+
+    void deleteTaxonomy(Long id);
 }

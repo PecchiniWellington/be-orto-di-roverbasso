@@ -17,7 +17,7 @@ public interface IProductInformationService {
 
     ProductInformationResponseDto createProductInformation(ProductInformationRequestDto productInformation);
 
-    ProductInformationResponseDto updateProductInformation(Long id, ProductInformationResponseDto productInformation);
+    ProductInformationResponseDto updateProductInformation(Long id, ProductInformationRequestDto productInformation);
 
     void deleteProductInformation(Long id);
 

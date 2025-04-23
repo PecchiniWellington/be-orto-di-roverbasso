@@ -2,9 +2,11 @@ package com.ortoroverbasso.ortorovebasso.controller.product.product_information;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,9 +30,19 @@ public class ProductInformationController {
         return productInformationService.getAllProductInformation();
     }
 
-    @GetMapping("/{sku}")
-    public ProductInformationResponseDto getProductInformationBySku(@PathVariable String sku) {
-        ProductInformationResponseDto productInfo = productInformationService.getProductInformationBySku(sku);
+    /*
+     * @GetMapping("/{sku}")
+     * public ProductInformationResponseDto getProductInformationBySku(@PathVariable
+     * String sku) {
+     * ProductInformationResponseDto productInfo =
+     * productInformationService.getProductInformationBySku(sku);
+     * return productInfo;
+     * }
+     */
+
+    @GetMapping("/{id}")
+    public ProductInformationResponseDto getProductInformationById(@PathVariable Long id) {
+        ProductInformationResponseDto productInfo = productInformationService.getProductInformationById(id);
         return productInfo;
     }
 
@@ -42,4 +54,17 @@ public class ProductInformationController {
         return productInformationResponseDto;
     }
 
+    @PutMapping("/{id}")
+    public ProductInformationResponseDto updateProductInformation(
+            @PathVariable Long id,
+            @RequestBody ProductInformationRequestDto productInformationRequestDto) {
+        ProductInformationResponseDto productInformationResponseDto = productInformationService
+                .updateProductInformation(id, productInformationRequestDto);
+        return productInformationResponseDto;
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteProductInformation(@PathVariable Long id) {
+        productInformationService.deleteProductInformation(id);
+    }
 }

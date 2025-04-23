@@ -22,8 +22,9 @@ public class ProductInformationServiceImpl implements IProductInformationService
     @Override
     public ProductInformationResponseDto getProductInformationById(Long id) {
 
-        // TODO Auto-generated method stub
-        return null;
+        ProductInformationEntity productInformationEntity = productInformationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product information not found"));
+        return ProductInformationMapper.toResponseDto(productInformationEntity);
     }
 
     @Override
@@ -51,14 +52,27 @@ public class ProductInformationServiceImpl implements IProductInformationService
 
     @Override
     public ProductInformationResponseDto updateProductInformation(Long id,
-            ProductInformationResponseDto productInformation) {
-        // TODO Auto-generated method stub
-        return null;
+            ProductInformationRequestDto productInformation) {
+        ProductInformationEntity entity = productInformationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product Information not found"));
+        entity.setName(productInformation.getName());
+        entity.setDescription(productInformation.getDescription());
+        entity.setSku(productInformation.getSku());
+        entity.setUrl(productInformation.getUrl());
+        entity.setIsoCode(productInformation.getIsoCode());
+
+        entity.setDateUpdDescription(productInformation.getDateUpdDescription());
+        productInformationRepository.save(entity);
+        return ProductInformationMapper.toResponseDto(entity);
+
     }
 
     @Override
     public void deleteProductInformation(Long id) {
-        // TODO Auto-generated method stub
+        ProductInformationEntity entity = productInformationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product Information not found"));
+
+        productInformationRepository.delete(entity);
 
     }
 

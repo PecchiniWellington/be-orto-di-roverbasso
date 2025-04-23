@@ -30,8 +30,15 @@ public class ProductInformationEntity {
     }
 
     // All-args constructor
-    public ProductInformationEntity(Long id, String sku, String name, String description, String url, String isoCode,
-            String dateUpdDescription, ProductEntity product) {
+    public ProductInformationEntity(
+            Long id,
+            String sku,
+            String name,
+            String description,
+            String url,
+            String isoCode,
+            String dateUpdDescription,
+            ProductEntity product) {
         this.id = id;
         this.sku = sku;
         this.name = name;

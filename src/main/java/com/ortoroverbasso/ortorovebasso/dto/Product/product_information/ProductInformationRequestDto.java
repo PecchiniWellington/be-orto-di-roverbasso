@@ -34,8 +34,14 @@ public class ProductInformationRequestDto {
     }
 
     // Costruttore con tutti gli argomenti
-    public ProductInformationRequestDto(Long id, String sku, String name, String description, String url,
-            String isoCode, String dateUpdDescription) {
+    public ProductInformationRequestDto(
+            Long id,
+            String sku,
+            String name,
+            String description,
+            String url,
+            String isoCode,
+            String dateUpdDescription) {
         this.id = id;
         this.sku = sku;
         this.name = name;
