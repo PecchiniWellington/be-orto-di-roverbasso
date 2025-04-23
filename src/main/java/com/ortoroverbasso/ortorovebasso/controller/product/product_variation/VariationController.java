@@ -16,7 +16,7 @@ import com.ortoroverbasso.ortorovebasso.dto.product.product_variation.VariationR
 import com.ortoroverbasso.ortorovebasso.service.product.product_variation.IVariationService;
 
 @RestController
-@RequestMapping("/variations")
+@RequestMapping("/api/variations")
 public class VariationController {
 
     @Autowired

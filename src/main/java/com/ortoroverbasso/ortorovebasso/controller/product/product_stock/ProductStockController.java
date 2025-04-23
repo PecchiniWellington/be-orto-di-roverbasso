@@ -38,14 +38,6 @@ public class ProductStockController {
         return productStockService.getAllProductStocks();
     }
 
-    /*
-     * @GetMapping("/sku/{sku}")
-     * public ProductStockResponseDto getProductStockBySku(@PathVariable String sku)
-     * {
-     * return productStockService.getProductStockBySku(sku);
-     * }
-     */
-
     @PutMapping("/{id}")
     public ProductStockResponseDto updateProductStock(@PathVariable Long id, @RequestBody ProductStockRequestDto dto) {
         return productStockService.updateProductStock(id, dto);

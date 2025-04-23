@@ -11,7 +11,6 @@ import com.ortoroverbasso.ortorovebasso.entity.product.product_variation.Product
 
 public class ProductVariationMapper {
 
-    // Converti ProductVariationRequestDto in ProductVariationEntity
     public static ProductVariationEntity toEntity(ProductVariationRequestDto dto) {
         ProductVariationEntity entity = new ProductVariationEntity();
         entity.setId(dto.getId());
@@ -28,7 +27,6 @@ public class ProductVariationMapper {
         entity.setPartNumber(dto.getPartNumber());
         entity.setCanon(dto.getCanon());
 
-        // Mappa la lista dei prezzi in base alla quantità
         List<ProductLargeQuantityPriceEntity> prices = dto.getPriceLargeQuantities().stream()
                 .map(priceDto -> new ProductLargeQuantityPriceEntity(priceDto.getQuantity(), priceDto.getPrice()))
                 .collect(Collectors.toList());
@@ -37,7 +35,6 @@ public class ProductVariationMapper {
         return entity;
     }
 
-    // Converti ProductVariationEntity in ProductVariationResponseDto
     public static ProductVariationResponseDto toResponse(ProductVariationEntity entity) {
         ProductVariationResponseDto dto = new ProductVariationResponseDto();
         dto.setId(entity.getId());
@@ -50,6 +47,10 @@ public class ProductVariationMapper {
         dto.setWidth(entity.getWidth());
         dto.setHeight(entity.getHeight());
         dto.setDepth(entity.getDepth());
+
+        if (entity.getProduct() != null) {
+            dto.setProductId(entity.getProduct().getId());
+        }
 
         // Mappa la lista dei prezzi
         List<ProductLargeQuantityPriceResponseDto> priceDtos = entity.getPriceLargeQuantities().stream()

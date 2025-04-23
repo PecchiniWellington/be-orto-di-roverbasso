@@ -19,6 +19,7 @@ public class ProductVariationResponseDto {
     private String logisticClass;
     private String partNumber;
     private Integer canon;
+    private Long productId;
 
     // All-args constructor
     public ProductVariationResponseDto(
@@ -35,7 +36,8 @@ public class ProductVariationResponseDto {
             String logisticClass,
             String partNumber,
             Integer canon,
-            List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities) {
+            List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities,
+            Long productId) {
         this.id = id;
         this.sku = sku;
         this.ean13 = ean13;
@@ -50,6 +52,7 @@ public class ProductVariationResponseDto {
         this.partNumber = partNumber;
         this.canon = canon;
         this.priceLargeQuantities = priceLargeQuantities;
+        this.productId = productId;
     }
 
     // No-args constructor
@@ -167,5 +170,13 @@ public class ProductVariationResponseDto {
 
     public void setPriceLargeQuantities(List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities) {
         this.priceLargeQuantities = priceLargeQuantities;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 }

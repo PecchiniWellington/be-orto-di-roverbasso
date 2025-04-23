@@ -7,11 +7,20 @@ import com.ortoroverbasso.ortorovebasso.dto.product.product_variation.ProductVar
 
 public interface IProductVariationService {
 
-    ProductVariationResponseDto createVariation(Long productId, ProductVariationRequestDto variationRequestDto);
+    ProductVariationResponseDto createProductVariation(
+            Long productId,
+            ProductVariationRequestDto variationRequestDto);
 
-    ProductVariationResponseDto getProductVariationById(Long id);
+    ProductVariationResponseDto getProductVariationById(
+            Long productId,
+            Long variationId);
 
-    List<ProductVariationResponseDto> getAllProductVariations();
+    List<ProductVariationResponseDto> getAllProductVariations(Long productId);
+
+    ProductVariationResponseDto updateProductVariation(
+            Long productId,
+            Long variationId,
+            ProductVariationRequestDto variationRequestDto);
 
     void deleteVariation(Long id);
 }

@@ -19,6 +19,7 @@ public class ProductVariationRequestDto {
     private String logisticClass;
     private String partNumber;
     private Integer canon;
+    private Long productId;
 
     // All-args constructor
     public ProductVariationRequestDto(
@@ -168,4 +169,5 @@ public class ProductVariationRequestDto {
     public void setPriceLargeQuantities(List<ProductLargeQuantityPriceEntity> priceLargeQuantities) {
         this.priceLargeQuantities = priceLargeQuantities;
     }
+
 }
