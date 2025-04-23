@@ -66,4 +66,18 @@ public class ProductStockServiceImpl implements IProductStockService {
         ProductStockEntity productStock = productStockRepository.findBySku(sku);
         return ProductStockMapper.toResponseDto(productStock);
     }
+
+    @Override
+    public ProductStockResponseDto getProductStockById(Long id) {
+        ProductStockEntity productStock = productStockRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product Stock not found"));
+        return ProductStockMapper.toResponseDto(productStock);
+    }
+
+    @Override
+    public void deleteProductStock(Long id) {
+        ProductStockEntity productStock = productStockRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product Stock not found"));
+        productStockRepository.delete(productStock);
+    }
 }

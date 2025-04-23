@@ -3,6 +3,7 @@ package com.ortoroverbasso.ortorovebasso.controller.product.product_stock;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,33 +17,43 @@ import com.ortoroverbasso.ortorovebasso.dto.product.product_stock.ProductStockRe
 import com.ortoroverbasso.ortorovebasso.service.product.product_stock.IProductStockService;
 
 @RestController
-@RequestMapping("/product-stock")
+@RequestMapping("/api/product-stock")
 public class ProductStockController {
 
-    private final IProductStockService productStockService;
-
     @Autowired
-    public ProductStockController(IProductStockService productStockService) {
-        this.productStockService = productStockService;
-    }
+    private IProductStockService productStockService;
 
     @PostMapping
     public ProductStockResponseDto createProductStock(@RequestBody ProductStockRequestDto dto) {
         return productStockService.createProductStock(dto);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
+    public ProductStockResponseDto getProductStockById(@PathVariable Long id) {
+        return productStockService.getProductStockById(id);
+    }
+
+    @GetMapping("/all")
     public List<ProductStockResponseDto> getAllProductStocks() {
         return productStockService.getAllProductStocks();
     }
 
-    @GetMapping("/sku/{sku}")
-    public ProductStockResponseDto getProductStockBySku(@PathVariable String sku) {
-        return productStockService.getProductStockBySku(sku);
-    }
+    /*
+     * @GetMapping("/sku/{sku}")
+     * public ProductStockResponseDto getProductStockBySku(@PathVariable String sku)
+     * {
+     * return productStockService.getProductStockBySku(sku);
+     * }
+     */
 
     @PutMapping("/{id}")
     public ProductStockResponseDto updateProductStock(@PathVariable Long id, @RequestBody ProductStockRequestDto dto) {
         return productStockService.updateProductStock(id, dto);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteProductStock(@PathVariable Long id) {
+        productStockService.deleteProductStock(id);
+    }
+
 }

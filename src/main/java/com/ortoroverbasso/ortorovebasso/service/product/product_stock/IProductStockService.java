@@ -13,6 +13,10 @@ public interface IProductStockService {
 
     List<ProductStockResponseDto> getAllProductStocks();
 
+    ProductStockResponseDto getProductStockById(Long id);
+
+    void deleteProductStock(Long id);
+
     ProductStockResponseDto getProductStockBySku(String sku);
 
 }
