@@ -7,13 +7,22 @@ import com.ortoroverbasso.ortorovebasso.dto.product.product_attributes.ProductAt
 
 public interface IProductAttributesService {
 
-    List<ProductAttributesResponseDto> getProductAttributesByProductId(Long productId);
+        List<ProductAttributesResponseDto> getAllProductAttributesByProductId(Long productId);
 
-    ProductAttributesResponseDto saveProductAttributes(ProductAttributesRequestDto productAttributesRequestDto);
+        ProductAttributesResponseDto createProductAttribute(
+                        Long productId,
+                        ProductAttributesRequestDto productAttributesRequestDto);
 
-    void deleteProductAttributes(Long id);
+        void deleteProductAttributes(
+                        Long productId,
+                        Long attributesId);
 
-    ProductAttributesResponseDto getProductAttributesById(Long id);
+        ProductAttributesResponseDto getProductAttributesById(
+                        Long productId,
+                        Long attributesId);
 
-    List<ProductAttributesResponseDto> getAllProductAttributes();
+        ProductAttributesResponseDto updateProductAttributes(
+                        Long productId,
+                        Long attributesId,
+                        ProductAttributesRequestDto productAttributesRequestDto);
 }

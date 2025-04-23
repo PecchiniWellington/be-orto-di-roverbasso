@@ -9,6 +9,10 @@ import com.ortoroverbasso.ortorovebasso.entity.product.product_attributes.Produc
 
 @Repository
 public interface ProductAttributesRepository extends JpaRepository<ProductAttributesEntity, Long> {
-    List<ProductAttributesEntity> findByProductId(Long productId);
+    List<ProductAttributesEntity> findAllByProductId(Long productId);
+
+    ProductAttributesEntity findByProductIdAndId(Long productId, Long attributeId);
+
+    boolean existsByProductId(Long productId);
 
 }

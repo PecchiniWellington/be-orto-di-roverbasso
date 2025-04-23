@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ortoroverbasso.ortorovebasso.dto.GenericResponseDto;
@@ -22,6 +23,7 @@ import com.ortoroverbasso.ortorovebasso.exception.ProductNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.product.ProductMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_information.ProductInformationMapper;
 import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
+import com.ortoroverbasso.ortorovebasso.repository.product.product_attributes.ProductAttributesRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_information.ProductInformationRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_large_quantity_price.ProductLargeQuantityPriceRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_pricing_repository.ProductPricingRepository;
@@ -33,24 +35,18 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class ProductServiceImpl implements IProductService {
 
-    private final ProductRepository productRepository;
-    private final ProductInformationRepository productInformationRepository;
-    private final ProductPricingRepository productPricingInfoRepository;
-    private final ProductLargeQuantityPriceRepository productLargeQuantityPriceRepository;
-    private final ProductTagsRepository productTagsRepository;
-
-    public ProductServiceImpl(
-            ProductRepository productRepository,
-            ProductInformationRepository productInformationRepository,
-            ProductPricingRepository productPricingInfoRepository,
-            ProductLargeQuantityPriceRepository productLargeQuantityPriceRepository,
-            ProductTagsRepository productTagsRepository) {
-        this.productPricingInfoRepository = productPricingInfoRepository;
-        this.productRepository = productRepository;
-        this.productInformationRepository = productInformationRepository;
-        this.productLargeQuantityPriceRepository = productLargeQuantityPriceRepository;
-        this.productTagsRepository = productTagsRepository;
-    }
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private ProductInformationRepository productInformationRepository;
+    @Autowired
+    private ProductPricingRepository productPricingInfoRepository;
+    @Autowired
+    private ProductLargeQuantityPriceRepository productLargeQuantityPriceRepository;
+    @Autowired
+    private ProductTagsRepository productTagsRepository;
+    @Autowired
+    private ProductAttributesRepository productAttributesRepository;
 
     @Override
     public ProductResponseDto createProduct(ProductRequestDto dto) {
@@ -86,19 +82,16 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public ProductResponseDto getProductById(Long productId) {
-        // Recupera il prodotto dal database
         ProductEntity product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
 
-        // Verifica se il prodotto ha dei tag associati
-        boolean hasTags = productTagsRepository.existsByProductId(productId); // Verifica se esiste almeno un tag
-                                                                              // associato al prodotto
+        boolean hasTags = productTagsRepository.existsByProductId(productId);
+        boolean hasAttributes = productAttributesRepository.existsByProductId(productId);
 
-        // Crea il DTO di risposta
         ProductResponseDto p = ProductMapper.toResponseDto(product);
 
-        // Imposta il valore di 'tags' nel DTO in base alla presenza di tag associati
         p.setTags(hasTags);
+        p.setAttributes(hasAttributes);
 
         return p;
     }
@@ -137,7 +130,10 @@ public class ProductServiceImpl implements IProductService {
                     productPricingInfoEntity.getInShopsPrice(),
                     product.getTags(),
                     manufacturerId,
-                    priceDtos);
+                    priceDtos,
+                    product.getAttributes()
+
+            );
 
         } catch (ProductNotFoundException e) {
             throw e;

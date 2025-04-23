@@ -29,6 +29,9 @@ public class ProductResponseDto {
     @Schema(description = "Se true allora ha un tag associato", example = "true")
     private Boolean tags;
 
+    @Schema(description = "Se true allora ha un attribute associato", example = "true")
+    private Boolean attributes;
+
     // Aggiungi i campi per i prezzi
     private String wholesalePrice;
     private Double inShopsPrice;
@@ -64,7 +67,8 @@ public class ProductResponseDto {
             Double inShopsPrice,
             Boolean tags,
             Long manufacturer,
-            List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities) {
+            List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities,
+            Boolean attributes) {
         this.id = id;
         this.sku = sku;
         this.retailPrice = retailPrice;
@@ -76,6 +80,7 @@ public class ProductResponseDto {
         this.tags = tags;
         this.manufacturer = manufacturer;
         this.priceLargeQuantities = priceLargeQuantities;
+        this.attributes = attributes;
     }
 
     // Getter e Setter
@@ -181,5 +186,13 @@ public class ProductResponseDto {
 
     public void setManufacturer(Long manufacturer) {
         this.manufacturer = manufacturer;
+    }
+
+    public Boolean getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Boolean attributes) {
+        this.attributes = attributes;
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,38 +17,41 @@ import com.ortoroverbasso.ortorovebasso.dto.product.product_attributes.ProductAt
 import com.ortoroverbasso.ortorovebasso.service.product.product_attributes.IProductAttributesService;
 
 @RestController
-@RequestMapping("/api/product-attributes")
+@RequestMapping("/api/products/{productId}/attributes")
 public class ProductAttributesController {
-    private final IProductAttributesService productAttributesService;
 
     @Autowired
-    public ProductAttributesController(IProductAttributesService productAttributesService) {
-        this.productAttributesService = productAttributesService;
-    }
-
-    @GetMapping("/{productId}")
-    public List<ProductAttributesResponseDto> getProductAttributesByProductId(@PathVariable Long productId) {
-        return productAttributesService.getProductAttributesByProductId(productId);
-    }
+    private IProductAttributesService productAttributesService;
 
     @PostMapping
-    public ProductAttributesResponseDto saveProductAttributes(
+    public ProductAttributesResponseDto createProductAttribute(
+            @PathVariable Long productId,
             @RequestBody ProductAttributesRequestDto productAttributesRequestDto) {
-        return productAttributesService.saveProductAttributes(productAttributesRequestDto);
+        return productAttributesService.createProductAttribute(productId, productAttributesRequestDto);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteProductAttributes(@PathVariable Long id) {
-        productAttributesService.deleteProductAttributes(id);
+    @GetMapping("/all")
+    public List<ProductAttributesResponseDto> getAllProductAttributesByProductId(@PathVariable Long productId) {
+        return productAttributesService.getAllProductAttributesByProductId(productId);
     }
 
-    @GetMapping("/{id}")
-    public ProductAttributesResponseDto getProductAttributesById(@PathVariable Long id) {
-        return productAttributesService.getProductAttributesById(id);
+    @GetMapping("/{attributesId}")
+    public ProductAttributesResponseDto getProductAttributesById(
+            @PathVariable Long productId,
+            @PathVariable Long attributesId) {
+        return productAttributesService.getProductAttributesById(productId, attributesId);
     }
 
-    @GetMapping
-    public List<ProductAttributesResponseDto> getAllProductAttributes() {
-        return productAttributesService.getAllProductAttributes();
+    @PutMapping("/{attributesId}")
+    public ProductAttributesResponseDto updateProductAttributes(
+            @PathVariable Long productId,
+            @PathVariable Long attributesId,
+            @RequestBody ProductAttributesRequestDto productAttributesRequestDto) {
+        return productAttributesService.updateProductAttributes(productId, attributesId, productAttributesRequestDto);
+    }
+
+    @DeleteMapping("/{attributesId}")
+    public void deleteProductAttributes(@PathVariable Long productId, @PathVariable Long attributesId) {
+        productAttributesService.deleteProductAttributes(productId, attributesId);
     }
 }

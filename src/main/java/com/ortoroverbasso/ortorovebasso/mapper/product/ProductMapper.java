@@ -60,7 +60,8 @@ public class ProductMapper {
                                 product.getInShopsPrice(),
                                 product.getTags(),
                                 manufacturerId,
-                                priceDtos);
+                                priceDtos,
+                                product.getAttributes());
 
         }
 

@@ -27,6 +27,7 @@ public class ProductVariationService implements IProductVariationService {
     @Override
     public List<ProductVariationResponseDto> getAllProductVariations(Long productId) {
         List<ProductVariationEntity> variations = productVariationRepository.findAllByProductId(productId);
+
         return variations.stream()
                 .map(ProductVariationMapper::toResponse)
                 .collect(Collectors.toList());
@@ -48,6 +49,7 @@ public class ProductVariationService implements IProductVariationService {
     public ProductVariationResponseDto createProductVariation(
             Long productId,
             ProductVariationRequestDto variationRequestDto) {
+
         ProductEntity productEntity = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 

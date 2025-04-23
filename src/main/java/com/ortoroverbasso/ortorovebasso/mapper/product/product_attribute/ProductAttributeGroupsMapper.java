@@ -9,7 +9,7 @@ import com.ortoroverbasso.ortorovebasso.entity.product.product_attributes.Produc
 public class ProductAttributeGroupsMapper {
 
     // Metodo di istanza, non statico
-    public ProductAttributeGroupsEntity toEntity(ProductAttributeGroupDto dto) {
+    public static ProductAttributeGroupsEntity toEntity(ProductAttributeGroupDto dto) {
         ProductAttributeGroupsEntity entity = new ProductAttributeGroupsEntity();
         entity.setName(dto.getName());
         entity.setIsoCode(dto.getIsoCode());
@@ -17,7 +17,7 @@ public class ProductAttributeGroupsMapper {
     }
 
     // Metodo di istanza
-    public ProductAttributeGroupDto toDto(ProductAttributeGroupsEntity entity) {
+    public static ProductAttributeGroupDto toDto(ProductAttributeGroupsEntity entity) {
         ProductAttributeGroupDto dto = new ProductAttributeGroupDto();
         dto.setId(entity.getId());
         dto.setName(entity.getName());

@@ -17,21 +17,17 @@ public class ProductAttributeGroupsServiceImpl implements IProductAttributeGroup
     @Autowired
     private ProductAttributeGroupsRepository productAttributeGroupRepository;
 
-    // Autowired come oggetto di tipo istanza
-    @Autowired
-    private ProductAttributeGroupsMapper productAttributeGroupMapper;
-
     @Override
     public List<ProductAttributeGroupDto> getAllAttributeGroups() {
         return productAttributeGroupRepository.findAll().stream()
-                .map(productAttributeGroupMapper::toDto)
+                .map(ProductAttributeGroupsMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public ProductAttributeGroupDto getAttributeGroupById(Long id) {
         return productAttributeGroupRepository.findById(id)
-                .map(productAttributeGroupMapper::toDto)
+                .map(ProductAttributeGroupsMapper::toDto)
                 .orElseThrow(() -> new RuntimeException("Attribute Group not found"));
     }
 }
