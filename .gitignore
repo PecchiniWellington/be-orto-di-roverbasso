@@ -56,5 +56,5 @@ application.yml
 
 # Remove run-dev.sh
 .run-dev.sh
-.run-dev-sh-debug.sh
+.run-dev-debug.sh
 .run-production.sh
