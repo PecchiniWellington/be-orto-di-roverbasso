@@ -38,6 +38,7 @@ public class ProductImagesController {
         return ResponseEntity.ok(productImageService.uploadProductImage(productId, file, requestDto));
     }
 
+    /* systemout */
     @PostMapping("/image/upload")
     public ResponseEntity<ImagesResponseDto> uploadGenericImage(@RequestParam("file") MultipartFile file,
             @RequestBody ImagesDetailDto requestDto) {

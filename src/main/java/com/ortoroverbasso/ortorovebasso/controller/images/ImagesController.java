@@ -18,12 +18,12 @@ public class ImagesController {
      * public ImagesResponseDto uploadImage(String imagePath) {
      * return imagesService.uploadImage(imagePath);
      * }
-     * 
+     *
      * @PostMapping("/download")
      * public byte[] downloadImage(String imageId) {
      * return imagesService.downloadImage(imageId);
      * }
-     * 
+     *
      * @DeleteMapping("/delete")
      * public void deleteImage(Long imageId) {
      * imagesService.deleteImage(imageId);
