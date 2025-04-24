@@ -3,7 +3,6 @@ package com.ortoroverbasso.ortorovebasso.service.product.product_stock.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ortoroverbasso.ortorovebasso.dto.product.product_stock.ProductStockRequestDto;
@@ -19,7 +18,6 @@ public class ProductStockServiceImpl implements IProductStockService {
 
     private final ProductStockRepository productStockRepository;
 
-    @Autowired
     public ProductStockServiceImpl(ProductStockRepository productStockRepository) {
         this.productStockRepository = productStockRepository;
     }
