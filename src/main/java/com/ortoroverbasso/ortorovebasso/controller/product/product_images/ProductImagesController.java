@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ortoroverbasso.ortorovebasso.dto.images.ImagesDetailDto;
-import com.ortoroverbasso.ortorovebasso.dto.images.ImagesResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesResponseDto;
-import com.ortoroverbasso.ortorovebasso.service.images.IImagesService;
+import com.ortoroverbasso.ortorovebasso.service.images.IImagesDetailService;
 import com.ortoroverbasso.ortorovebasso.service.product.product_images.IProductImagesService;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -28,7 +27,7 @@ public class ProductImagesController {
     private IProductImagesService productImageService;
 
     @Autowired
-    private IImagesService imagesService;
+    private IImagesDetailService imagesService;
 
     @PostMapping("/products/{productId}/image/upload")
     public ResponseEntity<ProductImagesResponseDto> uploadProductImage(
@@ -36,13 +35,6 @@ public class ProductImagesController {
             @RequestParam("file") MultipartFile file,
             @RequestBody ImagesDetailDto requestDto) {
         return ResponseEntity.ok(productImageService.uploadProductImage(productId, file, requestDto));
-    }
-
-    /* systemout */
-    @PostMapping("/image/upload")
-    public ResponseEntity<ImagesResponseDto> uploadGenericImage(@RequestParam("file") MultipartFile file,
-            @RequestBody ImagesDetailDto requestDto) {
-        return ResponseEntity.ok(imagesService.uploadImage(file, requestDto));
     }
 
     @GetMapping("/products/{productId}/images")

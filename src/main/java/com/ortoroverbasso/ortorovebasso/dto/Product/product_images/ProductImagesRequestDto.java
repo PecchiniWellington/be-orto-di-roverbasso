@@ -47,8 +47,8 @@ public class ProductImagesRequestDto {
         return isCover;
     }
 
-    public void setIsCover(boolean cover) {
-        isCover = cover;
+    public void setIsCover(boolean isCover) {
+        this.isCover = isCover;
     }
 
     public boolean isLogo() {

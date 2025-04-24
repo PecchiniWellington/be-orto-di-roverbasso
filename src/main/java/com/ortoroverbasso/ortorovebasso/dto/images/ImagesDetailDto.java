@@ -65,8 +65,8 @@ public class ImagesDetailDto {
         return isCover;
     }
 
-    public void setIsCover(boolean cover) {
-        isCover = cover;
+    public void setIsCover(boolean isCover) {
+        this.isCover = isCover;
     }
 
     public String getName() {

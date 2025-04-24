@@ -4,8 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -27,10 +25,6 @@ public class ImagesDetailEntity {
     private int brand;
     private boolean gpsrLabel;
     private boolean gpsrWarning;
-
-    @ManyToOne
-    @JoinColumn(name = "images_id")
-    private ImagesEntity imagesEntity;
 
     // Default constructor
     public ImagesDetailEntity() {
@@ -81,8 +75,8 @@ public class ImagesDetailEntity {
         return isCover;
     }
 
-    public void setIsCover(boolean cover) {
-        isCover = cover;
+    public void setIsCover(boolean isCover) {
+        isCover = isCover;
     }
 
     public String getName() {
@@ -181,11 +175,4 @@ public class ImagesDetailEntity {
         this.gpsrWarning = gpsrWarning;
     }
 
-    public ImagesEntity getImagesEntity() {
-        return imagesEntity;
-    }
-
-    public void setImagesEntity(ImagesEntity imagesEntity) {
-        this.imagesEntity = imagesEntity;
-    }
 }
