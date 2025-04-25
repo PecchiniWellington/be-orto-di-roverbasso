@@ -4,10 +4,13 @@ public class ErrorResponse {
 
     private String errorCode;
     private String message;
+    private int status;
 
-    public ErrorResponse(String errorCode, String message) {
+    public ErrorResponse(String errorCode, String message, int status) {
         this.errorCode = errorCode;
         this.message = message;
+        this.status = status;
+
     }
 
     // Getter e setter
@@ -25,5 +28,13 @@ public class ErrorResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

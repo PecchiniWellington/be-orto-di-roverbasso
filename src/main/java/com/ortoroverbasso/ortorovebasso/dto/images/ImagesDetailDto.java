@@ -15,6 +15,7 @@ public class ImagesDetailDto {
     private int brand;
     private boolean gpsrLabel;
     private boolean gpsrWarning;
+    private String fileId;
 
     // Default constructor
     public ImagesDetailDto() {
@@ -35,7 +36,8 @@ public class ImagesDetailDto {
             int packagingPhoto,
             int brand,
             boolean gpsrLabel,
-            boolean gpsrWarning) {
+            boolean gpsrWarning,
+            String fileId) {
         this.id = id;
         this.isCover = isCover;
         this.name = name;
@@ -50,6 +52,7 @@ public class ImagesDetailDto {
         this.brand = brand;
         this.gpsrLabel = gpsrLabel;
         this.gpsrWarning = gpsrWarning;
+        this.fileId = fileId;
     }
 
     // Getters and Setters
@@ -163,6 +166,14 @@ public class ImagesDetailDto {
 
     public void setGpsrWarning(boolean gpsrWarning) {
         this.gpsrWarning = gpsrWarning;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
     }
 
 }

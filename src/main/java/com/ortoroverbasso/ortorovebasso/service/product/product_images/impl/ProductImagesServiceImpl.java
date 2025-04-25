@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.service.product.product_images.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,5 +62,20 @@ public class ProductImagesServiceImpl implements IProductImagesService {
         return productImageRepository.findByProductId(productId).stream()
                 .map(ProductImagesMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductImagesResponseDto> deleteProductImages(Long productId, List<Long> imageIds) {
+        List<ProductImagesResponseDto> deleted = new ArrayList<>();
+
+        for (Long id : imageIds) {
+            ProductImageEntity entity = productImageRepository.findByProductIdAndId(productId, id);
+            if (entity != null) {
+                productImageRepository.delete(entity);
+                deleted.add(ProductImagesMapper.toResponse(entity));
+            }
+        }
+
+        return deleted;
     }
 }

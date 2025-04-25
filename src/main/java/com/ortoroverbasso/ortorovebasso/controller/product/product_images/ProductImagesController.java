@@ -4,23 +4,25 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ortoroverbasso.ortorovebasso.dto.images.ImageConnectRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.images.ImageConnectResponse;
 import com.ortoroverbasso.ortorovebasso.dto.images.ImagesDetailDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.images.IImagesDetailService;
 import com.ortoroverbasso.ortorovebasso.service.product.product_images.IProductImagesService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/products")
 public class ProductImagesController {
 
     @Autowired
@@ -29,7 +31,7 @@ public class ProductImagesController {
     @Autowired
     private IImagesDetailService imagesService;
 
-    @PostMapping("/products/{productId}/image/upload")
+    @PostMapping("/{productId}/image/upload")
     public ResponseEntity<ProductImagesResponseDto> uploadProductImage(
             @PathVariable Long productId,
             @RequestParam("file") MultipartFile file,
@@ -37,8 +39,29 @@ public class ProductImagesController {
         return ResponseEntity.ok(productImageService.uploadProductImage(productId, file, requestDto));
     }
 
-    @GetMapping("/products/{productId}/images")
+    @GetMapping("/{productId}/image/all")
     public ResponseEntity<List<ProductImagesResponseDto>> getImagesByProduct(@PathVariable Long productId) {
         return ResponseEntity.ok(productImageService.getImagesByProductId(productId));
+    }
+
+    @DeleteMapping("/{productId}/image/delete")
+    public ResponseEntity<List<ProductImagesResponseDto>> deleteProductImages(
+            @PathVariable Long productId,
+            @RequestBody List<Long> imageIds) {
+        return ResponseEntity.ok(productImageService.deleteProductImages(productId, imageIds));
+    }
+
+    @PostMapping("/image/connect")
+    public ResponseEntity<List<ProductImagesResponseDto>> connectImageToProduct(
+            @RequestBody ImageConnectRequestDto imageConnectRequest) {
+
+        return ResponseEntity.ok(imagesService.connectImageToProduct(imageConnectRequest));
+    }
+
+    @PostMapping("/image/disconnect")
+    public ResponseEntity<ImageConnectResponse> disconnectImagesFromProduct(
+            @RequestBody ImageConnectRequestDto imageConnectRequest) {
+
+        return ResponseEntity.ok(imagesService.disconnectImagesFromProduct(imageConnectRequest));
     }
 }

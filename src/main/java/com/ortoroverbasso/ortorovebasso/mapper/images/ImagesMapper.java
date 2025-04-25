@@ -22,7 +22,7 @@ public class ImagesMapper {
         imagesDetailEntity.setBrand(imageRequestDto.getBrand());
         imagesDetailEntity.setGpsrLabel(imageRequestDto.isGpsrLabel());
         imagesDetailEntity.setGpsrWarning(imageRequestDto.isGpsrWarning());
-
+        imagesDetailEntity.setFileId(imageRequestDto.getFileId());
         return imagesDetailEntity;
 
     }
@@ -44,6 +44,7 @@ public class ImagesMapper {
         imagesDetailDto.setBrand(imagesDetailEntity.getBrand());
         imagesDetailDto.setGpsrLabel(imagesDetailEntity.isGpsrLabel());
         imagesDetailDto.setGpsrWarning(imagesDetailEntity.isGpsrWarning());
+        imagesDetailDto.setFileId(imagesDetailEntity.getFileId());
 
         return imagesDetailDto;
     }

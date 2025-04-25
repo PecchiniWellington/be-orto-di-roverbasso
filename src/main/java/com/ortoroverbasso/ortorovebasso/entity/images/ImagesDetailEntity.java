@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.entity.images;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,6 +26,8 @@ public class ImagesDetailEntity {
     private int brand;
     private boolean gpsrLabel;
     private boolean gpsrWarning;
+    @Column(name = "file_id")
+    private String fileId;
 
     // Default constructor
     public ImagesDetailEntity() {
@@ -45,7 +48,8 @@ public class ImagesDetailEntity {
             int packagingPhoto,
             int brand,
             boolean gpsrLabel,
-            boolean gpsrWarning) {
+            boolean gpsrWarning,
+            String fileId) {
         this.id = id;
         this.isCover = isCover;
         this.name = name;
@@ -60,6 +64,7 @@ public class ImagesDetailEntity {
         this.brand = brand;
         this.gpsrLabel = gpsrLabel;
         this.gpsrWarning = gpsrWarning;
+        this.fileId = fileId;
     }
 
     // Getters and Setters
@@ -173,6 +178,14 @@ public class ImagesDetailEntity {
 
     public void setGpsrWarning(boolean gpsrWarning) {
         this.gpsrWarning = gpsrWarning;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
     }
 
 }

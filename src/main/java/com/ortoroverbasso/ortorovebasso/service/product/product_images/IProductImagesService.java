@@ -11,4 +11,6 @@ public interface IProductImagesService {
     ProductImagesResponseDto uploadProductImage(Long productId, MultipartFile file, ImagesDetailDto request);
 
     List<ProductImagesResponseDto> getImagesByProductId(Long productId);
+
+    List<ProductImagesResponseDto> deleteProductImages(Long productId, List<Long> imageId);
 }

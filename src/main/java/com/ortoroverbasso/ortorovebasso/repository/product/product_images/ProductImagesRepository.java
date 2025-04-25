@@ -9,4 +9,8 @@ import com.ortoroverbasso.ortorovebasso.entity.product.product_images.ProductIma
 public interface ProductImagesRepository extends JpaRepository<ProductImageEntity, Long> {
     List<ProductImageEntity> findByProductId(Long productId);
 
+    ProductImageEntity findByProductIdAndId(Long productId, Long imageId);
+
+    void deleteByProductIdAndIdIn(Long productId, List<Long> ids);
+
 }
