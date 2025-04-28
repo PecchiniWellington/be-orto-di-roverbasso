@@ -8,14 +8,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ortoroverbasso.ortorovebasso.dto.images.ImageConnectRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.images.ImagesDetailDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_images.ProductImageEntity;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_images.ProductImagesMapper;
+import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_images.ProductImagesRepository;
 import com.ortoroverbasso.ortorovebasso.service.images.IImagesDetailService;
 import com.ortoroverbasso.ortorovebasso.service.product.product_images.IProductImagesService;
-import com.ortoroverbasso.ortorovebasso.utils.FileUtils;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class ProductImagesServiceImpl implements IProductImagesService {
@@ -26,35 +29,29 @@ public class ProductImagesServiceImpl implements IProductImagesService {
     @Autowired
     private ProductImagesRepository productImageRepository;
 
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Transactional
     @Override
-    public ProductImagesResponseDto uploadProductImage(
+    public List<ProductImagesResponseDto> uploadProductImage(
             Long productId,
-            MultipartFile file,
-            ImagesDetailDto request) {
+            MultipartFile request) {
 
-        ImagesDetailDto urlResponse = imagesDetailService.uploadImage(file);
-        String filename = FileUtils.normalizeFilename(file);
+        productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product with ID " + productId + " does not exist."));
 
-        String uploadedImage = urlResponse.getUrl();
+        ImagesDetailDto productImage = imagesDetailService.uploadImage(request);
+        if (productImage == null) {
+            throw new IllegalArgumentException("Failed to upload image.");
+        }
 
-        ImagesDetailDto productRequest = new ImagesDetailDto();
-        productRequest.setIsCover(request.isCover());
-        productRequest.setLogo(request.isLogo());
-        productRequest.setWhiteBackground(request.isWhiteBackground());
-        productRequest.setPosition(request.getPosition());
-        productRequest.setEnergyEfficiency(request.getEnergyEfficiency());
-        productRequest.setIcon(request.getIcon());
-        productRequest.setMarketingPhoto(request.getMarketingPhoto());
-        productRequest.setPackagingPhoto(request.getPackagingPhoto());
-        productRequest.setBrand(request.getBrand());
-        productRequest.setGpsrLabel(request.isGpsrLabel());
-        productRequest.setGpsrWarning(request.isGpsrWarning());
+        ImageConnectRequestDto imageConnectRequest = new ImageConnectRequestDto(productId,
+                List.of(productImage.getId()));
 
-        ProductImageEntity entity = ProductImagesMapper.toEntity(productRequest, filename, uploadedImage,
-                productId);
-        productImageRepository.save(entity);
+        List<ProductImagesResponseDto> connectedImage = imagesDetailService.connectImageToProduct(imageConnectRequest);
 
-        return ProductImagesMapper.toResponse(entity);
+        return connectedImage;
     }
 
     @Override

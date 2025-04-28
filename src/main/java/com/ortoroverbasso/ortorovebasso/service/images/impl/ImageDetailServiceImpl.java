@@ -20,12 +20,14 @@ import com.ortoroverbasso.ortorovebasso.dto.images.ImageConnectResponse;
 import com.ortoroverbasso.ortorovebasso.dto.images.ImagesDetailDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.images.ImagesDetailEntity;
+import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_images.ProductImageEntity;
 import com.ortoroverbasso.ortorovebasso.exception.ImageNotFoundException;
 import com.ortoroverbasso.ortorovebasso.exception.ProductNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.images.ImagesMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_images.ProductImagesMapper;
 import com.ortoroverbasso.ortorovebasso.repository.images.ImagesDetailRepository;
+import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_images.ProductImagesRepository;
 import com.ortoroverbasso.ortorovebasso.service.images.IImagesDetailService;
 
@@ -33,6 +35,9 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class ImageDetailServiceImpl implements IImagesDetailService {
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @Autowired
     private B2StorageClientImpl b2StorageClient;
@@ -56,8 +61,8 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
                 .orElseThrow(() -> new ImageNotFoundException(id));
     }
 
-    private ProductImageEntity findProductOrThrow(Long id) {
-        return productImageRepository.findById(id)
+    private ProductEntity findProductOrThrow(Long id) {
+        return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
@@ -140,7 +145,7 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
     @Transactional
     @Override
     public List<ProductImagesResponseDto> connectImageToProduct(ImageConnectRequestDto imagesRequestDto) {
-        ProductImageEntity product = findProductOrThrow(imagesRequestDto.getIdConnect());
+        ProductEntity product = findProductOrThrow(imagesRequestDto.getIdConnect());
         List<ProductImagesResponseDto> connected = new ArrayList<>();
 
         for (Long imageId : imagesRequestDto.getImageIds()) {

@@ -10,13 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ortoroverbasso.ortorovebasso.dto.images.ImageConnectRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.images.ImageConnectResponse;
-import com.ortoroverbasso.ortorovebasso.dto.images.ImagesDetailDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.images.IImagesDetailService;
 import com.ortoroverbasso.ortorovebasso.service.product.product_images.IProductImagesService;
@@ -32,13 +31,28 @@ public class ProductImagesController {
     private IImagesDetailService imagesService;
 
     @PostMapping("/{productId}/image/upload")
-    public ResponseEntity<ProductImagesResponseDto> uploadProductImage(
+    public ResponseEntity<List<ProductImagesResponseDto>> uploadImage(
             @PathVariable Long productId,
-            @RequestParam("file") MultipartFile file,
-            @RequestBody ImagesDetailDto requestDto) {
-        return ResponseEntity.ok(productImageService.uploadProductImage(productId, file, requestDto));
+            @RequestPart("file") MultipartFile file) {
+        // Fase 1: Carica l'immagine
+        List<ProductImagesResponseDto> productImageUploaded = productImageService.uploadProductImage(productId, file);
+
+        return ResponseEntity.ok(productImageUploaded); // Restituisci i dettagli dell'immagine
     }
 
+    // Step 2: Associa l'immagine al prodotto
+    /*
+     * @PostMapping("/{productId}/image/uploadDetails")
+     * public ResponseEntity<ProductImagesResponseDto> uploadProductImageDetails(
+     *
+     * @PathVariable Long productId,
+     *
+     * @RequestBody ImagesDetailDto requestDto) {
+     *
+     * return ResponseEntity.ok(productImageService.uploadProductImage(productId,
+     * requestDto));
+     * }
+     */
     @GetMapping("/{productId}/image/all")
     public ResponseEntity<List<ProductImagesResponseDto>> getImagesByProduct(@PathVariable Long productId) {
         return ResponseEntity.ok(productImageService.getImagesByProductId(productId));
