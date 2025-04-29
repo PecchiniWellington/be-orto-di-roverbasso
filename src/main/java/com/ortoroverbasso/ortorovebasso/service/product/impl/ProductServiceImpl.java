@@ -149,6 +149,14 @@ public class ProductServiceImpl implements IProductService {
                 .collect(Collectors.toList());
         productDto.setProductImages(productImagesDtos);
 
+        ProductInformationEntity productInformation = productInformationRepository
+                .findByProductId(productId);
+
+        ProductInformationResponseDto productInformationResponseDto = ProductInformationMapper
+                .toResponseDto(productInformation);
+
+        productDto.setProductInformation(productInformationResponseDto);
+
         /*
          * List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities =
          * productLargeQuantityPriceRepository
@@ -193,6 +201,10 @@ public class ProductServiceImpl implements IProductService {
 
             Long manufacturerId = product.getManufacturer() != null ? product.getManufacturer().getId() : null;
 
+            ProductInformationResponseDto productInformationResponseDto = product.getProductInformation() != null
+                    ? ProductInformationMapper.toResponseDto(product.getProductInformation())
+                    : null;
+
             List<ProductImagesShortDto> productImagesDtos = product.getProductImages().stream()
                     .map(image -> new ProductImagesShortDto(
                             image.getId(),
@@ -213,7 +225,8 @@ public class ProductServiceImpl implements IProductService {
                     manufacturerId,
                     priceDtos,
                     product.getAttributes(),
-                    productImagesDtos);
+                    productImagesDtos,
+                    productInformationResponseDto);
 
         } catch (ProductNotFoundException e) {
             throw e;

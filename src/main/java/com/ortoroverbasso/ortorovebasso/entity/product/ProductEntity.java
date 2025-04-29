@@ -6,6 +6,7 @@ import java.util.List;
 import com.ortoroverbasso.ortorovebasso.entity.manufacturer.ManufacturerEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_attributes.ProductAttributesEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_images.ProductImageEntity;
+import com.ortoroverbasso.ortorovebasso.entity.product.product_informations.ProductInformationEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
 
 import jakarta.persistence.Entity;
@@ -16,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -72,6 +74,10 @@ public class ProductEntity {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<ProductImageEntity> productImages;
 
+    @OneToOne(mappedBy = "product", fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_information_id", referencedColumnName = "id")
+    private ProductInformationEntity productInformation;
+
     // Default constructor
     public ProductEntity() {
     }
@@ -121,7 +127,8 @@ public class ProductEntity {
             List<ProductLargeQuantityPriceEntity> priceLargeQuantities,
             String reference,
             Integer quantity,
-            List<ProductImageEntity> productImages) {
+            List<ProductImageEntity> productImages,
+            ProductInformationEntity productInformation) {
         this.id = id;
         this.manufacturer = manufacturer;
         this.sku = sku;
@@ -158,6 +165,7 @@ public class ProductEntity {
         this.reference = reference;
         this.quantity = quantity;
         this.productImages = productImages;
+        this.productInformation = productInformation;
     }
 
     // Getters and setters for all fields
@@ -465,4 +473,11 @@ public class ProductEntity {
         this.productImages = productImages;
     }
 
+    public ProductInformationEntity getProductInformation() {
+        return productInformation;
+    }
+
+    public void setProductInformation(ProductInformationEntity productInformation) {
+        this.productInformation = productInformation;
+    }
 }

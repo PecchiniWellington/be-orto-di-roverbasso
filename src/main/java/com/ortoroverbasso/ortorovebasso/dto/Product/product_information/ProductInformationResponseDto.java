@@ -45,6 +45,7 @@ public class ProductInformationResponseDto {
         this.url = url;
         this.isoCode = isoCode;
         this.dateUpdDescription = dateUpdDescription;
+
     }
 
     // Getter e Setter

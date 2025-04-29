@@ -2,46 +2,51 @@ package com.ortoroverbasso.ortorovebasso.service.product.product_information.imp
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
+import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_informations.ProductInformationEntity;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_information.ProductInformationMapper;
+import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_information.ProductInformationRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.product_information.IProductInformationService;
 
 @Service
 public class ProductInformationServiceImpl implements IProductInformationService {
-    private final ProductInformationRepository productInformationRepository;
+
+    @Autowired
+    private ProductInformationRepository productInformationRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
     public ProductInformationServiceImpl(ProductInformationRepository productInformationRepository) {
         this.productInformationRepository = productInformationRepository;
     }
 
     @Override
-    public ProductInformationResponseDto getProductInformationById(Long id) {
+    public ProductInformationResponseDto getProductInformation(Long productId) {
+        ProductInformationEntity productInformationEntity = productInformationRepository.findByProductId(productId);
 
-        ProductInformationEntity productInformationEntity = productInformationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product information not found"));
         return ProductInformationMapper.toResponseDto(productInformationEntity);
     }
 
     @Override
     public ProductInformationResponseDto createProductInformation(
+            Long productId,
             ProductInformationRequestDto productInformationRequestDto) {
+
         ProductInformationEntity productInformationEntity = ProductInformationMapper
                 .toEntity(productInformationRequestDto);
+        ProductEntity productEntity = productRepository.findById(productId)
+
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        productInformationEntity.setProduct(productEntity);
         productInformationEntity = productInformationRepository.save(productInformationEntity);
         return ProductInformationMapper.toResponseDto(productInformationEntity);
-    }
-
-    @Override
-    public List<ProductInformationResponseDto> getAllProductInformation() {
-        List<ProductInformationEntity> productInformationEntities = productInformationRepository.findAll();
-        return productInformationEntities.stream()
-                .map(ProductInformationMapper::toResponseDto)
-                .toList();
     }
 
     @Override

@@ -9,13 +9,12 @@ public interface IProductInformationService {
 
     ProductInformationResponseDto getProductInformationBySku(String sku);
 
-    ProductInformationResponseDto getProductInformationById(Long id);
-
-    List<ProductInformationResponseDto> getAllProductInformation();
+    ProductInformationResponseDto getProductInformation(Long productId);
 
     List<ProductInformationResponseDto> getProductInformationByProductId(Long productId);
 
-    ProductInformationResponseDto createProductInformation(ProductInformationRequestDto productInformation);
+    ProductInformationResponseDto createProductInformation(Long productId,
+            ProductInformationRequestDto productInformation);
 
     ProductInformationResponseDto updateProductInformation(Long id, ProductInformationRequestDto productInformation);
 
