@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.ortoroverbasso.ortorovebasso.entity.manufacturer.ManufacturerEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_attributes.ProductAttributesEntity;
+import com.ortoroverbasso.ortorovebasso.entity.product.product_features.ProductFeaturesEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_images.ProductImageEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_informations.ProductInformationEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
@@ -15,6 +16,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -79,6 +81,10 @@ public class ProductEntity {
     @JoinColumn(name = "product_information_id", referencedColumnName = "id")
     private ProductInformationEntity productInformation;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_features_id", referencedColumnName = "id")
+    private List<ProductFeaturesEntity> productFeatures;
+
     // Default constructor
     public ProductEntity() {
     }
@@ -130,7 +136,8 @@ public class ProductEntity {
             Integer quantity,
             List<ProductImageEntity> productImages,
             ProductInformationEntity productInformation,
-            Integer discount) {
+            Integer discount,
+            List<ProductFeaturesEntity> productFeatures) {
         this.id = id;
         this.manufacturer = manufacturer;
         this.sku = sku;
@@ -169,6 +176,7 @@ public class ProductEntity {
         this.productImages = productImages;
         this.productInformation = productInformation;
         this.discount = discount;
+        this.productFeatures = productFeatures;
     }
 
     // Getters and setters for all fields
@@ -490,5 +498,13 @@ public class ProductEntity {
 
     public void setDiscount(Integer discount) {
         this.discount = discount;
+    }
+
+    public List<ProductFeaturesEntity> getProductFeatures() {
+        return productFeatures;
+    }
+
+    public void setProductFeatures(List<ProductFeaturesEntity> productFeatures) {
+        this.productFeatures = productFeatures;
     }
 }

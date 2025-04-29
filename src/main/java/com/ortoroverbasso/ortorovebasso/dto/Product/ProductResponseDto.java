@@ -3,6 +3,7 @@ package com.ortoroverbasso.ortorovebasso.dto.product;
 import java.util.List;
 
 import com.ortoroverbasso.ortorovebasso.dto.product.product_attributes.ProductAttributesResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_features.ProductFeaturesResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesShortDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
@@ -53,6 +54,7 @@ public class ProductResponseDto {
     private List<ProductTagsResponseDto> productTags;
     private List<ProductAttributesResponseDto> productAttributes;
     private List<ProductImagesShortDto> productImages;
+    private List<ProductFeaturesResponseDto> productFeatures;
 
     // Costruttore vuoto
 
@@ -82,7 +84,8 @@ public class ProductResponseDto {
             Boolean attributes,
             List<ProductImagesShortDto> productImages,
             ProductInformationResponseDto productInformation,
-            Integer discount) {
+            Integer discount,
+            List<ProductFeaturesResponseDto> productFeatures) {
         this.id = id;
         this.sku = sku;
         this.retailPrice = retailPrice;
@@ -98,6 +101,7 @@ public class ProductResponseDto {
         this.productImages = productImages;
         this.productInformation = productInformation;
         this.discount = discount;
+        this.productFeatures = productFeatures;
     }
 
     // Getter e Setter
@@ -243,5 +247,13 @@ public class ProductResponseDto {
 
     public void setDiscount(Integer discount) {
         this.discount = discount;
+    }
+
+    public List<ProductFeaturesResponseDto> getProductFeatures() {
+        return productFeatures;
+    }
+
+    public void setProductFeatures(List<ProductFeaturesResponseDto> productFeatures) {
+        this.productFeatures = productFeatures;
     }
 }

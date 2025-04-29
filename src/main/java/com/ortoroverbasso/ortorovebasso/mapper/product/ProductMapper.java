@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_features.ProductFeaturesResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesShortDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
@@ -60,6 +61,13 @@ public class ProductMapper {
                                                 image.isCover()))
                                 .collect(Collectors.toList());
 
+                List<ProductFeaturesResponseDto> productFeaturesDto = product.getProductFeatures().stream()
+                                .map(feature -> new ProductFeaturesResponseDto(
+                                                feature.getId(),
+                                                feature.getFeature(),
+                                                feature.getValue()))
+                                .collect(Collectors.toList());
+
                 ProductInformationResponseDto productInformationResponseDto = product.getProductInformation() != null
                                 ? ProductInformationMapper.toResponseDto(product.getProductInformation())
                                 : null;
@@ -79,7 +87,8 @@ public class ProductMapper {
                                 product.getAttributes(),
                                 productImagesDtos,
                                 productInformationResponseDto,
-                                product.getDiscount()); // Usa la lista di DTO
+                                product.getDiscount(),
+                                productFeaturesDto); // Usa la lista di DTO
 
         }
 
