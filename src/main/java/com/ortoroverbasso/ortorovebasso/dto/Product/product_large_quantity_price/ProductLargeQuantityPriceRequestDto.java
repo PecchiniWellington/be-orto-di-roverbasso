@@ -8,19 +8,11 @@ public class ProductLargeQuantityPriceRequestDto {
     private Long id;
     private ProductEntity product;
 
-    @NotNull(message = "ProductId is required")
-    private Long productId;
-
     @NotNull(message = "Quantity is required")
     private Integer quantity;
 
     @NotNull(message = "Price is required")
     private Double price;
-
-    /*
-     * @NotNull(message = "Product Variation is required")
-     * private Long productVariationId;
-     */
 
     // Default constructor
     public ProductLargeQuantityPriceRequestDto() {
@@ -30,12 +22,10 @@ public class ProductLargeQuantityPriceRequestDto {
     public ProductLargeQuantityPriceRequestDto(
             Long id,
             Integer quantity,
-            Double price,
-            Long productId) {
+            Double price) {
         this.id = id;
         this.quantity = quantity;
         this.price = price;
-        this.productId = productId;
 
     }
 
@@ -72,11 +62,4 @@ public class ProductLargeQuantityPriceRequestDto {
         this.product = product;
     }
 
-    public Long getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
 }

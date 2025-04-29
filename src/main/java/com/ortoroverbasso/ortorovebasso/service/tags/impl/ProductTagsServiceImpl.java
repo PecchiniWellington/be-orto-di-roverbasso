@@ -55,39 +55,6 @@ public class ProductTagsServiceImpl implements IProductTagsService {
     }
 
     @Override
-    public void associateTagsToProduct(Long productId, List<Long> tagIds) {
-        System.out.println("Associating tags to product with ID: " + productId);
-        ProductEntity product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        System.out.println("Product found: " + product.getSku());
-        List<ProductTagsEntity> productTagsEntities = new ArrayList<>();
-
-        for (Long tagId : tagIds) {
-            TagsEntity tag = tagsRepository.findById(tagId)
-                    .orElseThrow(() -> new RuntimeException("Tag not found"));
-
-            ProductTagsEntity productTagsEntity = ProductTagsMapper.toEntity(new ProductTagsRequestDto(), product, tag);
-            productTagsEntities.add(productTagsEntity);
-        }
-
-        productTagsRepository.saveAll(productTagsEntities);
-    }
-
-    @Override
-    public void disassociateTagsFromProduct(Long productId, List<Long> tagIds) {
-        ProductEntity product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        for (Long tagId : tagIds) {
-            ProductTagsEntity productTagsEntity = productTagsRepository.findByProductAndTagId(product, tagId)
-                    .orElseThrow(() -> new RuntimeException("Association not found"));
-
-            productTagsRepository.delete(productTagsEntity);
-        }
-    }
-
-    @Override
     public void deleteProductTag(Long id) {
         productTagsRepository.deleteById(id);
     }

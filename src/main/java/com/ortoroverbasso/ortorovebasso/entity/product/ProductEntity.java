@@ -480,4 +480,5 @@ public class ProductEntity {
     public void setProductInformation(ProductInformationEntity productInformation) {
         this.productInformation = productInformation;
     }
+
 }

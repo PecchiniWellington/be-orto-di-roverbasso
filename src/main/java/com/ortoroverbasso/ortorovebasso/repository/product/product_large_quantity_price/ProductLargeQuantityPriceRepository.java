@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
 
@@ -14,5 +13,5 @@ public interface ProductLargeQuantityPriceRepository extends JpaRepository<Produ
     /* List<ProductPriceLargeQuantityEntity> findBySku(String sku); */
     List<ProductLargeQuantityPriceEntity> findByProduct(ProductEntity product);
 
-    List<ProductLargeQuantityPriceResponseDto> findByProductId(Long productId);
+    ProductLargeQuantityPriceEntity findByIdAndProductId(Long id, Long productId);
 }

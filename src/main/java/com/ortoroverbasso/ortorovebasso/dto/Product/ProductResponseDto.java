@@ -6,7 +6,6 @@ import com.ortoroverbasso.ortorovebasso.dto.product.product_attributes.ProductAt
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesShortDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
-import com.ortoroverbasso.ortorovebasso.dto.product.product_pricing.ProductPricingRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsResponseDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -49,7 +48,6 @@ public class ProductResponseDto {
     private List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities;
 
     private ProductInformationResponseDto productInformation;
-    private List<ProductPricingRequestDto> productPricing;
     private List<ProductTagsResponseDto> productTags;
     private List<ProductAttributesResponseDto> productAttributes;
     private List<ProductImagesShortDto> productImages;
@@ -96,6 +94,7 @@ public class ProductResponseDto {
         this.attributes = attributes;
         this.productImages = productImages;
         this.productInformation = productInformation;
+
     }
 
     // Getter e Setter

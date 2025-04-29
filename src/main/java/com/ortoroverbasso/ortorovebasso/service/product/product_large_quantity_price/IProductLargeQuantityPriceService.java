@@ -7,15 +7,16 @@ import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price
 
 public interface IProductLargeQuantityPriceService {
 
-    List<ProductLargeQuantityPriceResponseDto> getProductLargeQuantityPriceByProductId(Long productId);
+        List<ProductLargeQuantityPriceResponseDto> getProductLargeQuantityPriceByProductId(Long productId);
 
-    List<ProductLargeQuantityPriceResponseDto> getProductLargeQuantityPrice();
+        ProductLargeQuantityPriceResponseDto createProductPriceLargeQuantity(
+                        Long productId,
+                        ProductLargeQuantityPriceRequestDto productPriceLargeQuantityRequestDto);
 
-    ProductLargeQuantityPriceResponseDto createProductPriceLargeQuantity(
-            ProductLargeQuantityPriceRequestDto productPriceLargeQuantityRequestDto);
+        ProductLargeQuantityPriceResponseDto updateProductPriceLargeQuantity(
+                        Long productId,
+                        Long priceId,
+                        ProductLargeQuantityPriceRequestDto productPriceLargeQuantityRequestDto);
 
-    ProductLargeQuantityPriceResponseDto updateProductPriceLargeQuantity(
-            ProductLargeQuantityPriceRequestDto productPriceLargeQuantityRequestDto);
-
-    String deleteProductPriceLargeQuantity(Long priceId);
+        String deleteProductPriceLargeQuantity(Long priceId);
 }

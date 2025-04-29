@@ -35,20 +35,16 @@ public class ProductLargeQuantityPriceServiceImpl implements IProductLargeQuanti
     @Validated
     @Override
     public ProductLargeQuantityPriceResponseDto createProductPriceLargeQuantity(
+            Long productId,
             @Valid ProductLargeQuantityPriceRequestDto priceLargeQuantityRequestDto) {
 
-        ProductResponseDto product = productService.getProductById(priceLargeQuantityRequestDto.getProductId());
+        ProductResponseDto product = productService.getProductById(productId);
 
         if (product == null) {
-            throw new ProductNotFoundException(priceLargeQuantityRequestDto.getProductId());
+            throw new ProductNotFoundException(productId);
         }
 
         ProductEntity p = ProductMapper.fromResponseToEntity(product);
-
-        if (p.getId() == null) {
-            throw new ProductNotFoundException(
-                    priceLargeQuantityRequestDto.getProductId());
-        }
 
         ProductLargeQuantityPriceEntity priceLargeQuantityEntity = ProductLargeQuantityPriceMapper
                 .toEntity(priceLargeQuantityRequestDto);
@@ -77,27 +73,13 @@ public class ProductLargeQuantityPriceServiceImpl implements IProductLargeQuanti
     }
 
     @Override
-    public List<ProductLargeQuantityPriceResponseDto> getProductLargeQuantityPrice() {
-
-        List<ProductLargeQuantityPriceEntity> prices = priceLargeQuantityRepository.findAll();
-
-        if (prices.isEmpty()) {
-            return List.of();
-        }
-
-        return prices.stream()
-                .map(ProductLargeQuantityPriceMapper::toResponseDto)
-                .toList();
-    }
-
-    @Override
     public ProductLargeQuantityPriceResponseDto updateProductPriceLargeQuantity(
+            Long productId,
+            Long priceId,
             ProductLargeQuantityPriceRequestDto productPriceLargeQuantityRequestDto) {
 
         ProductLargeQuantityPriceEntity existingPrice = priceLargeQuantityRepository
-                .findById(productPriceLargeQuantityRequestDto.getId())
-                .orElseThrow(() -> new ProductNotFoundException(
-                        productPriceLargeQuantityRequestDto.getId()));
+                .findByIdAndProductId(priceId, productId);
 
         existingPrice.setQuantity(productPriceLargeQuantityRequestDto.getQuantity());
         existingPrice.setPrice(productPriceLargeQuantityRequestDto.getPrice());

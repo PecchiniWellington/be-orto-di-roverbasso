@@ -17,15 +17,12 @@ public class ProductLargeQuantityPriceMapper {
         product.setPrice(dto.getPrice());
 
         ProductEntity productEntity = new ProductEntity();
-        productEntity.setId(dto.getProductId());
 
         product.setProduct(productEntity);
 
         return product;
     }
 
-    // Method to convert a single ProductPriceLargeQuantityEntity to
-    // ProductPriceLargeQuantityResponseDto
     public static ProductLargeQuantityPriceResponseDto toResponseDto(ProductLargeQuantityPriceEntity product) {
         ProductLargeQuantityPriceResponseDto response = new ProductLargeQuantityPriceResponseDto();
         response.setId(product.getId());
@@ -35,8 +32,6 @@ public class ProductLargeQuantityPriceMapper {
         return response;
     }
 
-    // Method to convert List<ProductLargeQuantityEntity> to
-    // List<ProductLargeQuantityResponseDto>
     public static List<ProductLargeQuantityPriceResponseDto> toResponseDto(
             List<ProductLargeQuantityPriceEntity> products) {
         return products.stream()

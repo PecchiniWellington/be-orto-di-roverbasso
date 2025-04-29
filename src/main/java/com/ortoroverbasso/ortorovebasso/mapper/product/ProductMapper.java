@@ -108,8 +108,7 @@ public class ProductMapper {
                                 .map(priceEntity -> new ProductLargeQuantityPriceRequestDto(
                                                 priceEntity.getId(),
                                                 priceEntity.getQuantity(),
-                                                priceEntity.getPrice(),
-                                                product.getId()))
+                                                priceEntity.getPrice()))
                                 .collect(Collectors.toList());
 
                 return new ProductRequestDto(

@@ -41,7 +41,6 @@ public class ProductInformationServiceImpl implements IProductInformationService
         ProductInformationEntity productInformationEntity = ProductInformationMapper
                 .toEntity(productInformationRequestDto);
         ProductEntity productEntity = productRepository.findById(productId)
-
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         productInformationEntity.setProduct(productEntity);

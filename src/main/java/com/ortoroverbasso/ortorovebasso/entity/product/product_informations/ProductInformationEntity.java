@@ -9,7 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Table(name = "product_information")
@@ -28,8 +28,8 @@ public class ProductInformationEntity {
     private String isoCode;
     private String dateUpdDescription;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id") // Assicurati che la colonna si chiami 'product_id'
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id") // Associa questa colonna con il prodotto
     private ProductEntity product;
 
     // Default constructor
