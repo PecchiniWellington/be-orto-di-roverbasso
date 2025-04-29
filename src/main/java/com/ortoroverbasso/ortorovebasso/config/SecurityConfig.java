@@ -43,12 +43,14 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration corsConfiguration = new CorsConfiguration();
-    corsConfiguration.addAllowedOrigin("http://localhost:3000");
-    corsConfiguration.addAllowedMethod("*");
-    corsConfiguration.addAllowedHeader("*");
-    corsConfiguration.setAllowCredentials(true);
+    corsConfiguration.addAllowedOrigin("http://localhost:3000"); // Consenti solo localhost:3000
+    corsConfiguration.addAllowedMethod("*"); // Permetti tutti i metodi HTTP
+    corsConfiguration.addAllowedHeader("*"); // Permetti tutti gli header
+    corsConfiguration.setAllowCredentials(true); // Consenti credenziali (cookie, auth headers, etc.)
+
+    // Rimuovi setAllowedOrigins(List.of("*")); per evitare conflitti
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", corsConfiguration);
+    source.registerCorsConfiguration("/**", corsConfiguration); // Applica la configurazione a tutte le route
     return source;
   }
 

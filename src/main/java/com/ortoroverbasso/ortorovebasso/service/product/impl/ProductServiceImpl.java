@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.ortoroverbasso.ortorovebasso.dto.GenericResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesShortDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
@@ -24,6 +25,7 @@ import com.ortoroverbasso.ortorovebasso.mapper.product.ProductMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_information.ProductInformationMapper;
 import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_attributes.ProductAttributesRepository;
+import com.ortoroverbasso.ortorovebasso.repository.product.product_images.ProductImagesRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_information.ProductInformationRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_large_quantity_price.ProductLargeQuantityPriceRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_pricing_repository.ProductPricingRepository;
@@ -47,6 +49,9 @@ public class ProductServiceImpl implements IProductService {
     private ProductTagsRepository productTagsRepository;
     @Autowired
     private ProductAttributesRepository productAttributesRepository;
+
+    @Autowired
+    private ProductImagesRepository productImagesRepository;
 
     @Override
     public ProductResponseDto createProduct(ProductRequestDto dto) {
@@ -77,7 +82,47 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public List<ProductResponseDto> getAllProducts() {
         List<ProductEntity> products = productRepository.findAll();
-        return ProductMapper.toResponseListDto(products);
+
+        // Recupera tutti i prodotti con le informazioni aggiuntive
+        return products.stream().map(product -> {
+            ProductResponseDto productDto = ProductMapper.toResponseDto(product);
+
+            // Aggiungi informazioni aggiuntive come tag, attributi, immagini, prezzi, ecc.
+            productDto.setTags(productTagsRepository.existsByProductId(product.getId()));
+            productDto.setAttributes(productAttributesRepository.existsByProductId(product.getId()));
+
+            // Mappare le immagini del prodotto
+            List<ProductImagesShortDto> productImagesDtos = product.getProductImages().stream()
+                    .map(image -> new ProductImagesShortDto(
+                            image.getId(),
+                            image.getUrl(),
+                            image.isCover()))
+                    .collect(Collectors.toList());
+            productDto.setProductImages(productImagesDtos);
+
+            // Mappare i prezzi per quantità
+            /*
+             * List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities =
+             * productLargeQuantityPriceRepository
+             * .findByProductId(product.getId())
+             * .stream()
+             * .map(priceEntity ->
+             * ProductLargeQuantityPriceMapper.toResponseDto(priceEntity))
+             * .collect(Collectors.toList());
+             * productDto.setPriceLargeQuantities(priceLargeQuantities);
+             *
+             * // Mappare le informazioni di prodotto
+             * List<ProductInformationResponseDto> productInformation =
+             * productInformationRepository
+             * .findByProductId(product.getId())
+             * .stream()
+             * .map(ProductInformationMapper::toResponse)
+             * .collect(Collectors.toList());
+             * productDto.setProductInformation(productInformation);
+             */
+
+            return productDto;
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -85,15 +130,44 @@ public class ProductServiceImpl implements IProductService {
         ProductEntity product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
 
+        // Recupera informazioni aggiuntive
         boolean hasTags = productTagsRepository.existsByProductId(productId);
         boolean hasAttributes = productAttributesRepository.existsByProductId(productId);
 
-        ProductResponseDto p = ProductMapper.toResponseDto(product);
+        ProductResponseDto productDto = ProductMapper.toResponseDto(product);
 
-        p.setTags(hasTags);
-        p.setAttributes(hasAttributes);
+        // Mappare il risultato dal repository alle risposte DTO
+        productDto.setTags(hasTags);
+        productDto.setAttributes(hasAttributes);
 
-        return p;
+        // Mappare le immagini del prodotto
+        List<ProductImagesShortDto> productImagesDtos = product.getProductImages().stream()
+                .map(image -> new ProductImagesShortDto(
+                        image.getId(),
+                        image.getUrl(),
+                        image.isCover()))
+                .collect(Collectors.toList());
+        productDto.setProductImages(productImagesDtos);
+
+        /*
+         * List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities =
+         * productLargeQuantityPriceRepository
+         * .findByProductId(productId)
+         * .stream()
+         * .map(ProductLargeQuantityPriceMapper::toResponse) // Assicurati di usare il
+         * mapper giusto
+         * .collect(Collectors.toList());
+         * productDto.setPriceLargeQuantities(priceLargeQuantities);
+         *
+         * List<ProductInformationResponseDto> productInformation =
+         * productInformationRepository.findByProductId(productId)
+         * .stream()
+         * .map(ProductInformationMapper::toResponseDto)
+         * .collect(Collectors.toList());
+         * productDto.setProductInformation(productInformation);
+         */
+
+        return productDto;
     }
 
     @Override
@@ -119,6 +193,13 @@ public class ProductServiceImpl implements IProductService {
 
             Long manufacturerId = product.getManufacturer() != null ? product.getManufacturer().getId() : null;
 
+            List<ProductImagesShortDto> productImagesDtos = product.getProductImages().stream()
+                    .map(image -> new ProductImagesShortDto(
+                            image.getId(),
+                            image.getUrl(),
+                            image.isCover()))
+                    .collect(Collectors.toList());
+
             return new ProductResponseDto(
                     product.getId(),
                     product.getSku(),
@@ -126,14 +207,13 @@ public class ProductServiceImpl implements IProductService {
                     product.getCategory(),
                     product.getWeight(),
                     product.getActive(),
-                    productPricingInfoEntity.getWholesalePrice(),
-                    productPricingInfoEntity.getInShopsPrice(),
+                    product.getWholesalePrice(),
+                    product.getInShopsPrice(),
                     product.getTags(),
                     manufacturerId,
                     priceDtos,
-                    product.getAttributes()
-
-            );
+                    product.getAttributes(),
+                    productImagesDtos);
 
         } catch (ProductNotFoundException e) {
             throw e;

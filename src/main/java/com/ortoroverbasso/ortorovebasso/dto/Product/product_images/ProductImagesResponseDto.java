@@ -21,6 +21,16 @@ public class ProductImagesResponseDto {
     public ProductImagesResponseDto() {
     }
 
+    public ProductImagesResponseDto(Long id, String url, boolean isCover) {
+
+        this.id = id;
+
+        this.url = url;
+
+        this.isCover = isCover;
+
+    }
+
     // All-args constructor
     public ProductImagesResponseDto(
             Long id,

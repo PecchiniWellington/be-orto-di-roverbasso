@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.ortoroverbasso.ortorovebasso.entity.manufacturer.ManufacturerEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_attributes.ProductAttributesEntity;
+import com.ortoroverbasso.ortorovebasso.entity.product.product_images.ProductImageEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
 
 import jakarta.persistence.Entity;
@@ -68,6 +69,9 @@ public class ProductEntity {
     @JoinColumn(name = "manufacturer_id", referencedColumnName = "id")
     private ManufacturerEntity manufacturer;
 
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<ProductImageEntity> productImages;
+
     // Default constructor
     public ProductEntity() {
     }
@@ -116,7 +120,8 @@ public class ProductEntity {
             Double canon,
             List<ProductLargeQuantityPriceEntity> priceLargeQuantities,
             String reference,
-            Integer quantity) {
+            Integer quantity,
+            List<ProductImageEntity> productImages) {
         this.id = id;
         this.manufacturer = manufacturer;
         this.sku = sku;
@@ -152,6 +157,7 @@ public class ProductEntity {
         this.canon = canon;
         this.reference = reference;
         this.quantity = quantity;
+        this.productImages = productImages;
     }
 
     // Getters and setters for all fields
@@ -449,6 +455,14 @@ public class ProductEntity {
 
     public void setPriceLargeQuantities(List<ProductLargeQuantityPriceEntity> priceLargeQuantities) {
         this.priceLargeQuantities = priceLargeQuantities;
+    }
+
+    public List<ProductImageEntity> getProductImages() {
+        return productImages;
+    }
+
+    public void setProductImages(List<ProductImageEntity> productImages) {
+        this.productImages = productImages;
     }
 
 }

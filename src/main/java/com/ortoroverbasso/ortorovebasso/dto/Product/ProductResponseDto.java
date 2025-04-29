@@ -2,7 +2,12 @@ package com.ortoroverbasso.ortorovebasso.dto.product;
 
 import java.util.List;
 
+import com.ortoroverbasso.ortorovebasso.dto.product.product_attributes.ProductAttributesResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesShortDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_pricing.ProductPricingRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsResponseDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -43,6 +48,12 @@ public class ProductResponseDto {
 
     private List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities;
 
+    private List<ProductInformationResponseDto> productInformation;
+    private List<ProductPricingRequestDto> productPricing;
+    private List<ProductTagsResponseDto> productTags;
+    private List<ProductAttributesResponseDto> productAttributes;
+    private List<ProductImagesShortDto> productImages;
+
     // Costruttore vuoto
 
     public ProductResponseDto() {
@@ -68,7 +79,8 @@ public class ProductResponseDto {
             Boolean tags,
             Long manufacturer,
             List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities,
-            Boolean attributes) {
+            Boolean attributes,
+            List<ProductImagesShortDto> productImages) {
         this.id = id;
         this.sku = sku;
         this.retailPrice = retailPrice;
@@ -81,6 +93,7 @@ public class ProductResponseDto {
         this.manufacturer = manufacturer;
         this.priceLargeQuantities = priceLargeQuantities;
         this.attributes = attributes;
+        this.productImages = productImages;
     }
 
     // Getter e Setter
@@ -172,14 +185,6 @@ public class ProductResponseDto {
         this.quantity = quantity;
     }
 
-    public List<ProductLargeQuantityPriceResponseDto> getPriceLargeQuantities() {
-        return priceLargeQuantities;
-    }
-
-    public void setPriceLargeQuantities(List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities) {
-        this.priceLargeQuantities = priceLargeQuantities;
-    }
-
     public Long getManufacturer() {
         return manufacturer;
     }
@@ -195,4 +200,29 @@ public class ProductResponseDto {
     public void setAttributes(Boolean attributes) {
         this.attributes = attributes;
     }
+
+    public List<ProductImagesShortDto> getProductImages() {
+        return productImages;
+    }
+
+    public void setProductImages(List<ProductImagesShortDto> productImages) {
+        this.productImages = productImages;
+    }
+
+    public List<ProductLargeQuantityPriceResponseDto> getPriceLargeQuantities() {
+        return priceLargeQuantities;
+    }
+
+    public void setPriceLargeQuantities(List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities) {
+        this.priceLargeQuantities = priceLargeQuantities;
+    }
+
+    public List<ProductInformationResponseDto> getProductInformation() {
+        return productInformation;
+    }
+
+    public void setProductInformation(List<ProductInformationResponseDto> productInformation) {
+        this.productInformation = productInformation;
+    }
+
 }

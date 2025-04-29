@@ -4,9 +4,12 @@ import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Table(name = "product_information")
@@ -24,6 +27,10 @@ public class ProductInformationEntity {
     private String url;
     private String isoCode;
     private String dateUpdDescription;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id") // Assicurati che la colonna si chiami 'product_id'
+    private ProductEntity product;
 
     // Default constructor
     public ProductInformationEntity() {
@@ -103,6 +110,14 @@ public class ProductInformationEntity {
 
     public void setDateUpdDescription(String dateUpdDescription) {
         this.dateUpdDescription = dateUpdDescription;
+    }
+
+    public ProductEntity getProduct() {
+        return product;
+    }
+
+    public void setProduct(ProductEntity product) {
+        this.product = product;
     }
 
     // toString method

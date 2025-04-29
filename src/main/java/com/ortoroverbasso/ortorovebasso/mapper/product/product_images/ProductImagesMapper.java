@@ -32,46 +32,15 @@ public class ProductImagesMapper {
     }
 
     public static ProductImagesResponseDto toResponse(ProductImageEntity entity) {
-        /*
-         * return new ProductImagesResponseDto(
-         * entity.getId(),
-         * entity.getName(),
-         * entity.getUrl(),
-         * entity.isCover(),
-         * entity.isLogo(),
-         * entity.isWhiteBackground(),
-         * entity.getPosition(),
-         * entity.getEnergyEfficiency(),
-         * entity.getIcon(),
-         * entity.getMarketingPhoto(),
-         * entity.getPackagingPhoto(),
-         * entity.getBrand(),
-         * entity.isGpsrLabel(),
-         * entity.isGpsrWarning(),
-         * entity.getProductId());
-         * }
-         */
 
         if (entity == null) {
-
             return null;
-
         }
 
         ProductImagesResponseDto response = new ProductImagesResponseDto();
 
-        // Map fields from ProductImageEntity to ProductImagesResponseDto
-
-        if (entity == null) {
-
-            return null;
-
-        }
-
         response.setId(entity.getId());
-
-        response.setProductId(entity.getProductId());
-
+        response.setProductId(entity.getProductId()); // Singolo set
         response.setUrl(entity.getUrl());
         response.setName(entity.getName());
         response.setCover(entity.isCover());
@@ -84,7 +53,6 @@ public class ProductImagesMapper {
         response.setBrand(entity.getBrand());
         response.setGpsrLabel(entity.isGpsrLabel());
         response.setGpsrWarning(entity.isGpsrWarning());
-        response.setProductId(entity.getProductId());
 
         return response;
     }
