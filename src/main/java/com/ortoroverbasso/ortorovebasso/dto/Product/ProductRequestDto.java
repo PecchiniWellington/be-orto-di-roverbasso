@@ -32,6 +32,7 @@ public class ProductRequestDto {
 
     private String reference;
     private Integer quantity;
+    private Integer discount;
 
     private List<ProductLargeQuantityPriceRequestDto> priceLargeQuantities;
 
@@ -57,7 +58,8 @@ public class ProductRequestDto {
             Integer active,
             String wholesalePrice,
             Double inShopsPrice,
-            List<ProductLargeQuantityPriceRequestDto> priceLargeQuantities) {
+            List<ProductLargeQuantityPriceRequestDto> priceLargeQuantities,
+            Integer discount) {
         this.id = id;
         this.sku = sku;
         this.retailPrice = retailPrice;
@@ -67,6 +69,7 @@ public class ProductRequestDto {
         this.wholesalePrice = wholesalePrice;
         this.inShopsPrice = inShopsPrice;
         this.priceLargeQuantities = priceLargeQuantities;
+        this.discount = discount;
     }
 
     // Getter e Setter
@@ -156,5 +159,13 @@ public class ProductRequestDto {
 
     public void setPriceLargeQuantities(List<ProductLargeQuantityPriceRequestDto> priceLargeQuantities) {
         this.priceLargeQuantities = priceLargeQuantities;
+    }
+
+    public Integer getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Integer discount) {
+        this.discount = discount;
     }
 }

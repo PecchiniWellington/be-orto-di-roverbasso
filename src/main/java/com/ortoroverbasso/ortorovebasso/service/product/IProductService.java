@@ -12,6 +12,8 @@ public interface IProductService {
 
     ProductResponseDto getProductById(Long productId);
 
+    ProductResponseDto updateProduct(Long productId, ProductRequestDto product);
+
     List<ProductResponseDto> getAllProducts();
 
     GenericResponseDto deleteProduct(Long productId);

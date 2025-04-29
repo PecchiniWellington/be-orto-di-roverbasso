@@ -45,6 +45,8 @@ public class ProductResponseDto {
 
     private Long manufacturer;
 
+    private Integer discount;
+
     private List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities;
 
     private ProductInformationResponseDto productInformation;
@@ -79,7 +81,8 @@ public class ProductResponseDto {
             List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities,
             Boolean attributes,
             List<ProductImagesShortDto> productImages,
-            ProductInformationResponseDto productInformation) {
+            ProductInformationResponseDto productInformation,
+            Integer discount) {
         this.id = id;
         this.sku = sku;
         this.retailPrice = retailPrice;
@@ -94,7 +97,7 @@ public class ProductResponseDto {
         this.attributes = attributes;
         this.productImages = productImages;
         this.productInformation = productInformation;
-
+        this.discount = discount;
     }
 
     // Getter e Setter
@@ -226,4 +229,19 @@ public class ProductResponseDto {
         this.productInformation = productInformation;
     }
 
+    public List<ProductTagsResponseDto> getProductTags() {
+        return productTags;
+    }
+
+    public void setProductTags(List<ProductTagsResponseDto> productTags) {
+        this.productTags = productTags;
+    }
+
+    public Integer getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Integer discount) {
+        this.discount = discount;
+    }
 }

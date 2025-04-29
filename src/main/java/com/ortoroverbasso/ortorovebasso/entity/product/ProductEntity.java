@@ -60,6 +60,7 @@ public class ProductEntity {
     private Double canon;
     private String reference;
     private Integer quantity;
+    private Integer discount;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<ProductAttributesEntity> productAttributes;
@@ -128,7 +129,8 @@ public class ProductEntity {
             String reference,
             Integer quantity,
             List<ProductImageEntity> productImages,
-            ProductInformationEntity productInformation) {
+            ProductInformationEntity productInformation,
+            Integer discount) {
         this.id = id;
         this.manufacturer = manufacturer;
         this.sku = sku;
@@ -166,6 +168,7 @@ public class ProductEntity {
         this.quantity = quantity;
         this.productImages = productImages;
         this.productInformation = productInformation;
+        this.discount = discount;
     }
 
     // Getters and setters for all fields
@@ -481,4 +484,11 @@ public class ProductEntity {
         this.productInformation = productInformation;
     }
 
+    public Integer getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Integer discount) {
+        this.discount = discount;
+    }
 }

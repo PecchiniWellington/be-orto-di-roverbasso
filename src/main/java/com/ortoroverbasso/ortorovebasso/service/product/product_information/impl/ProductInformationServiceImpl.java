@@ -2,6 +2,7 @@ package com.ortoroverbasso.ortorovebasso.service.product.product_information.imp
 
 import java.util.List;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import com.ortoroverbasso.ortorovebasso.mapper.product.product_information.Produ
 import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_information.ProductInformationRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.product_information.IProductInformationService;
+import com.ortoroverbasso.ortorovebasso.utils.BeanUtilsHelper;
 
 @Service
 public class ProductInformationServiceImpl implements IProductInformationService {
@@ -40,11 +42,14 @@ public class ProductInformationServiceImpl implements IProductInformationService
 
         ProductInformationEntity productInformationEntity = ProductInformationMapper
                 .toEntity(productInformationRequestDto);
+
         ProductEntity productEntity = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         productInformationEntity.setProduct(productEntity);
+
         productInformationEntity = productInformationRepository.save(productInformationEntity);
+
         return ProductInformationMapper.toResponseDto(productInformationEntity);
     }
 
@@ -55,18 +60,17 @@ public class ProductInformationServiceImpl implements IProductInformationService
     }
 
     @Override
-    public ProductInformationResponseDto updateProductInformation(Long id,
+    public ProductInformationResponseDto updateProductInformation(
+            Long id,
             ProductInformationRequestDto productInformation) {
+
         ProductInformationEntity entity = productInformationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product Information not found"));
-        entity.setName(productInformation.getName());
-        entity.setDescription(productInformation.getDescription());
-        entity.setSku(productInformation.getSku());
-        entity.setUrl(productInformation.getUrl());
-        entity.setIsoCode(productInformation.getIsoCode());
 
-        entity.setDateUpdDescription(productInformation.getDateUpdDescription());
+        BeanUtils.copyProperties(productInformation, entity, BeanUtilsHelper.getNullPropertyNames(productInformation));
+
         productInformationRepository.save(entity);
+
         return ProductInformationMapper.toResponseDto(entity);
 
     }

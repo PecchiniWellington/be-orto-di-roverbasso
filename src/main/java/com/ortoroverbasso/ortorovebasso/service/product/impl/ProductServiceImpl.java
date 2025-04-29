@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ import com.ortoroverbasso.ortorovebasso.repository.product.product_information.P
 import com.ortoroverbasso.ortorovebasso.repository.product.product_large_quantity_price.ProductLargeQuantityPriceRepository;
 import com.ortoroverbasso.ortorovebasso.repository.tags.ProductTagsRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
+import com.ortoroverbasso.ortorovebasso.utils.BeanUtilsHelper;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -89,6 +91,33 @@ public class ProductServiceImpl implements IProductService {
 
                         return productDto;
                 }).collect(Collectors.toList());
+        }
+
+        @Override
+        public ProductResponseDto updateProduct(Long productId, ProductRequestDto productRequest) {
+
+                ProductEntity existingProduct = productRepository.findById(productId)
+                                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
+
+                ProductEntity updatedProduct = ProductMapper.toEntity(productRequest);
+
+                updatedProduct.setId(productId);
+
+                BeanUtils.copyProperties(
+                                updatedProduct,
+                                existingProduct,
+                                BeanUtilsHelper.getNullPropertyNames(updatedProduct));
+
+                if (updatedProduct.getPriceLargeQuantities() != null) {
+                        existingProduct.setPriceLargeQuantities(updatedProduct.getPriceLargeQuantities());
+                }
+                if (updatedProduct.getProductInformation() != null) {
+                        existingProduct.setProductInformation(updatedProduct.getProductInformation());
+                }
+
+                productRepository.save(existingProduct);
+
+                return ProductMapper.toResponseDto(existingProduct);
         }
 
         @Override

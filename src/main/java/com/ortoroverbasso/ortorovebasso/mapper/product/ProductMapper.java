@@ -22,6 +22,7 @@ public class ProductMapper {
                 product.setCategory(dto.getCategory());
                 product.setRetailPrice(dto.getRetailPrice());
                 product.setActive(dto.getActive());
+                product.setDiscount(dto.getDiscount());
 
                 // Mappare priceLargeQuantities se esistono nel DTO
                 if (dto.getPriceLargeQuantities() != null) {
@@ -77,7 +78,8 @@ public class ProductMapper {
                                 priceDtos,
                                 product.getAttributes(),
                                 productImagesDtos,
-                                productInformationResponseDto); // Usa la lista di DTO
+                                productInformationResponseDto,
+                                product.getDiscount()); // Usa la lista di DTO
 
         }
 
@@ -120,7 +122,8 @@ public class ProductMapper {
                                 product.getActive(),
                                 product.getWholesalePrice(),
                                 product.getInShopsPrice(),
-                                priceLargeQuantities);
+                                priceLargeQuantities,
+                                product.getDiscount());
         }
 
 }
