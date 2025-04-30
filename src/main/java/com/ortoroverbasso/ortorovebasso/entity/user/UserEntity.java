@@ -1,8 +1,14 @@
 package com.ortoroverbasso.ortorovebasso.entity.user;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -17,7 +23,7 @@ import jakarta.persistence.Table;
 
 @Table(name = "users")
 @Entity
-public class UserEntity {
+public class UserEntity extends User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +32,7 @@ public class UserEntity {
     private String email;
     private String password;
     private String role;
+
     private String token;
     private String tokenExpirationDate;
     private String createdAt;
@@ -102,6 +109,12 @@ public class UserEntity {
 
     // Constructor
     public UserEntity() {
+        super("", "", Collections.emptyList());
+    }
+
+    public UserEntity(Long id) {
+        super("", "", List.of());
+        this.id = id;
     }
 
     public UserEntity(
@@ -147,7 +160,9 @@ public class UserEntity {
             String recoveryTokenExpiration,
             String country,
             String region,
-            List<String> deviceHistory) {
+            List<String> deviceHistory,
+            Collection<? extends GrantedAuthority> authorities) {
+        super(email, password, authorities); // Pass the authorities to the parent User class constructor
         this.id = id;
         this.name = name;
         this.email = email;
@@ -193,7 +208,13 @@ public class UserEntity {
         this.deviceHistory = deviceHistory;
     }
 
-    // Getters and Setters
+    @Override
+    public Collection<GrantedAuthority> getAuthorities() {
+        // Return authorities as a collection of SimpleGrantedAuthority
+        return Collections.singletonList(new SimpleGrantedAuthority(role)); // Convert the role to a GrantedAuthority
+    }
+
+    // Getters and setters for the fields
     public Long getId() {
         return id;
     }
@@ -537,5 +558,4 @@ public class UserEntity {
     public void setDeviceHistory(List<String> deviceHistory) {
         this.deviceHistory = deviceHistory;
     }
-
 }

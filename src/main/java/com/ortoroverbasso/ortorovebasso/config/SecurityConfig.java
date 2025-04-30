@@ -10,6 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,16 +29,28 @@ public class SecurityConfig {
         .csrf(csrf -> csrf
             .ignoringRequestMatchers("/api/**"))
         .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless per le API
         .authorizeHttpRequests(requests -> requests
-            .requestMatchers("/").permitAll()
-            .requestMatchers("/api/**").permitAll() // Assicurati che i percorsi siano corretti per le tue API
-            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            .requestMatchers("/admin").hasRole("ADMIN")
-            .requestMatchers("/dashboard").hasRole("ADMIN"))
-        .formLogin(login -> login.disable())
-        .logout(logout -> logout.disable());
+            .requestMatchers("/").permitAll() // Rendi disponibile la home
+            .requestMatchers("/api/**").permitAll() // Consenti accesso alle API senza login
+            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger
+            .requestMatchers("/admin").hasRole("ADMIN") // Solo per admin
+            .requestMatchers("/dashboard").hasRole("ADMIN") // Solo per admin
+            .requestMatchers("/cart").authenticated() // Proteggi la rotta del carrello
+            .requestMatchers("/cart/merge").authenticated() // Merge carrelli per utenti autenticati
+        )
+        .formLogin(login -> login.disable()) // Disabilita il login tradizionale
+        .logout(logout -> logout.disable()) // Disabilita il logout tradizionale
+        .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class); // Aggiungi il filtro di
+                                                                                              // autenticazione
+
     return http.build();
+  }
+
+  // Crea un filtro per la gestione dell'autenticazione con token o sessione
+  @Bean
+  public AuthenticationFilter authenticationFilter() {
+    return new AuthenticationFilter();
   }
 
   @Bean
@@ -48,7 +61,6 @@ public class SecurityConfig {
     corsConfiguration.addAllowedHeader("*"); // Permetti tutti gli header
     corsConfiguration.setAllowCredentials(true); // Consenti credenziali (cookie, auth headers, etc.)
 
-    // Rimuovi setAllowedOrigins(List.of("*")); per evitare conflitti
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", corsConfiguration); // Applica la configurazione a tutte le route
     return source;
@@ -62,5 +74,4 @@ public class SecurityConfig {
           new ErrorPage(HttpStatus.NOT_FOUND, "/404"));
     };
   }
-
 }
