@@ -1,19 +1,14 @@
 package com.ortoroverbasso.ortorovebasso.service.upload_invoice.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ortoroverbasso.ortorovebasso.dto.upload_invoice.UploadInvoiceRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.upload_invoice.UploadInvoiceResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.upload_invoice.UploadInvoiceEntity;
-import com.ortoroverbasso.ortorovebasso.repository.upload_invoice.UploadInvoiceRepository;
 import com.ortoroverbasso.ortorovebasso.service.upload_invoice.IUploadInvoiceService;
 
 @Service
 public class UploadInvoiceServiceImpl implements IUploadInvoiceService {
-
-    @Autowired
-    private UploadInvoiceRepository invoiceRepository;
 
     @Override
     public UploadInvoiceResponseDto uploadInvoice(UploadInvoiceRequestDto dto) {
@@ -26,7 +21,6 @@ public class UploadInvoiceServiceImpl implements IUploadInvoiceService {
         invoiceEntity.setConcept(dto.getConcept());
 
         // Save the invoice to the database
-        UploadInvoiceEntity savedInvoice = invoiceRepository.save(invoiceEntity);
 
         // Return response with success flag
         UploadInvoiceResponseDto response = new UploadInvoiceResponseDto();

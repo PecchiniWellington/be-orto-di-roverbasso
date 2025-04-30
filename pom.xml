@@ -131,11 +131,7 @@
 			<version>3.2.0</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<!-- <scope>provided</scope> -->
-		</dependency>
+
 
 		<dependency>
 			<groupId>org.slf4j</groupId>

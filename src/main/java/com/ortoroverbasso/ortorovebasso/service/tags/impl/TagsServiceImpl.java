@@ -9,8 +9,6 @@ import com.ortoroverbasso.ortorovebasso.dto.tags.TagsRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.tags.TagsResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.tags.TagsEntity;
 import com.ortoroverbasso.ortorovebasso.mapper.tags.TagsMapper;
-import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
-import com.ortoroverbasso.ortorovebasso.repository.tags.ProductTagsRepository;
 import com.ortoroverbasso.ortorovebasso.repository.tags.TagsRepository;
 import com.ortoroverbasso.ortorovebasso.service.tags.ITagsService;
 
@@ -19,10 +17,6 @@ public class TagsServiceImpl implements ITagsService {
 
     @Autowired
     private TagsRepository tagsRepository;
-    @Autowired
-    private ProductRepository productRepository;
-    @Autowired
-    private ProductTagsRepository productTagsRepository;
 
     @Override
     public TagsResponseDto getTagById(Long id) {

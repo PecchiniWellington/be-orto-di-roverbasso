@@ -81,7 +81,7 @@ public class ImagesDetailEntity {
     }
 
     public void setIsCover(boolean isCover) {
-        isCover = isCover;
+        this.isCover = isCover;
     }
 
     public String getName() {

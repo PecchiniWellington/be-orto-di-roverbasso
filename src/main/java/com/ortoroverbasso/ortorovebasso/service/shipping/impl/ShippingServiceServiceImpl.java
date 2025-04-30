@@ -18,7 +18,6 @@ import com.ortoroverbasso.ortorovebasso.entity.shipping.CarriersEntity;
 import com.ortoroverbasso.ortorovebasso.entity.shipping.ShippingCostEntity;
 import com.ortoroverbasso.ortorovebasso.entity.shipping.ShippingServiceEntity;
 import com.ortoroverbasso.ortorovebasso.mapper.shipping.ShippingServiceMapper;
-import com.ortoroverbasso.ortorovebasso.repository.orders.OrderRepository;
 import com.ortoroverbasso.ortorovebasso.repository.shipping.CarriersRepository;
 import com.ortoroverbasso.ortorovebasso.repository.shipping.ShippingCostRepository;
 import com.ortoroverbasso.ortorovebasso.repository.shipping.ShippingServiceRepository;
@@ -33,8 +32,6 @@ public class ShippingServiceServiceImpl implements IShippingServiceService {
     private CarriersRepository carriersRepository;
     @Autowired
     private ShippingCostRepository shippingCostRepository;
-    @Autowired
-    private OrderRepository orderRepository;
 
     @Override
     public List<ShippingServiceResponseDto> getAllShippingServices() {

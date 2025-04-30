@@ -19,7 +19,6 @@ public class ProductVariationRequestDto {
     private String logisticClass;
     private String partNumber;
     private Integer canon;
-    private Long productId;
 
     // All-args constructor
     public ProductVariationRequestDto(

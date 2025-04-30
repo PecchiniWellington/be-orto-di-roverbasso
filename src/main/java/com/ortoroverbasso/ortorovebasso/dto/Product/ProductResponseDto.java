@@ -2,7 +2,6 @@ package com.ortoroverbasso.ortorovebasso.dto.product;
 
 import java.util.List;
 
-import com.ortoroverbasso.ortorovebasso.dto.product.product_attributes.ProductAttributesResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_features.ProductFeaturesResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesShortDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
@@ -52,7 +51,6 @@ public class ProductResponseDto {
 
     private ProductInformationResponseDto productInformation;
     private List<ProductTagsResponseDto> productTags;
-    private List<ProductAttributesResponseDto> productAttributes;
     private List<ProductImagesShortDto> productImages;
     private List<ProductFeaturesResponseDto> productFeatures;
 

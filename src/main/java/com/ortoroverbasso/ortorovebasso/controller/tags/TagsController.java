@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ortoroverbasso.ortorovebasso.dto.tags.TagsRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.tags.TagsResponseDto;
-import com.ortoroverbasso.ortorovebasso.service.tags.IProductTagsService;
 import com.ortoroverbasso.ortorovebasso.service.tags.ITagsService;
 
 @RestController
@@ -23,8 +22,6 @@ public class TagsController {
 
     @Autowired
     private ITagsService tagsService;
-    @Autowired
-    private IProductTagsService productTagsService;
 
     @GetMapping("/all")
     public List<TagsResponseDto> getAllTags() {
