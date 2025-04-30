@@ -10,9 +10,11 @@ import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImages
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_why_choose.ProductWhyChooseResponseNoProductIdDto;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_information.ProductInformationMapper;
+import com.ortoroverbasso.ortorovebasso.mapper.product.product_why_choose.ProductWhyChooseMapper;
 
 public class ProductMapper {
 
@@ -72,6 +74,10 @@ public class ProductMapper {
                                 ? ProductInformationMapper.toResponseDto(product.getProductInformation())
                                 : null;
 
+                List<ProductWhyChooseResponseNoProductIdDto> whyChooseResponses = product.getWhyChoose().stream()
+                                .map(ProductWhyChooseMapper::toResponseWithoutProductId)
+                                .collect(Collectors.toList());
+
                 return new ProductResponseDto(
                                 product.getId(),
                                 product.getSku(),
@@ -88,7 +94,8 @@ public class ProductMapper {
                                 productImagesDtos,
                                 productInformationResponseDto,
                                 product.getDiscount(),
-                                productFeaturesDto); // Usa la lista di DTO
+                                productFeaturesDto,
+                                whyChooseResponses); // Usa la lista di DTO
 
         }
 

@@ -6,6 +6,7 @@ import com.ortoroverbasso.ortorovebasso.dto.product.product_features.ProductFeat
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesShortDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_why_choose.ProductWhyChooseResponseNoProductIdDto;
 import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsResponseDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -53,6 +54,7 @@ public class ProductResponseDto {
     private List<ProductTagsResponseDto> productTags;
     private List<ProductImagesShortDto> productImages;
     private List<ProductFeaturesResponseDto> productFeatures;
+    private List<ProductWhyChooseResponseNoProductIdDto> whyChoose;
 
     // Costruttore vuoto
 
@@ -83,7 +85,8 @@ public class ProductResponseDto {
             List<ProductImagesShortDto> productImages,
             ProductInformationResponseDto productInformation,
             Integer discount,
-            List<ProductFeaturesResponseDto> productFeatures) {
+            List<ProductFeaturesResponseDto> productFeatures,
+            List<ProductWhyChooseResponseNoProductIdDto> whyChoose) {
         this.id = id;
         this.sku = sku;
         this.retailPrice = retailPrice;
@@ -100,6 +103,7 @@ public class ProductResponseDto {
         this.productInformation = productInformation;
         this.discount = discount;
         this.productFeatures = productFeatures;
+        this.whyChoose = whyChoose;
     }
 
     // Getter e Setter
@@ -253,5 +257,13 @@ public class ProductResponseDto {
 
     public void setProductFeatures(List<ProductFeaturesResponseDto> productFeatures) {
         this.productFeatures = productFeatures;
+    }
+
+    public List<ProductWhyChooseResponseNoProductIdDto> getWhyChoose() {
+        return whyChoose;
+    }
+
+    public void setWhyChoose(List<ProductWhyChooseResponseNoProductIdDto> whyChoose) {
+        this.whyChoose = whyChoose;
     }
 }

@@ -2,6 +2,7 @@ package com.ortoroverbasso.ortorovebasso.entity.product;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import com.ortoroverbasso.ortorovebasso.entity.manufacturer.ManufacturerEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_attributes.ProductAttributesEntity;
@@ -9,6 +10,7 @@ import com.ortoroverbasso.ortorovebasso.entity.product.product_features.ProductF
 import com.ortoroverbasso.ortorovebasso.entity.product.product_images.ProductImageEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_informations.ProductInformationEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
+import com.ortoroverbasso.ortorovebasso.entity.product.product_why_choose.ProductWhyChooseEntity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,6 +18,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -84,6 +87,10 @@ public class ProductEntity {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_features_id", referencedColumnName = "id")
     private List<ProductFeaturesEntity> productFeatures;
+
+    @ManyToMany
+    @JoinTable(name = "product_whychoose", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "whychoose_id"))
+    private Set<ProductWhyChooseEntity> whyChoose;
 
     // Default constructor
     public ProductEntity() {
@@ -506,5 +513,13 @@ public class ProductEntity {
 
     public void setProductFeatures(List<ProductFeaturesEntity> productFeatures) {
         this.productFeatures = productFeatures;
+    }
+
+    public Set<ProductWhyChooseEntity> getWhyChoose() {
+        return whyChoose;
+    }
+
+    public void setWhyChoose(Set<ProductWhyChooseEntity> whyChoose) {
+        this.whyChoose = whyChoose;
     }
 }
