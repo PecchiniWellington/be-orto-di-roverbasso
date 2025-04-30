@@ -8,5 +8,11 @@ public interface ICartService {
 
     CartResponseDto addItemToCart(String cartToken, CartRequestDto cartRequestDto);
 
-    CartResponseDto mergeCarts(String cartToken, Long userId);
+    CartResponseDto mergeCarts(Long userId, String cartToken);
+
+    CartResponseDto getCart(Long userId);
+
+    CartResponseDto addItemToCart(Long userId, CartRequestDto cartRequestDto);
+
+    String createCart();
 }

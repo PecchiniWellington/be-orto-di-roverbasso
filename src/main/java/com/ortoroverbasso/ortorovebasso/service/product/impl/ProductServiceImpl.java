@@ -141,13 +141,15 @@ public class ProductServiceImpl implements IProductService {
                                 .collect(Collectors.toList());
                 productDto.setProductImages(productImagesDtos);
 
-                ProductInformationEntity productInformation = productInformationRepository
-                                .findByProductId(productId);
+                ProductInformationEntity productInformation = productInformationRepository.findByProductId(productId);
 
-                ProductInformationResponseDto productInformationResponseDto = ProductInformationMapper
-                                .toResponseDto(productInformation);
-
-                productDto.setProductInformation(productInformationResponseDto);
+                if (productInformation != null) {
+                        ProductInformationResponseDto productInformationResponseDto = ProductInformationMapper
+                                        .toResponseDto(productInformation);
+                        productDto.setProductInformation(productInformationResponseDto);
+                } else {
+                        productDto.setProductInformation(null);
+                }
 
                 return productDto;
         }
