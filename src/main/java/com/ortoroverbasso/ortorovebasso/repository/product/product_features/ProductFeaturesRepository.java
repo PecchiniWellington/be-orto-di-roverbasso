@@ -7,6 +7,5 @@ import com.ortoroverbasso.ortorovebasso.entity.product.product_features.ProductF
 
 @Repository
 public interface ProductFeaturesRepository extends JpaRepository<ProductFeaturesEntity, Long> {
-    ProductFeaturesEntity findByProductId(Long product);
 
 }

@@ -5,12 +5,15 @@ import java.util.Objects;
 
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 
+@Entity
 public class ProductFeaturesEntity {
 
     @Id
@@ -19,7 +22,8 @@ public class ProductFeaturesEntity {
     private String feature;
     private String value;
 
-    @OneToMany(mappedBy = "features", fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
     private List<ProductEntity> products;
 
     // Default constructor
