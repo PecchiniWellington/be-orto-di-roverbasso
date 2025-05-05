@@ -9,9 +9,9 @@ public class CartItemDto {
     // Modifica del costruttore per prendere il nome dal ProductInformation
     public CartItemDto(Long productId, String productName, int quantity, String price) {
         this.productId = productId;
-        this.productName = productName != null ? productName : "Default Name"; // Fallback per il nome
+        this.productName = productName != null ? productName : "Default Name";
         this.quantity = quantity;
-        this.price = price != null ? price : "0.00"; // Fallback per il prezzo
+        this.price = price != null ? price.replace(",", ".") : "0.00";
     }
 
     public Long getProductId() {

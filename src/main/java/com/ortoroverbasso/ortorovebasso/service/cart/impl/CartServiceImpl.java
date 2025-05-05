@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.service.cart.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -20,6 +21,8 @@ import com.ortoroverbasso.ortorovebasso.repository.cart.CartRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.service.cart.ICartService;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class CartServiceImpl implements ICartService {
 
@@ -32,161 +35,18 @@ public class CartServiceImpl implements ICartService {
     @Autowired
     private ProductRepository productRepository;
 
-    @Override
-    public CartResponseDto getCart(String cartToken) {
-        CartEntity cart = cartRepository.findByCartToken(cartToken)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
-
-        // Mappa il carrello e i suoi articoli
-        List<CartItemDto> cartItems = cart.getItems().stream()
-                .map(item -> {
-                    // Gestisci il caso in cui ProductInformation è null
-                    String productName = "Unknown Product"; // Nome di fallback
-                    if (item.getProduct().getProductInformation() != null) {
-                        productName = item.getProduct().getProductInformation().getName();
-                    }
-                    return new CartItemDto(
-                            item.getProduct().getId(),
-                            productName, // Usa il nome del prodotto o il nome di fallback
-                            item.getQuantity(),
-                            item.getProduct().getRetailPrice().toString());
-                })
-                .collect(Collectors.toList());
-
-        CartResponseDto cartResponseDto = new CartResponseDto();
-        cartResponseDto.setCartId(cart.getId());
-        cartResponseDto.setCartToken(cart.getCartToken());
-        cartResponseDto.setItems(cartItems);
-
-        return cartResponseDto;
+    private String getProductName(CartItemEntity item) {
+        return item.getProduct().getProductInformation() != null
+                ? item.getProduct().getProductInformation().getName()
+                : "Unknown Product";
     }
 
-    @Override
-    public CartResponseDto getCart(Long userId) {
-        CartEntity cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("User cart not found"));
-
-        // Mappa il carrello e i suoi articoli
-        List<CartItemDto> cartItems = cart.getItems().stream()
-                .map(item -> {
-                    String productName = "Unknown Product";
-                    if (item.getProduct().getProductInformation() != null) {
-                        productName = item.getProduct().getProductInformation().getName();
-                    }
-                    return new CartItemDto(
-                            item.getProduct().getId(),
-                            productName,
-                            item.getQuantity(),
-                            item.getProduct().getRetailPrice().toString());
-                })
-                .collect(Collectors.toList());
-
-        CartResponseDto cartResponseDto = new CartResponseDto();
-        cartResponseDto.setCartId(cart.getId());
-        cartResponseDto.setCartToken(cart.getCartToken());
-        cartResponseDto.setItems(cartItems);
-
-        return cartResponseDto;
-    }
-
-    @Override
-    public CartResponseDto addItemToCart(String cartToken, CartRequestDto cartRequestDto) {
-        // Recupera il carrello tramite il cartToken
-        CartEntity cart = cartRepository.findByCartToken(cartToken)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
-
-        // Recupera il prodotto tramite il productId
-        ProductEntity product = productRepository.findById(cartRequestDto.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        // Ottieni il nome del prodotto da ProductInformation
-        String productName = null;
-        if (product.getProductInformation() != null) {
-            productName = product.getProductInformation().getName(); // Recupera il nome dal ProductInformation
-        }
-
-        // Crea un nuovo cart item
-        CartItemEntity cartItem = new CartItemEntity();
-        cartItem.setCart(cart);
-        cartItem.setProduct(product);
-        cartItem.setQuantity(cartRequestDto.getQuantity());
-
-        // Salva l'articolo nel carrello
-        cartItemRepository.save(cartItem);
-
-        // Mappa il carrello e restituisci il DTO
-        List<CartItemDto> cartItems = cart.getItems().stream()
-                .map(item -> new CartItemDto(item.getProduct().getId(),
-                        item.getProduct().getProductInformation() != null
-                                ? item.getProduct().getProductInformation().getName()
-                                : "Default Product",
-                        item.getQuantity(),
-                        item.getProduct().getRetailPrice())) // Usando il nome da ProductInformation
-                .collect(Collectors.toList());
-
-        CartResponseDto cartResponseDto = new CartResponseDto();
-        cartResponseDto.setCartId(cart.getId());
-        cartResponseDto.setCartToken(cart.getCartToken());
-        cartResponseDto.setItems(cartItems);
-
-        return cartResponseDto;
-    }
-
-    @Override
-    public CartResponseDto addItemToCart(Long userId, CartRequestDto cartRequestDto) {
-        CartEntity cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("User cart not found"));
-
-        ProductEntity product = productRepository.findById(cartRequestDto.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        // Ottieni il nome del prodotto da ProductInformation
-        String productName = null;
-        if (product.getProductInformation() != null) {
-            productName = product.getProductInformation().getName(); // Recupera il nome dal ProductInformation
-        }
-
-        CartItemEntity cartItem = new CartItemEntity();
-        cartItem.setCart(cart);
-        cartItem.setProduct(product);
-        cartItem.setQuantity(cartRequestDto.getQuantity());
-
-        // Salva il cart item
-        cartItemRepository.save(cartItem);
-
-        // Mappa il cart e restituisci il DTO
-        List<CartItemDto> cartItems = cart.getItems().stream()
-                .map(item -> new CartItemDto(item.getProduct().getId(),
-                        item.getProduct().getProductInformation() != null
-                                ? item.getProduct().getProductInformation().getName()
-                                : "Default Product",
-                        item.getQuantity(),
-                        item.getProduct().getRetailPrice())) // Usando il nome da ProductInformation
-                .collect(Collectors.toList());
-
-        CartResponseDto cartResponseDto = new CartResponseDto();
-        cartResponseDto.setCartId(cart.getId());
-        cartResponseDto.setCartToken(cart.getCartToken());
-        cartResponseDto.setItems(cartItems);
-
-        return cartResponseDto;
-    }
-
-    @Override
-    public CartResponseDto mergeCarts(Long userId, String cartToken) {
-        CartEntity cart = cartRepository.findByCartToken(cartToken)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
-
-        CartEntity userCart = cartRepository.findByUserId(userId).orElseGet(() -> {
-            CartEntity newCart = new CartEntity();
-            newCart.setUser(new UserEntity(userId)); // Correct handling of user
-            return newCart;
-        });
-
-        // Merge items logic...
-
-        cartRepository.save(userCart);
-        return CartMapper.mapToCartResponseDto(userCart);
+    private CartItemDto createCartItemDto(CartItemEntity item) {
+        return new CartItemDto(
+                item.getProduct().getId(),
+                getProductName(item),
+                item.getQuantity(),
+                item.getProduct().getRetailPrice().toString());
     }
 
     public String createCart() {
@@ -196,4 +56,252 @@ public class CartServiceImpl implements ICartService {
         return cart.getCartToken();
     }
 
+    private void calculateCartTotals(List<CartItemDto> cartItems) {
+        final int[] totalQuantity = { 0 };
+        final double[] totalPrice = { 0.0 };
+
+        cartItems.forEach(item -> {
+            try {
+                String priceString = item.getPrice().replace(",", ".");
+                double price = Double.parseDouble(priceString);
+                totalPrice[0] += price * item.getQuantity();
+            } catch (NumberFormatException e) {
+                System.out.println("Error parsing price for product " + item.getProductId() + ": " + item.getPrice());
+            }
+
+            totalQuantity[0] += item.getQuantity();
+        });
+
+        System.out.println("Total Quantity: " + totalQuantity[0]);
+        System.out.println("Total Price: " + totalPrice[0]);
+
+        cartItems.forEach(item -> {
+        });
+    }
+
+    private CartResponseDto getCartInternal(CartEntity cart) {
+        // Mappa i CartItemEntity in CartItemDto
+        List<CartItemDto> cartItems = cart.getItems().stream()
+                .map(this::createCartItemDto)
+                .collect(Collectors.toList());
+
+        calculateCartTotals(cartItems);
+
+        CartResponseDto cartResponseDto = new CartResponseDto();
+        cartResponseDto.setCartId(cart.getId());
+        cartResponseDto.setCartToken(cart.getCartToken());
+        cartResponseDto.setItems(cartItems);
+
+        System.out.println("Cart ID: " + cart.getId());
+        System.out.println("Cart Token: " + cart.getCartToken());
+
+        int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
+        double totalPrice = cartItems.stream()
+                .mapToDouble(item -> {
+
+                    try {
+                        return Double.parseDouble(item.getPrice().replace(",", ".")) * item.getQuantity();
+                    } catch (NumberFormatException e) {
+                        return 0.0;
+                    }
+                })
+                .sum();
+
+        System.out.println("Total Quantity: " + totalQuantity);
+        System.out.println("Total Price: " + totalPrice);
+
+        cartResponseDto.setTotalQuantity(totalQuantity);
+        cartResponseDto.setTotalPrice(String.format("%.2f", totalPrice));
+
+        return cartResponseDto;
+    }
+
+    private void deleteCartItem(CartEntity cart, CartItemEntity cartItem) {
+        cart.getItems().remove(cartItem);
+        cartItemRepository.delete(cartItem);
+    }
+
+    private CartResponseDto removeItemFromCartInternal(CartEntity cart, Long productId, int quantity) {
+        CartItemEntity cartItem = cart.getItems().stream()
+                .filter(item -> item.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Product not found in cart"));
+
+        if (quantity >= cartItem.getQuantity()) {
+            deleteCartItem(cart, cartItem);
+        } else {
+            cartItem.setQuantity(cartItem.getQuantity() - quantity);
+            cartItemRepository.save(cartItem);
+        }
+
+        cartRepository.save(cart);
+
+        List<CartItemDto> cartItems = cart.getItems().stream()
+                .map(this::createCartItemDto)
+                .collect(Collectors.toList());
+
+        calculateCartTotals(cartItems);
+
+        CartResponseDto cartResponseDto = new CartResponseDto();
+        cartResponseDto.setCartId(cart.getId());
+        cartResponseDto.setCartToken(cart.getCartToken());
+        cartResponseDto.setItems(cartItems);
+
+        int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
+        double totalPrice = cartItems.stream()
+                .mapToDouble(item -> Double.parseDouble(item.getPrice()) * item.getQuantity()).sum();
+
+        cartResponseDto.setTotalQuantity(totalQuantity);
+        cartResponseDto.setTotalPrice(String.format("%.2f", totalPrice));
+
+        return cartResponseDto;
+    }
+
+    private CartResponseDto addItemToCartInternal(CartEntity cart, CartRequestDto cartRequestDto) {
+        ProductEntity product = productRepository.findById(cartRequestDto.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        CartItemEntity existingCartItem = cart.getItems().stream()
+                .filter(item -> item.getProduct().getId().equals(product.getId()))
+                .findFirst()
+                .orElse(null);
+
+        if (existingCartItem != null) {
+            existingCartItem.setQuantity(existingCartItem.getQuantity() + cartRequestDto.getQuantity());
+            cartItemRepository.save(existingCartItem);
+        } else {
+            CartItemEntity newCartItem = new CartItemEntity();
+            newCartItem.setCart(cart);
+            newCartItem.setProduct(product);
+            newCartItem.setQuantity(cartRequestDto.getQuantity());
+            cart.getItems().add(newCartItem);
+            cartItemRepository.save(newCartItem);
+        }
+
+        cartRepository.save(cart);
+
+        List<CartItemDto> cartItems = cart.getItems().stream()
+                .map(this::createCartItemDto)
+                .collect(Collectors.toList());
+
+        calculateCartTotals(cartItems);
+
+        CartResponseDto cartResponseDto = new CartResponseDto();
+        cartResponseDto.setCartId(cart.getId());
+        cartResponseDto.setCartToken(cart.getCartToken());
+        cartResponseDto.setItems(cartItems);
+
+        int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
+        double totalPrice = cartItems.stream()
+                .mapToDouble(item -> Double.parseDouble(item.getPrice()) * item.getQuantity()).sum();
+
+        cartResponseDto.setTotalQuantity(totalQuantity);
+        cartResponseDto.setTotalPrice(String.format("%.2f", totalPrice));
+
+        return cartResponseDto;
+    }
+
+    @Transactional
+    private CartResponseDto clearCartInternal(CartEntity cart) {
+        System.out.println("Before deletion, cart contains: " + cart.getItems().size() + " items.");
+
+        List<CartItemEntity> itemsToRemove = new ArrayList<>(cart.getItems());
+        cart.getItems().clear();
+
+        if (!itemsToRemove.isEmpty()) {
+            cartItemRepository.deleteAll(itemsToRemove);
+            System.out.println("Items deleted from the database.");
+        }
+
+        cartRepository.save(cart);
+
+        CartResponseDto cartResponseDto = new CartResponseDto();
+        cartResponseDto.setCartId(cart.getId());
+        cartResponseDto.setCartToken(cart.getCartToken());
+        cartResponseDto.setItems(new ArrayList<>());
+
+        calculateCartTotals(cartResponseDto.getItems());
+        System.out.println("Cart totals calculated (should be 0).");
+
+        return cartResponseDto;
+    }
+
+    @Override
+    public CartResponseDto addItemToCart(String cartToken, CartRequestDto cartRequestDto) {
+        CartEntity cart = cartRepository.findByCartToken(cartToken)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        return addItemToCartInternal(cart, cartRequestDto);
+    }
+
+    @Override
+    public CartResponseDto addItemToCart(Long userId, CartRequestDto cartRequestDto) {
+        CartEntity cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User cart not found"));
+
+        return addItemToCartInternal(cart, cartRequestDto);
+    }
+
+    @Override
+    public CartResponseDto removeItemFromCart(Long userId, Long productId, int quantity) {
+        CartEntity cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User cart not found"));
+
+        return removeItemFromCartInternal(cart, productId, quantity);
+    }
+
+    @Override
+    public CartResponseDto removeItemFromCart(String cartToken, Long productId, int quantity) {
+        CartEntity cart = cartRepository.findByCartToken(cartToken)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        return removeItemFromCartInternal(cart, productId, quantity);
+    }
+
+    @Override
+    public CartResponseDto clearCart(Long userId) {
+        CartEntity cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User cart not found"));
+
+        return clearCartInternal(cart);
+    }
+
+    @Override
+    public CartResponseDto clearCart(String cartToken) {
+        CartEntity cart = cartRepository.findByCartToken(cartToken)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        return clearCartInternal(cart);
+    }
+
+    @Override
+    public CartResponseDto mergeCarts(Long userId, String cartToken) {
+        CartEntity cart = cartRepository.findByCartToken(cartToken)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        CartEntity userCart = cartRepository.findByUserId(userId).orElseGet(() -> {
+            CartEntity newCart = new CartEntity();
+            newCart.setUser(new UserEntity(userId));
+            return newCart;
+        });
+
+        cartRepository.save(userCart);
+        return CartMapper.mapToCartResponseDto(userCart);
+    }
+
+    @Override
+    public CartResponseDto getCart(String cartToken) {
+        CartEntity cart = cartRepository.findByCartToken(cartToken)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        return getCartInternal(cart);
+    }
+
+    @Override
+    public CartResponseDto getCart(Long userId) {
+        CartEntity cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User cart not found"));
+
+        return getCartInternal(cart);
+    }
 }

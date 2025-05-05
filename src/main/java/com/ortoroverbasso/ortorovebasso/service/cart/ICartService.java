@@ -6,13 +6,21 @@ import com.ortoroverbasso.ortorovebasso.dto.cart.CartResponseDto;
 public interface ICartService {
     CartResponseDto getCart(String cartToken);
 
+    CartResponseDto getCart(Long userId);
+
     CartResponseDto addItemToCart(String cartToken, CartRequestDto cartRequestDto);
+
+    CartResponseDto addItemToCart(Long userId, CartRequestDto cartRequestDto);
+
+    CartResponseDto removeItemFromCart(String cartToken, Long productId, int quantity);
+
+    CartResponseDto removeItemFromCart(Long userId, Long productId, int quantity);
 
     CartResponseDto mergeCarts(Long userId, String cartToken);
 
-    CartResponseDto getCart(Long userId);
+    CartResponseDto clearCart(Long userId);
 
-    CartResponseDto addItemToCart(Long userId, CartRequestDto cartRequestDto);
+    CartResponseDto clearCart(String cartToken);
 
     String createCart();
 }

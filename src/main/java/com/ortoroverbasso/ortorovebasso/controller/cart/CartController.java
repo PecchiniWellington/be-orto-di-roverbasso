@@ -2,6 +2,7 @@ package com.ortoroverbasso.ortorovebasso.controller.cart;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +26,7 @@ public class CartController {
     private ICartService cartService;
 
     @Autowired
-    private JwtUtil jwtUtil; // Utilità per decodificare il JWT
+    private JwtUtil jwtUtil;
 
     @GetMapping
     public ResponseEntity<CartResponseDto> getCart(HttpServletRequest request) {
@@ -59,6 +60,34 @@ public class CartController {
         }
     }
 
+    @PostMapping("/remove")
+    public ResponseEntity<CartResponseDto> removeItemFromCart(
+            HttpServletRequest request,
+            @RequestBody CartRequestDto cartRequestDto) {
+
+        String jwt = getJwtFromRequest(request);
+
+        try {
+            if (jwt != null && jwtUtil.validateToken(jwt)) {
+                Long userId = jwtUtil.getUserIdFromToken(jwt);
+                CartResponseDto cart = cartService.removeItemFromCart(userId, cartRequestDto.getProductId(),
+                        cartRequestDto.getQuantity());
+                return ResponseEntity.ok(cart);
+            } else {
+                String cartToken = getCartTokenFromRequest(request);
+                if (cartToken == null) {
+                    return ResponseEntity.status(400).body(null);
+                }
+                CartResponseDto cart = cartService.removeItemFromCart(cartToken, cartRequestDto.getProductId(),
+                        cartRequestDto.getQuantity());
+                return ResponseEntity.ok(cart);
+            }
+        } catch (Exception e) {
+            System.out.println("Error removing item from cart: " + e.getMessage());
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
     @PostMapping("/merge")
     public ResponseEntity<CartResponseDto> mergeCarts(
             HttpServletRequest request,
@@ -66,30 +95,51 @@ public class CartController {
         String jwt = getJwtFromRequest(request);
 
         if (jwt != null && jwtUtil.validateToken(jwt)) {
-            // Utente autenticato, uniamo il carrello
-            Long loggedUserId = jwtUtil.getUserIdFromToken(jwt); // Get logged user ID from token
-            CartResponseDto cart = cartService.mergeCarts(loggedUserId, getCartTokenFromRequest(request)); // Correct
-                                                                                                           // order of
-                                                                                                           // params
+            Long loggedUserId = jwtUtil.getUserIdFromToken(jwt);
+            CartResponseDto cart = cartService.mergeCarts(loggedUserId, getCartTokenFromRequest(request));
             return ResponseEntity.ok(cart);
         } else {
-            // Utente non autenticato
             String cartToken = getCartTokenFromRequest(request);
-            CartResponseDto cart = cartService.mergeCarts(userId, cartToken); // Correct order of params
+            CartResponseDto cart = cartService.mergeCarts(userId, cartToken);
             return ResponseEntity.ok(cart);
+        }
+    }
+
+    @DeleteMapping("/clear")
+    public ResponseEntity<CartResponseDto> clearCart(HttpServletRequest request) {
+        String jwt = getJwtFromRequest(request);
+
+        try {
+            if (jwt != null && jwtUtil.validateToken(jwt)) {
+                Long userId = jwtUtil.getUserIdFromToken(jwt);
+                CartResponseDto cart = cartService.clearCart(userId);
+                return ResponseEntity.ok(cart);
+            } else {
+                String cartToken = getCartTokenFromRequest(request);
+                if (cartToken == null) {
+                    return ResponseEntity.status(400).body(null);
+                }
+                CartResponseDto cart = cartService.clearCart(cartToken);
+
+                return ResponseEntity.ok(cart);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error clearing cart: " + e.getMessage());
+            return ResponseEntity.status(500).body(null);
         }
     }
 
     @PostMapping("/create")
     public ResponseEntity<String> createCart() {
-        String cartToken = cartService.createCart(); // Metodo per creare un carrello
-        return ResponseEntity.ok(cartToken); // Restituisce il cartToken
+        String cartToken = cartService.createCart();
+        return ResponseEntity.ok(cartToken);
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7); // Remove "Bearer " prefix
+            return bearerToken.substring(7);
         }
 
         Cookie[] cookies = request.getCookies();

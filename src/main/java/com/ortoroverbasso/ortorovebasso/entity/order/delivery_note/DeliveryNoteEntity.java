@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.entity.order.delivery_note;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,6 +16,7 @@ public class DeliveryNoteEntity {
     private Long id;
 
     private String reference;
+    @Column(name = "order_reference")
     private String order;
     private String status;
     private String carrier;

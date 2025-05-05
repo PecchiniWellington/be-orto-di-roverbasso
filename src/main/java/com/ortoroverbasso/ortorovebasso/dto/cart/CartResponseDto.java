@@ -7,6 +7,10 @@ public class CartResponseDto {
     private String cartToken;
     private List<CartItemDto> items;
 
+    // Aggiungi questi campi
+    private int totalQuantity;
+    private String totalPrice;
+
     public Long getCartId() {
         return cartId;
     }
@@ -31,4 +35,20 @@ public class CartResponseDto {
         this.items = items;
     }
 
+    // Getter e setter per totalQuantity e totalPrice
+    public int getTotalQuantity() {
+        return totalQuantity;
+    }
+
+    public void setTotalQuantity(int totalQuantity) {
+        this.totalQuantity = totalQuantity;
+    }
+
+    public String getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(String totalPrice) {
+        this.totalPrice = totalPrice;
+    }
 }
