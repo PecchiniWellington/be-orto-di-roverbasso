@@ -26,50 +26,18 @@ public class ProductRequestDto {
     @Schema(description = "Indica se il prodotto è attivo o meno", example = "true")
     private Integer active;
 
-    // Aggiungi i campi per i prezzi
     private String wholesalePrice;
     private Double inShopsPrice;
 
     private String reference;
     private Integer quantity;
     private Integer discount;
+    private Long subCategoryId;
 
     private List<ProductLargeQuantityPriceRequestDto> priceLargeQuantities;
 
-    // Costruttore vuoto
-
+    // Costruttore con tutti i parametri
     public ProductRequestDto() {
-    }
-
-    public ProductRequestDto(
-            String reference,
-            Integer quantity) {
-        this.reference = reference;
-        this.quantity = quantity;
-
-    }
-
-    public ProductRequestDto(
-            Long id,
-            String sku,
-            String retailPrice,
-            Long category,
-            Integer weight,
-            Integer active,
-            String wholesalePrice,
-            Double inShopsPrice,
-            List<ProductLargeQuantityPriceRequestDto> priceLargeQuantities,
-            Integer discount) {
-        this.id = id;
-        this.sku = sku;
-        this.retailPrice = retailPrice;
-        this.category = category;
-        this.weight = weight;
-        this.active = active;
-        this.wholesalePrice = wholesalePrice;
-        this.inShopsPrice = inShopsPrice;
-        this.priceLargeQuantities = priceLargeQuantities;
-        this.discount = discount;
     }
 
     // Getter e Setter
@@ -167,5 +135,13 @@ public class ProductRequestDto {
 
     public void setDiscount(Integer discount) {
         this.discount = discount;
+    }
+
+    public Long getSubCategoryId() {
+        return subCategoryId;
+    }
+
+    public void setSubCategoryId(Long subCategoryId) {
+        this.subCategoryId = subCategoryId;
     }
 }

@@ -14,12 +14,14 @@ import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesShortDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
+import com.ortoroverbasso.ortorovebasso.entity.category.CategoryEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_informations.ProductInformationEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
 import com.ortoroverbasso.ortorovebasso.exception.ProductNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.product.ProductMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_information.ProductInformationMapper;
+import com.ortoroverbasso.ortorovebasso.repository.category.CategoryRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_attributes.ProductAttributesRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_information.ProductInformationRepository;
@@ -43,6 +45,8 @@ public class ProductServiceImpl implements IProductService {
         private ProductTagsRepository productTagsRepository;
         @Autowired
         private ProductAttributesRepository productAttributesRepository;
+        @Autowired
+        private CategoryRepository categoryRepository;
 
         @Override
         public ProductResponseDto createProduct(ProductRequestDto dto) {
@@ -166,4 +170,17 @@ public class ProductServiceImpl implements IProductService {
                 return new GenericResponseDto(200, "Prodotto eliminato con successo. ID: " + productId);
         }
 
+        public List<ProductResponseDto> getProductsByCategory(Long categoryId) {
+                // Trova la categoria dal suo ID
+                CategoryEntity category = categoryRepository.findById(categoryId)
+                                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+                // Trova i prodotti per la categoria
+                List<ProductEntity> products = productRepository.findByCategory(category);
+
+                // Mappa i prodotti in DTO
+                return products.stream()
+                                .map(ProductMapper::toResponseDto)
+                                .collect(Collectors.toList());
+        }
 }

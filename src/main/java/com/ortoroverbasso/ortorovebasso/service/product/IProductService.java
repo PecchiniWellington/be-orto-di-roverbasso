@@ -18,4 +18,5 @@ public interface IProductService {
 
     GenericResponseDto deleteProduct(Long productId);
 
+    List<ProductResponseDto> getProductsByCategory(Long subCategoryId);
 }

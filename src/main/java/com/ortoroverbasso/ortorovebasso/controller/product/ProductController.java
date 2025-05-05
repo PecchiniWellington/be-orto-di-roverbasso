@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ortoroverbasso.ortorovebasso.dto.GenericResponseDto;
@@ -53,6 +54,11 @@ public class ProductController {
         GenericResponseDto response = productService.deleteProduct(productId);
         return new ResponseEntity<>(response, HttpStatus.OK);
 
+    }
+
+    @GetMapping("/subcategories")
+    public List<ProductResponseDto> getProductsByCategory(@RequestParam Long categoryId) {
+        return productService.getProductsByCategory(categoryId);
     }
 
 }

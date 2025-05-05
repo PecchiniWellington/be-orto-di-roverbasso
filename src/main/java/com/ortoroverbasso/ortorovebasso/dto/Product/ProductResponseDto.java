@@ -7,7 +7,6 @@ import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImages
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_why_choose.ProductWhyChooseResponseNoProductIdDto;
-import com.ortoroverbasso.ortorovebasso.dto.tags.ProductTagsResponseDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -22,88 +21,27 @@ public class ProductResponseDto {
     @Schema(description = "Prezzo al dettaglio del prodotto", example = "299.99")
     private String retailPrice;
 
-    @Schema(description = "ID della categoria del prodotto", example = "1")
-    private Long category;
-
     @Schema(description = "Peso del prodotto in grammi", example = "200")
     private Integer weight;
 
     @Schema(description = "Indica se il prodotto è attivo o meno", example = "true")
     private Integer active;
 
-    @Schema(description = "Se true allora ha un tag associato", example = "true")
-    private Boolean tags;
-
-    @Schema(description = "Se true allora ha un attribute associato", example = "true")
-    private Boolean attributes;
-
-    // Aggiungi i campi per i prezzi
     private String wholesalePrice;
     private Double inShopsPrice;
 
-    private String reference;
-    private Integer quantity;
-
+    private Boolean tags;
     private Long manufacturer;
-
     private Integer discount;
 
     private List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities;
-
-    private ProductInformationResponseDto productInformation;
-    private List<ProductTagsResponseDto> productTags;
+    private Boolean attributes;
     private List<ProductImagesShortDto> productImages;
+    private ProductInformationResponseDto productInformation;
     private List<ProductFeaturesResponseDto> productFeatures;
     private List<ProductWhyChooseResponseNoProductIdDto> whyChoose;
 
-    // Costruttore vuoto
-
     public ProductResponseDto() {
-    }
-
-    public ProductResponseDto(
-            String reference,
-            Integer quantity) {
-        this.reference = reference;
-        this.quantity = quantity;
-
-    }
-
-    public ProductResponseDto(
-            Long id,
-            String sku,
-            String retailPrice,
-            Long category,
-            Integer weight,
-            Integer active,
-            String wholesalePrice,
-            Double inShopsPrice,
-            Boolean tags,
-            Long manufacturer,
-            List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities,
-            Boolean attributes,
-            List<ProductImagesShortDto> productImages,
-            ProductInformationResponseDto productInformation,
-            Integer discount,
-            List<ProductFeaturesResponseDto> productFeatures,
-            List<ProductWhyChooseResponseNoProductIdDto> whyChoose) {
-        this.id = id;
-        this.sku = sku;
-        this.retailPrice = retailPrice;
-        this.category = category;
-        this.weight = weight;
-        this.active = active;
-        this.wholesalePrice = wholesalePrice;
-        this.inShopsPrice = inShopsPrice;
-        this.tags = tags;
-        this.manufacturer = manufacturer;
-        this.priceLargeQuantities = priceLargeQuantities;
-        this.attributes = attributes;
-        this.productImages = productImages;
-        this.productInformation = productInformation;
-        this.discount = discount;
-        this.productFeatures = productFeatures;
-        this.whyChoose = whyChoose;
     }
 
     // Getter e Setter
@@ -129,14 +67,6 @@ public class ProductResponseDto {
 
     public void setRetailPrice(String retailPrice) {
         this.retailPrice = retailPrice;
-    }
-
-    public Long getCategory() {
-        return category;
-    }
-
-    public void setCategory(Long category) {
-        this.category = category;
     }
 
     public Integer getWeight() {
@@ -179,28 +109,28 @@ public class ProductResponseDto {
         this.tags = tags;
     }
 
-    public String getReference() {
-        return reference;
-    }
-
-    public void setReference(String reference) {
-        this.reference = reference;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
     public Long getManufacturer() {
         return manufacturer;
     }
 
     public void setManufacturer(Long manufacturer) {
         this.manufacturer = manufacturer;
+    }
+
+    public Integer getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Integer discount) {
+        this.discount = discount;
+    }
+
+    public List<ProductLargeQuantityPriceResponseDto> getPriceLargeQuantities() {
+        return priceLargeQuantities;
+    }
+
+    public void setPriceLargeQuantities(List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities) {
+        this.priceLargeQuantities = priceLargeQuantities;
     }
 
     public Boolean getAttributes() {
@@ -219,36 +149,12 @@ public class ProductResponseDto {
         this.productImages = productImages;
     }
 
-    public List<ProductLargeQuantityPriceResponseDto> getPriceLargeQuantities() {
-        return priceLargeQuantities;
-    }
-
-    public void setPriceLargeQuantities(List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities) {
-        this.priceLargeQuantities = priceLargeQuantities;
-    }
-
     public ProductInformationResponseDto getProductInformation() {
         return productInformation;
     }
 
     public void setProductInformation(ProductInformationResponseDto productInformation) {
         this.productInformation = productInformation;
-    }
-
-    public List<ProductTagsResponseDto> getProductTags() {
-        return productTags;
-    }
-
-    public void setProductTags(List<ProductTagsResponseDto> productTags) {
-        this.productTags = productTags;
-    }
-
-    public Integer getDiscount() {
-        return discount;
-    }
-
-    public void setDiscount(Integer discount) {
-        this.discount = discount;
     }
 
     public List<ProductFeaturesResponseDto> getProductFeatures() {

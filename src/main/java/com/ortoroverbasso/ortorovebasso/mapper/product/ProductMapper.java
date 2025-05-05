@@ -22,7 +22,6 @@ public class ProductMapper {
                 ProductEntity product = new ProductEntity();
                 product.setSku(dto.getSku());
                 product.setWeight(dto.getWeight());
-                product.setCategory(dto.getCategory());
                 product.setRetailPrice(dto.getRetailPrice());
                 product.setActive(dto.getActive());
                 product.setDiscount(dto.getDiscount());
@@ -78,24 +77,25 @@ public class ProductMapper {
                                 .map(ProductWhyChooseMapper::toResponseWithoutProductId)
                                 .collect(Collectors.toList());
 
-                return new ProductResponseDto(
-                                product.getId(),
-                                product.getSku(),
-                                product.getRetailPrice(),
-                                product.getCategory(),
-                                product.getWeight(),
-                                product.getActive(),
-                                product.getWholesalePrice(),
-                                product.getInShopsPrice(),
-                                product.getTags(),
-                                manufacturerId,
-                                priceDtos,
-                                product.getAttributes(),
-                                productImagesDtos,
-                                productInformationResponseDto,
-                                product.getDiscount(),
-                                productFeaturesDto,
-                                whyChooseResponses); // Usa la lista di DTO
+                ProductResponseDto productResponseDto = new ProductResponseDto();
+                productResponseDto.setId(product.getId());
+                productResponseDto.setSku(product.getSku());
+                productResponseDto.setRetailPrice(product.getRetailPrice());
+                productResponseDto.setWeight(product.getWeight());
+                productResponseDto.setActive(product.getActive());
+                productResponseDto.setWholesalePrice(product.getWholesalePrice());
+                productResponseDto.setInShopsPrice(product.getInShopsPrice());
+                productResponseDto.setTags(product.getTags());
+                productResponseDto.setManufacturer(manufacturerId);
+                productResponseDto.setPriceLargeQuantities(priceDtos);
+                productResponseDto.setAttributes(product.getAttributes());
+                productResponseDto.setProductImages(productImagesDtos);
+                productResponseDto.setProductInformation(productInformationResponseDto);
+                productResponseDto.setDiscount(product.getDiscount());
+                productResponseDto.setProductFeatures(productFeaturesDto);
+                productResponseDto.setWhyChoose(whyChooseResponses);
+
+                return productResponseDto;
 
         }
 
@@ -104,7 +104,6 @@ public class ProductMapper {
                 product.setId(dto.getId());
                 product.setSku(dto.getSku());
                 product.setWeight(dto.getWeight());
-                product.setCategory(dto.getCategory());
                 product.setRetailPrice(dto.getRetailPrice());
                 product.setActive(dto.getActive());
 
@@ -129,17 +128,18 @@ public class ProductMapper {
                                                 priceEntity.getPrice()))
                                 .collect(Collectors.toList());
 
-                return new ProductRequestDto(
-                                product.getId(),
-                                product.getSku(),
-                                product.getRetailPrice(),
-                                product.getCategory(),
-                                product.getWeight(),
-                                product.getActive(),
-                                product.getWholesalePrice(),
-                                product.getInShopsPrice(),
-                                priceLargeQuantities,
-                                product.getDiscount());
+                ProductRequestDto productRequestDto = new ProductRequestDto();
+                productRequestDto.setId(product.getId());
+                productRequestDto.setSku(product.getSku());
+                productRequestDto.setRetailPrice(product.getRetailPrice());
+                productRequestDto.setWeight(product.getWeight());
+                productRequestDto.setActive(product.getActive());
+                productRequestDto.setWholesalePrice(product.getWholesalePrice());
+                productRequestDto.setInShopsPrice(product.getInShopsPrice());
+                productRequestDto.setPriceLargeQuantities(priceLargeQuantities);
+                productRequestDto.setDiscount(product.getDiscount());
+
+                return productRequestDto;
         }
 
 }

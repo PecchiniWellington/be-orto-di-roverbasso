@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import com.ortoroverbasso.ortorovebasso.entity.category.CategoryEntity;
 import com.ortoroverbasso.ortorovebasso.entity.manufacturer.ManufacturerEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_attributes.ProductAttributesEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_features.ProductFeaturesEntity;
@@ -39,7 +40,6 @@ public class ProductEntity {
     private Integer width;
     private Integer depth;
     private LocalDateTime dateUpd;
-    private Long category;
     private LocalDateTime dateUpdDescription;
     private LocalDateTime dateUpdImages;
     private LocalDateTime dateUpdStock;
@@ -103,6 +103,10 @@ public class ProductEntity {
 
     }
 
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private CategoryEntity category;
+
     // All-args constructor
     public ProductEntity(
             Long id,
@@ -114,7 +118,7 @@ public class ProductEntity {
             Integer width,
             Integer depth,
             LocalDateTime dateUpd,
-            Long category,
+
             LocalDateTime dateUpdDescription,
             LocalDateTime dateUpdImages,
             LocalDateTime dateUpdStock,
@@ -154,7 +158,6 @@ public class ProductEntity {
         this.width = width;
         this.depth = depth;
         this.dateUpd = dateUpd;
-        this.category = category;
         this.dateUpdDescription = dateUpdDescription;
         this.dateUpdImages = dateUpdImages;
         this.dateUpdStock = dateUpdStock;
@@ -259,11 +262,11 @@ public class ProductEntity {
         this.dateUpd = dateUpd;
     }
 
-    public Long getCategory() {
+    public CategoryEntity getCategory() {
         return category;
     }
 
-    public void setCategory(Long category) {
+    public void setCategory(CategoryEntity category) {
         this.category = category;
     }
 
