@@ -112,18 +112,7 @@
 			<version>1.0.2</version>
 		</dependency>
 
-		<dependency>
-			<groupId>io.sentry</groupId>
-			<artifactId>sentry</artifactId>
-			<version>5.5.0</version> <!-- Usa l'ultima versione disponibile -->
-		</dependency>
 
-
-		<dependency>
-			<groupId>io.sentry</groupId>
-			<artifactId>sentry-spring-boot-starter</artifactId>
-			<version>5.5.0</version>
-		</dependency>
 
 		<dependency>
 			<groupId>io.github.cdimascio</groupId>
@@ -203,6 +192,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.15.4</version>
+		</dependency>
+
+
+		<dependency>
 
 			<groupId>io.jsonwebtoken</groupId>
 
@@ -276,28 +272,7 @@
 			</plugin>
 
 
-			<plugin>
-				<groupId>io.sentry</groupId>
-				<artifactId>sentry-maven-plugin</artifactId>
-				<version>0.4.0</version>
-				<extensions>true</extensions>
-				<configuration>
-					<debugSentryCli>true</debugSentryCli>
 
-					<org>wellintone</org>
-
-					<project>java-spring-boot</project>
-
-					<authToken>${env.SENTRY_AUTH_TOKEN}</authToken>
-				</configuration>
-				<executions>
-					<execution>
-					<goals>
-						<goal>uploadSourceBundle</goal>
-					</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 

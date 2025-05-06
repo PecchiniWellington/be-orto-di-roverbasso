@@ -3,6 +3,8 @@ package com.ortoroverbasso.ortorovebasso.entity.category;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
 import jakarta.persistence.CascadeType;
@@ -27,15 +29,17 @@ public class CategoryEntity {
 
     @ManyToOne
     @JoinColumn(name = "parent_category_id", nullable = true)
+    @JsonBackReference
     private CategoryEntity parentCategory;
 
-    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL) // Cambia da PERSIST a ALL
     private Set<CategoryEntity> subCategories = new HashSet<>();
 
     @OneToMany(mappedBy = "category")
-    private Set<ProductEntity> products = new HashSet<>(); // Prodotti della categoria
+    @JsonManagedReference
+    private Set<ProductEntity> products = new HashSet<>();
 
-    // Getter e Setter
+    // Getter e setter...
 
     public Long getId() {
         return id;

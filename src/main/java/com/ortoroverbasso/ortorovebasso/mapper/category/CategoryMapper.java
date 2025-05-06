@@ -5,9 +5,8 @@ import java.util.stream.Collectors;
 
 import com.ortoroverbasso.ortorovebasso.dto.category.CategoryRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.category.CategoryResponseDto;
-import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.category.ProductCategoryResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.category.CategoryEntity;
-import com.ortoroverbasso.ortorovebasso.mapper.product.ProductMapper;
 
 public class CategoryMapper {
 
@@ -30,17 +29,17 @@ public class CategoryMapper {
         response.setId(category.getId());
         response.setName(category.getName());
 
-        // Mappa le sottocategorie della categoria
-        Set<CategoryResponseDto> subCategoryResponseDtos = category.getSubCategories().stream()
-                .map(CategoryMapper::toResponse)
+        // Mappa i prodotti della categoria come ProductCategoryResponseDto
+        Set<ProductCategoryResponseDto> productCategoryResponseDtos = category.getProducts().stream()
+                .map(product -> {
+                    String productName = (product.getProductInformation() != null)
+                            ? product.getProductInformation().getName()
+                            : "";
+                    return new ProductCategoryResponseDto(product.getId(), productName);
+                })
                 .collect(Collectors.toSet());
-        response.setSubCategories(subCategoryResponseDtos);
 
-        // Mappa i prodotti della categoria
-        Set<ProductResponseDto> productResponseDtos = category.getProducts().stream()
-                .map(ProductMapper::toResponseDto)
-                .collect(Collectors.toSet());
-        response.setProducts(productResponseDtos);
+        response.setProducts(productCategoryResponseDtos);
 
         // Aggiungi l'ID della categoria padre alla risposta
         if (category.getParentCategory() != null) {

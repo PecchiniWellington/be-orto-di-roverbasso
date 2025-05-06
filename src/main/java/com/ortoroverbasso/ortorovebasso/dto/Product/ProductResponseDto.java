@@ -33,6 +33,7 @@ public class ProductResponseDto {
     private Boolean tags;
     private Long manufacturer;
     private Integer discount;
+    private String productName;
 
     private List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities;
     private Boolean attributes;
@@ -171,5 +172,13 @@ public class ProductResponseDto {
 
     public void setWhyChoose(List<ProductWhyChooseResponseNoProductIdDto> whyChoose) {
         this.whyChoose = whyChoose;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 }

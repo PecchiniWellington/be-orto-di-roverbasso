@@ -2,14 +2,31 @@ package com.ortoroverbasso.ortorovebasso.dto.category;
 
 import java.util.Set;
 
-import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
-
 public class CategoryResponseDto {
     private Long id;
     private String name;
     private Set<CategoryResponseDto> subCategories; // Sottocategorie
-    private Set<ProductResponseDto> products; // Prodotti associati alla categoria
+    private Set<ProductCategoryResponseDto> products; // Prodotti associati alla categoria
     private Long parentCategoryId; // ID della categoria padre (per evitare il ciclo infinito)
+
+    public CategoryResponseDto() {
+
+    }
+
+    // Costruttore con parametri
+    public CategoryResponseDto(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public CategoryResponseDto(Long id, String name, Set<CategoryResponseDto> subCategories,
+            Set<ProductCategoryResponseDto> products, Long parentCategoryId) {
+        this.id = id;
+        this.name = name;
+        this.subCategories = subCategories;
+        this.products = products;
+        this.parentCategoryId = parentCategoryId;
+    }
 
     // Getter e Setter
     public Long getId() {
@@ -36,11 +53,11 @@ public class CategoryResponseDto {
         this.subCategories = subCategories;
     }
 
-    public Set<ProductResponseDto> getProducts() {
+    public Set<ProductCategoryResponseDto> getProducts() {
         return products;
     }
 
-    public void setProducts(Set<ProductResponseDto> products) {
+    public void setProducts(Set<ProductCategoryResponseDto> products) {
         this.products = products;
     }
 

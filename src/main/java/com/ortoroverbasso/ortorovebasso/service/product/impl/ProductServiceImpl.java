@@ -37,22 +37,36 @@ public class ProductServiceImpl implements IProductService {
 
         @Autowired
         private ProductRepository productRepository;
+
         @Autowired
         private ProductInformationRepository productInformationRepository;
+
         @Autowired
         private ProductLargeQuantityPriceRepository productLargeQuantityPriceRepository;
+
         @Autowired
         private ProductTagsRepository productTagsRepository;
+
         @Autowired
         private ProductAttributesRepository productAttributesRepository;
+
         @Autowired
         private CategoryRepository categoryRepository;
 
         @Override
         public ProductResponseDto createProduct(ProductRequestDto dto) {
 
+                // Recuperiamo la categoria tramite l'ID
+                CategoryEntity category = categoryRepository.findById(dto.getCategory())
+                                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+                // Creiamo il prodotto
                 ProductEntity product = ProductMapper.toEntity(dto);
 
+                // Associa la categoria al prodotto
+                product.setCategory(category);
+
+                // Gestione dei prezzi per quantità
                 if (dto.getPriceLargeQuantities() == null) {
                         product.setPriceLargeQuantities(new ArrayList<>());
                 } else {
@@ -70,6 +84,7 @@ public class ProductServiceImpl implements IProductService {
                         product.setPriceLargeQuantities(prices);
                 }
 
+                // Salviamo il prodotto nel database
                 product = productRepository.save(product);
 
                 return ProductMapper.toResponseDto(product);
@@ -103,15 +118,22 @@ public class ProductServiceImpl implements IProductService {
                 ProductEntity existingProduct = productRepository.findById(productId)
                                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
 
-                ProductEntity updatedProduct = ProductMapper.toEntity(productRequest);
+                // Recuperiamo la categoria tramite l'ID
+                CategoryEntity category = categoryRepository.findById(productRequest.getCategory())
+                                .orElseThrow(() -> new RuntimeException("Category not found"));
 
+                // Aggiorniamo le informazioni del prodotto
+                ProductEntity updatedProduct = ProductMapper.toEntity(productRequest);
                 updatedProduct.setId(productId);
 
-                BeanUtils.copyProperties(
-                                updatedProduct,
-                                existingProduct,
+                // Associa la categoria aggiornata
+                updatedProduct.setCategory(category);
+
+                // Copia le proprietà dal prodotto esistente a quello aggiornato
+                BeanUtils.copyProperties(updatedProduct, existingProduct,
                                 BeanUtilsHelper.getNullPropertyNames(updatedProduct));
 
+                // Gestiamo i prezzi per quantità se esistono
                 if (updatedProduct.getPriceLargeQuantities() != null) {
                         existingProduct.setPriceLargeQuantities(updatedProduct.getPriceLargeQuantities());
                 }
@@ -170,6 +192,7 @@ public class ProductServiceImpl implements IProductService {
                 return new GenericResponseDto(200, "Prodotto eliminato con successo. ID: " + productId);
         }
 
+        @Override
         public List<ProductResponseDto> getProductsByCategory(Long categoryId) {
                 // Trova la categoria dal suo ID
                 CategoryEntity category = categoryRepository.findById(categoryId)

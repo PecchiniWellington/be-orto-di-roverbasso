@@ -2,7 +2,7 @@ package com.ortoroverbasso.ortorovebasso.dto.category;
 
 public class CategoryRequestDto {
     private String name;
-    private Long parentCategoryId; // ID della categoria padre, può essere null
+    private Long parentCategoryId;
 
     // Getter e Setter
 

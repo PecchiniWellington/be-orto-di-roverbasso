@@ -21,7 +21,6 @@ public class ProductMapper {
         public static ProductEntity toEntity(ProductRequestDto dto) {
                 ProductEntity product = new ProductEntity();
                 product.setSku(dto.getSku());
-                product.setWeight(dto.getWeight());
                 product.setRetailPrice(dto.getRetailPrice());
                 product.setActive(dto.getActive());
                 product.setDiscount(dto.getDiscount());
@@ -81,7 +80,6 @@ public class ProductMapper {
                 productResponseDto.setId(product.getId());
                 productResponseDto.setSku(product.getSku());
                 productResponseDto.setRetailPrice(product.getRetailPrice());
-                productResponseDto.setWeight(product.getWeight());
                 productResponseDto.setActive(product.getActive());
                 productResponseDto.setWholesalePrice(product.getWholesalePrice());
                 productResponseDto.setInShopsPrice(product.getInShopsPrice());
@@ -96,14 +94,12 @@ public class ProductMapper {
                 productResponseDto.setWhyChoose(whyChooseResponses);
 
                 return productResponseDto;
-
         }
 
         public static ProductEntity fromResponseToEntity(ProductResponseDto dto) {
                 ProductEntity product = new ProductEntity();
                 product.setId(dto.getId());
                 product.setSku(dto.getSku());
-                product.setWeight(dto.getWeight());
                 product.setRetailPrice(dto.getRetailPrice());
                 product.setActive(dto.getActive());
 
@@ -132,7 +128,6 @@ public class ProductMapper {
                 productRequestDto.setId(product.getId());
                 productRequestDto.setSku(product.getSku());
                 productRequestDto.setRetailPrice(product.getRetailPrice());
-                productRequestDto.setWeight(product.getWeight());
                 productRequestDto.setActive(product.getActive());
                 productRequestDto.setWholesalePrice(product.getWholesalePrice());
                 productRequestDto.setInShopsPrice(product.getInShopsPrice());
