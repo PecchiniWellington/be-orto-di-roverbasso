@@ -13,6 +13,7 @@ import com.ortoroverbasso.ortorovebasso.dto.category.ProductCategoryResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.category.CategoryEntity;
 import com.ortoroverbasso.ortorovebasso.mapper.category.CategoryMapper;
 import com.ortoroverbasso.ortorovebasso.repository.category.CategoryRepository;
+import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.service.category.ICategoryService;
 
 @Service
@@ -20,6 +21,8 @@ public class CategoryServiceImpl implements ICategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
     @Override
     public CategoryResponseDto getCategory(Long id) {
@@ -56,26 +59,9 @@ public class CategoryServiceImpl implements ICategoryService {
                             .collect(Collectors.toSet());
 
                     // Mappa le sottocategorie, includendo i prodotti se presenti
-                    Set<CategoryResponseDto> subCategoriesDtos = category.getSubCategories().stream()
-                            .map(subCategory -> {
-                                Set<ProductCategoryResponseDto> subCategoryProducts = subCategory.getProducts().stream()
-                                        .map(product -> new ProductCategoryResponseDto(product.getId(),
-                                                product.getProductInformation().getName()))
-                                        .collect(Collectors.toSet());
+                    Set<CategoryResponseDto> subCategoriesDtos = getSubCategoriesRecursive(category);
 
-                                CategoryResponseDto subCategoryDto = new CategoryResponseDto();
-                                subCategoryDto.setId(subCategory.getId());
-                                subCategoryDto.setName(subCategory.getName());
-                                subCategoryDto.setProducts(subCategoryProducts); // Aggiungi i prodotti della
-                                                                                 // sottocategoria
-                                subCategoryDto.setParentCategoryId(subCategory.getParentCategory() != null
-                                        ? subCategory.getParentCategory().getId()
-                                        : null);
-                                return subCategoryDto;
-                            })
-                            .collect(Collectors.toSet());
-
-                    // Crea la risposta per la categoria
+                    // Crea la risposta per la categoria principale
                     CategoryResponseDto categoryResponseDto = new CategoryResponseDto();
                     categoryResponseDto.setId(category.getId());
                     categoryResponseDto.setName(category.getName());
@@ -87,6 +73,34 @@ public class CategoryServiceImpl implements ICategoryService {
                     return categoryResponseDto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private Set<CategoryResponseDto> getSubCategoriesRecursive(CategoryEntity category) {
+        Set<CategoryResponseDto> subCategoriesDtos = category.getSubCategories().stream()
+                .map(subCategory -> {
+                    Set<ProductCategoryResponseDto> subCategoryProducts = subCategory.getProducts().stream()
+                            .map(product -> new ProductCategoryResponseDto(product.getId(),
+                                    product.getProductInformation() != null ? product.getProductInformation().getName()
+                                            : ""))
+                            .collect(Collectors.toSet());
+
+                    // Mappa la subcategoria ricorsivamente
+                    Set<CategoryResponseDto> nestedSubCategories = getSubCategoriesRecursive(subCategory);
+
+                    CategoryResponseDto subCategoryDto = new CategoryResponseDto();
+                    subCategoryDto.setId(subCategory.getId());
+                    subCategoryDto.setName(subCategory.getName());
+                    subCategoryDto.setProducts(subCategoryProducts);
+                    subCategoryDto.setSubCategories(nestedSubCategories); // Aggiungi le subcategorie annidate
+                    subCategoryDto.setParentCategoryId(subCategory.getParentCategory() != null
+                            ? subCategory.getParentCategory().getId()
+                            : null);
+
+                    return subCategoryDto;
+                })
+                .collect(Collectors.toSet());
+
+        return subCategoriesDtos;
     }
 
     @Override
@@ -136,18 +150,69 @@ public class CategoryServiceImpl implements ICategoryService {
 
     @Override
     public void deleteCategory(Long id) {
+        // Recupera la categoria da eliminare
         CategoryEntity category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        // Disassociare i prodotti dalla sottocategoria, se presente
-        category.getSubCategories().forEach(subCategory -> {
-            subCategory.setParentCategory(null); // Disassociamo la sottocategoria dalla categoria principale
-            // Se hai una relazione con i prodotti, disassocia anche i prodotti
-            subCategory.getProducts().forEach(product -> product.setCategory(null));
+        // Ottieni o crea la categoria fittizia "Nessuna categoria associata"
+        CategoryEntity noCategory = categoryRepository.findByName("Nessuna categoria associata")
+                .orElseGet(() -> {
+                    CategoryEntity newCategory = new CategoryEntity();
+                    newCategory.setName("Nessuna categoria associata");
+                    return categoryRepository.save(newCategory); // Salva la categoria fittizia
+                });
+
+        // Disassociare tutti i prodotti dalla categoria e associarli a "Nessuna
+        // categoria associata"
+        category.getProducts().forEach(product -> {
+            if (product.getCategory() != null) {
+                // Impostiamo il prodotto nella categoria "Nessuna categoria associata"
+                product.setCategory(noCategory);
+
+                // Se il prodotto ha associato "product_information", possiamo gestirlo
+                if (product.getProductInformation() != null) {
+                    // Settiamo la relazione null per "product_information" se è legata alla
+                    // categoria eliminata
+                    product.getProductInformation().setProduct(null); // Disassocia il prodotto da product_information
+                }
+
+                productRepository.save(product); // Aggiorniamo il prodotto nel database
+            }
         });
 
-        // Procediamo con la cancellazione della categoria e delle sue sottocategorie
-        categoryRepository.delete(category);
+        // Disassociare tutte le sottocategorie ricorsivamente
+        deleteSubCategories(category, noCategory);
+
+        // Procedi con la cancellazione della categoria principale
+        categoryRepository.delete(category); // Ora possiamo eliminare la categoria
+    }
+
+    // Metodo ricorsivo per eliminare le sottocategorie e disassociare i loro
+    // prodotti
+    private void deleteSubCategories(CategoryEntity category, CategoryEntity noCategory) {
+        category.getSubCategories().forEach(subCategory -> {
+            // Disassociare i prodotti della sottocategoria e associarli a "Nessuna
+            // categoria associata"
+            subCategory.getProducts().forEach(product -> {
+                if (product.getCategory() != null) {
+                    product.setCategory(noCategory); // Disassociare il prodotto dalla sottocategoria
+
+                    // Se il prodotto ha associato "product_information", possiamo gestirlo
+                    if (product.getProductInformation() != null) {
+                        // Settiamo la relazione null per "product_information" se è legata alla
+                        // sottocategoria eliminata
+                        product.getProductInformation().setProduct(null); // Disassocia il prodotto da
+                                                                          // product_information
+                    }
+
+                    productRepository.save(product); // Aggiorna il prodotto nel database
+                }
+            });
+
+            // Disassociare ulteriori sottocategorie, se esistono
+            deleteSubCategories(subCategory, noCategory); // Ricorsione per sottocategorie
+            categoryRepository.delete(subCategory); // Elimina la sottocategoria
+        });
     }
 
     @Override

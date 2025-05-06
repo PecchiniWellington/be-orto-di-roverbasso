@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.ortoroverbasso.ortorovebasso.entity.category.CategoryEntity;
 import com.ortoroverbasso.ortorovebasso.entity.manufacturer.ManufacturerEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_attributes.ProductAttributesEntity;
@@ -67,7 +66,7 @@ public class ProductEntity {
     private List<ProductImageEntity> productImages = new ArrayList<>();
 
     @OneToOne(mappedBy = "product", fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_information_id", referencedColumnName = "id")
+    @JoinColumn(name = "product_information_id", referencedColumnName = "id", nullable = true)
     private ProductInformationEntity productInformation;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -79,20 +78,17 @@ public class ProductEntity {
     private Set<ProductWhyChooseEntity> whyChoose = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    @JsonBackReference // Impedisce il ciclo circolare nella relazione con la categoria
+    @JoinColumn(name = "category_id", nullable = true)
     private CategoryEntity category;
 
     public ProductEntity(String reference,
             Integer quantity) {
         this.reference = reference;
         this.quantity = quantity;
-
     }
 
     // All-args constructor
     public ProductEntity() {
-
     }
 
     // Getters and setters for all fields
