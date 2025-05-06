@@ -10,4 +10,6 @@ import com.ortoroverbasso.ortorovebasso.entity.category.CategoryEntity;
 public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
     Optional<CategoryEntity> findByName(String name);
 
+    CategoryEntity findBySlug(String slug);
+
 }

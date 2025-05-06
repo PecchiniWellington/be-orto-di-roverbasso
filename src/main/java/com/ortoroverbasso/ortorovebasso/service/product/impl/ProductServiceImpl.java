@@ -155,6 +155,10 @@ public class ProductServiceImpl implements IProductService {
                 boolean hasAttributes = productAttributesRepository.existsByProductId(productId);
 
                 ProductResponseDto productDto = ProductMapper.toResponseDto(product);
+                // Se la categoria è presente, aggiungi l'ID della categoria nella risposta
+                if (product.getCategory() != null) {
+                        productDto.setCategoryId(product.getCategory().getId());
+                }
 
                 productDto.setTags(hasTags);
                 productDto.setAttributes(hasAttributes);
@@ -206,4 +210,23 @@ public class ProductServiceImpl implements IProductService {
                                 .map(ProductMapper::toResponseDto)
                                 .collect(Collectors.toList());
         }
+
+        public List<ProductResponseDto> getProductsByCategorySlug(String slug) {
+                CategoryEntity category = categoryRepository.findBySlug(slug);
+
+                List<ProductResponseDto> products = new ArrayList<>();
+                collectProducts(category, products);
+                return products;
+        }
+
+        private void collectProducts(CategoryEntity category, List<ProductResponseDto> products) {
+                products.addAll(productRepository.findByCategory(category).stream()
+                                .map(ProductMapper::toResponseDto)
+                                .collect(Collectors.toList()));
+
+                for (CategoryEntity subCategory : category.getSubCategories()) {
+                        collectProducts(subCategory, products);
+                }
+        }
+
 }

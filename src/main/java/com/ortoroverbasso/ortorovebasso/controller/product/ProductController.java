@@ -61,4 +61,17 @@ public class ProductController {
         return productService.getProductsByCategory(categoryId);
     }
 
+    // Endpoint per ottenere i prodotti da una categoria e tutte le sue
+    // sottocategorie
+    @GetMapping("/category/{slug}")
+    public List<ProductResponseDto> getProductsByCategorySlug(@PathVariable String slug) {
+        return productService.getProductsByCategorySlug(slug);
+    }
+
+    // Endpoint per ottenere i prodotti di una specifica sottocategoria
+    @GetMapping("/subcategory/{slug}")
+    public List<ProductResponseDto> getProductsBySubCategorySlug(@PathVariable String slug) {
+        return productService.getProductsByCategorySlug(slug);
+    }
+
 }

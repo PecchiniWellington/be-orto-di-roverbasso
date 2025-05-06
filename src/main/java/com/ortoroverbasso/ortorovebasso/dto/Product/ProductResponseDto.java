@@ -35,6 +35,9 @@ public class ProductResponseDto {
     private Integer discount;
     private String productName;
 
+    @Schema(description = "ID della categoria", example = "1")
+    private Long categoryId;
+
     private List<ProductLargeQuantityPriceResponseDto> priceLargeQuantities;
     private Boolean attributes;
     private List<ProductImagesShortDto> productImages;
@@ -180,5 +183,13 @@ public class ProductResponseDto {
 
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 }

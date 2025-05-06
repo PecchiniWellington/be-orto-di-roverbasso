@@ -92,6 +92,7 @@ public class ProductMapper {
                 productResponseDto.setDiscount(product.getDiscount());
                 productResponseDto.setProductFeatures(productFeaturesDto);
                 productResponseDto.setWhyChoose(whyChooseResponses);
+                productResponseDto.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
 
                 return productResponseDto;
         }
