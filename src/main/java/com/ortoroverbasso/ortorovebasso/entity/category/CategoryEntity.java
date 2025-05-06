@@ -24,6 +24,7 @@ public class CategoryEntity {
     private Long id;
 
     private String name;
+    private String slug;
 
     @ManyToOne
     @JoinColumn(name = "parent_category_id", nullable = true)
@@ -76,4 +77,13 @@ public class CategoryEntity {
     public void setProducts(Set<ProductEntity> products) {
         this.products = products;
     }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
+    }
+
 }

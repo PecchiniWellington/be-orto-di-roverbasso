@@ -3,6 +3,7 @@ package com.ortoroverbasso.ortorovebasso.dto.category;
 public class CategoryRequestDto {
     private String name;
     private Long parentCategoryId;
+    private String slug;
 
     // Getter e Setter
 
@@ -21,4 +22,13 @@ public class CategoryRequestDto {
     public void setParentCategoryId(Long parentCategoryId) {
         this.parentCategoryId = parentCategoryId;
     }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
+    }
+
 }

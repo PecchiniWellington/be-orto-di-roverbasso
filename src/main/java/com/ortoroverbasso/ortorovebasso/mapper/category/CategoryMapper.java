@@ -13,8 +13,8 @@ public class CategoryMapper {
     public static CategoryEntity toEntity(CategoryRequestDto categoryRequestDto) {
         CategoryEntity category = new CategoryEntity();
         category.setName(categoryRequestDto.getName());
+        category.setSlug(categoryRequestDto.getSlug());
 
-        // Imposta la categoria padre se presente
         if (categoryRequestDto.getParentCategoryId() != null) {
             CategoryEntity parentCategory = new CategoryEntity();
             parentCategory.setId(categoryRequestDto.getParentCategoryId());
@@ -28,9 +28,10 @@ public class CategoryMapper {
         CategoryResponseDto response = new CategoryResponseDto();
         response.setId(category.getId());
         response.setName(category.getName());
+        response.setSlug(category.getSlug());
 
-        // Mappa i prodotti della categoria come ProductCategoryResponseDto
-        Set<ProductCategoryResponseDto> productCategoryResponseDtos = category.getProducts().stream()
+        Set<ProductCategoryResponseDto> productCategoryResponseDtos = category.getProducts()
+                .stream()
                 .map(product -> {
                     String productName = (product.getProductInformation() != null)
                             ? product.getProductInformation().getName()
@@ -41,7 +42,6 @@ public class CategoryMapper {
 
         response.setProducts(productCategoryResponseDtos);
 
-        // Aggiungi l'ID della categoria padre alla risposta
         if (category.getParentCategory() != null) {
             response.setParentCategoryId(category.getParentCategory().getId());
         }
