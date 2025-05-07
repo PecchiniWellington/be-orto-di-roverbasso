@@ -19,7 +19,7 @@ public class ProductResponseDto {
     private String sku;
 
     @Schema(description = "Prezzo al dettaglio del prodotto", example = "299.99")
-    private String retailPrice;
+    private Double retailPrice;
 
     @Schema(description = "Peso del prodotto in grammi", example = "200")
     private Integer weight;
@@ -65,11 +65,11 @@ public class ProductResponseDto {
         this.sku = sku;
     }
 
-    public String getRetailPrice() {
+    public Double getRetailPrice() {
         return retailPrice;
     }
 
-    public void setRetailPrice(String retailPrice) {
+    public void setRetailPrice(Double retailPrice) {
         this.retailPrice = retailPrice;
     }
 

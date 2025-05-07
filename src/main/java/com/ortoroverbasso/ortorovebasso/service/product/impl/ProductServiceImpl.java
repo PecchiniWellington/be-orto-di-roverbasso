@@ -6,9 +6,13 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.ortoroverbasso.ortorovebasso.dto.GenericResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.filters.paginate.PaginatedResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFacetResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFilterRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesShortDto;
@@ -28,9 +32,12 @@ import com.ortoroverbasso.ortorovebasso.repository.product.product_information.P
 import com.ortoroverbasso.ortorovebasso.repository.product.product_large_quantity_price.ProductLargeQuantityPriceRepository;
 import com.ortoroverbasso.ortorovebasso.repository.tags.ProductTagsRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
+import com.ortoroverbasso.ortorovebasso.service.product.product_filters.IProductFacetService;
 import com.ortoroverbasso.ortorovebasso.utils.BeanUtilsHelper;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
 
 @Service
 public class ProductServiceImpl implements IProductService {
@@ -52,6 +59,12 @@ public class ProductServiceImpl implements IProductService {
 
         @Autowired
         private CategoryRepository categoryRepository;
+
+        @Autowired
+        private IProductFacetService productFacetService;
+
+        @PersistenceContext
+        private EntityManager entityManager;
 
         @Override
         public ProductResponseDto createProduct(ProductRequestDto dto) {
@@ -229,4 +242,15 @@ public class ProductServiceImpl implements IProductService {
                 }
         }
 
+        @Override
+        public ProductFacetResponseDto getAvailableFilters(ProductFilterRequestDto filterDto) {
+                return productFacetService.getFacets(filterDto);
+        }
+
+        @Override
+        public PaginatedResponseDto<ProductResponseDto> getFilteredProducts(
+                        ProductFilterRequestDto filterDto,
+                        Pageable pageable) {
+                return productFacetService.getFilteredProducts(filterDto, pageable);
+        }
 }

@@ -3,6 +3,7 @@ package com.ortoroverbasso.ortorovebasso.controller.product;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ortoroverbasso.ortorovebasso.dto.GenericResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.filters.paginate.PaginatedResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFacetResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFilterRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
@@ -72,6 +76,19 @@ public class ProductController {
     @GetMapping("/subcategory/{slug}")
     public List<ProductResponseDto> getProductsBySubCategorySlug(@PathVariable String slug) {
         return productService.getProductsByCategorySlug(slug);
+    }
+
+    @PostMapping("/filter")
+    public PaginatedResponseDto<ProductResponseDto> getFilteredProducts(
+            @RequestBody ProductFilterRequestDto filterDto,
+            Pageable pageable) {
+        return productService.getFilteredProducts(filterDto, pageable);
+    }
+
+    @PostMapping("/available-filters")
+    public ProductFacetResponseDto getAvailableFilters(
+            @RequestBody ProductFilterRequestDto filterDto) {
+        return productService.getAvailableFilters(filterDto);
     }
 
 }

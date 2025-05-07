@@ -38,7 +38,7 @@ public class ProductEntity {
     private String sku;
 
     private String wholesalePrice;
-    private String retailPrice;
+    private Double retailPrice;
     private Long taxonomy;
     private LocalDateTime dateAdd;
     private Integer active;
@@ -51,6 +51,7 @@ public class ProductEntity {
     private String reference;
     private Integer quantity;
     private Integer discount;
+    private Double weight;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<ProductAttributesEntity> productAttributes;
@@ -132,11 +133,11 @@ public class ProductEntity {
         this.wholesalePrice = wholesalePrice;
     }
 
-    public String getRetailPrice() {
+    public Double getRetailPrice() {
         return retailPrice;
     }
 
-    public void setRetailPrice(String retailPrice) {
+    public void setRetailPrice(Double retailPrice) {
         this.retailPrice = retailPrice;
     }
 
@@ -282,5 +283,13 @@ public class ProductEntity {
 
     public void setWhyChoose(Set<ProductWhyChooseEntity> whyChoose) {
         this.whyChoose = whyChoose;
+    }
+
+    public Double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
     }
 }

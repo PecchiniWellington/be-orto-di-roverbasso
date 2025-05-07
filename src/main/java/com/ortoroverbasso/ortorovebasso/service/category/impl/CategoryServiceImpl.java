@@ -150,16 +150,10 @@ public class CategoryServiceImpl implements ICategoryService {
         CategoryEntity category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        CategoryEntity noCategory = categoryRepository.findByName("Nessuna categoria associata")
-                .orElseGet(() -> {
-                    CategoryEntity newCategory = new CategoryEntity();
-                    newCategory.setName("Nessuna categoria associata");
-                    return categoryRepository.save(newCategory);
-                });
-
+        // Rimuovi la categoria dai prodotti collegati
         category.getProducts().forEach(product -> {
-            if (product.getCategory() != null) {
-                product.setCategory(noCategory);
+            if (product.getCategory() != null && product.getCategory().getId().equals(id)) {
+                product.setCategory(null);
 
                 if (product.getProductInformation() != null) {
                     product.getProductInformation().setProduct(null);
@@ -169,7 +163,9 @@ public class CategoryServiceImpl implements ICategoryService {
             }
         });
 
-        deleteSubCategories(category, noCategory);
+        // Elimina eventuali sottocategorie collegate
+        deleteSubCategories(category, null); // se deleteSubCategories richiede una categoria sostitutiva, dovrai
+                                             // adattarlo
 
         categoryRepository.delete(category);
     }

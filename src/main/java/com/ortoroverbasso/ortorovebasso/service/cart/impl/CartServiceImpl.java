@@ -46,7 +46,7 @@ public class CartServiceImpl implements ICartService {
                 item.getProduct().getId(),
                 getProductName(item),
                 item.getQuantity(),
-                item.getProduct().getRetailPrice().toString());
+                item.getProduct().getRetailPrice());
     }
 
     public String createCart() {
@@ -62,8 +62,8 @@ public class CartServiceImpl implements ICartService {
 
         cartItems.forEach(item -> {
             try {
-                String priceString = item.getPrice().replace(",", ".");
-                double price = Double.parseDouble(priceString);
+                Double priceString = item.getPrice();
+                double price = priceString;
                 totalPrice[0] += price * item.getQuantity();
             } catch (NumberFormatException e) {
                 System.out.println("Error parsing price for product " + item.getProductId() + ": " + item.getPrice());
@@ -100,7 +100,7 @@ public class CartServiceImpl implements ICartService {
                 .mapToDouble(item -> {
 
                     try {
-                        return Double.parseDouble(item.getPrice().replace(",", ".")) * item.getQuantity();
+                        return item.getPrice() * item.getQuantity();
                     } catch (NumberFormatException e) {
                         return 0.0;
                     }
@@ -149,7 +149,7 @@ public class CartServiceImpl implements ICartService {
 
         int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
         double totalPrice = cartItems.stream()
-                .mapToDouble(item -> Double.parseDouble(item.getPrice()) * item.getQuantity()).sum();
+                .mapToDouble(item -> item.getPrice() * item.getQuantity()).sum();
 
         cartResponseDto.setTotalQuantity(totalQuantity);
         cartResponseDto.setTotalPrice(String.format("%.2f", totalPrice));
@@ -193,7 +193,7 @@ public class CartServiceImpl implements ICartService {
 
         int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
         double totalPrice = cartItems.stream()
-                .mapToDouble(item -> Double.parseDouble(item.getPrice()) * item.getQuantity()).sum();
+                .mapToDouble(item -> item.getPrice() * item.getQuantity()).sum();
 
         cartResponseDto.setTotalQuantity(totalQuantity);
         cartResponseDto.setTotalPrice(String.format("%.2f", totalPrice));

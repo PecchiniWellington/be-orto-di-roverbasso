@@ -15,7 +15,7 @@ public class ProductRequestDto {
     private String sku;
 
     @Schema(description = "Prezzo al dettaglio del prodotto", example = "299.99")
-    private String retailPrice;
+    private Double retailPrice;
 
     @Schema(description = "ID della categoria del prodotto", example = "1")
     private Long category;
@@ -57,11 +57,11 @@ public class ProductRequestDto {
         this.sku = sku;
     }
 
-    public String getRetailPrice() {
+    public Double getRetailPrice() {
         return retailPrice;
     }
 
-    public void setRetailPrice(String retailPrice) {
+    public void setRetailPrice(Double retailPrice) {
         this.retailPrice = retailPrice;
     }
 

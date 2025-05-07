@@ -13,7 +13,7 @@ public class CartMapper {
     public static CartItemDto mapToCartItemDto(CartItemEntity cartItemEntity) {
         // Ora otteniamo il nome dal ProductInformationEntity
         String productName = cartItemEntity.getProduct().getProductInformation().getName();
-        String productPrice = cartItemEntity.getProduct().getRetailPrice();
+        Double productPrice = cartItemEntity.getProduct().getRetailPrice();
 
         return new CartItemDto(
                 cartItemEntity.getProduct().getId(),
