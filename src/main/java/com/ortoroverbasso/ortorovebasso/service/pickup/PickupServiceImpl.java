@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import com.ortoroverbasso.ortorovebasso.dto.pickup.PickupRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.pickup.PickupResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.pickup.PickupEntity;
-import com.ortoroverbasso.ortorovebasso.mapper.PickupMapper;
-import com.ortoroverbasso.ortorovebasso.repository.PickupRepository;
+import com.ortoroverbasso.ortorovebasso.mapper.piackup.PickupMapper;
+import com.ortoroverbasso.ortorovebasso.repository.pickup.PickupRepository;
 
 @Service
 public class PickupServiceImpl implements IPickupService {

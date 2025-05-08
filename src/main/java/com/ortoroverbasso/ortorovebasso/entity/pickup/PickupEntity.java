@@ -23,20 +23,22 @@ public class PickupEntity {
     private String phone;
     private String transportType;
     private String loadAssistance;
+    private String token; // Nuovo campo token
 
     // Costruttore vuoto
     public PickupEntity() {
     }
 
-    // Costruttore completo
+    // Costruttore completo aggiornato con token
     public PickupEntity(LocalDate pickupDate, LocalTime pickupTime, String fullName,
-            String phone, String transportType, String loadAssistance) {
+            String phone, String transportType, String loadAssistance, String token) {
         this.pickupDate = pickupDate;
         this.pickupTime = pickupTime;
         this.fullName = fullName;
         this.phone = phone;
         this.transportType = transportType;
         this.loadAssistance = loadAssistance;
+        this.token = token;
     }
 
     // Getters e Setters
@@ -94,5 +96,13 @@ public class PickupEntity {
 
     public void setLoadAssistance(String loadAssistance) {
         this.loadAssistance = loadAssistance;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

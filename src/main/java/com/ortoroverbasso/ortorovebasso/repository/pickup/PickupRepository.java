@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.repository;
+package com.ortoroverbasso.ortorovebasso.repository.pickup;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

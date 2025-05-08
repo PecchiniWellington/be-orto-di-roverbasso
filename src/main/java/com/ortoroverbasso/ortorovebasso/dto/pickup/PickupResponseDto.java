@@ -9,6 +9,7 @@ public class PickupResponseDto {
     private String phone;
     private String transportType;
     private String loadAssistance;
+    private String token;
 
     // Costruttore vuoto
     public PickupResponseDto() {
@@ -16,7 +17,7 @@ public class PickupResponseDto {
 
     // Costruttore completo
     public PickupResponseDto(Long id, String pickupDate, String pickupTime, String fullName,
-            String phone, String transportType, String loadAssistance) {
+            String phone, String transportType, String loadAssistance, String token) {
         this.id = id;
         this.pickupDate = pickupDate;
         this.pickupTime = pickupTime;
@@ -24,6 +25,7 @@ public class PickupResponseDto {
         this.phone = phone;
         this.transportType = transportType;
         this.loadAssistance = loadAssistance;
+        this.token = token;
     }
 
     // Getters e Setters
@@ -82,4 +84,13 @@ public class PickupResponseDto {
     public void setLoadAssistance(String loadAssistance) {
         this.loadAssistance = loadAssistance;
     }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
 }

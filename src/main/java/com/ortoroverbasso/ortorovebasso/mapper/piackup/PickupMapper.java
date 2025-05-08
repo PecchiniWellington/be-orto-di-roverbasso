@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.mapper;
+package com.ortoroverbasso.ortorovebasso.mapper.piackup;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -32,6 +32,7 @@ public class PickupMapper {
         entity.setPhone(dto.getPhone());
         entity.setTransportType(dto.getTransportType());
         entity.setLoadAssistance(dto.getLoadAssistance());
+        entity.setToken(dto.getToken());
 
         return entity;
     }
@@ -58,6 +59,7 @@ public class PickupMapper {
         dto.setPhone(entity.getPhone());
         dto.setTransportType(entity.getTransportType());
         dto.setLoadAssistance(entity.getLoadAssistance());
+        dto.setToken(entity.getToken());
 
         return dto;
     }
@@ -90,6 +92,10 @@ public class PickupMapper {
 
         if (dto.getLoadAssistance() != null) {
             entity.setLoadAssistance(dto.getLoadAssistance());
+        }
+
+        if (dto.getToken() != null) {
+            entity.setToken(dto.getToken());
         }
     }
 }

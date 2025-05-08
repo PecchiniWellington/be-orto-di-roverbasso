@@ -8,6 +8,7 @@ public class PickupRequestDto {
     private String phone;
     private String transportType;
     private String loadAssistance;
+    private String token; // Nuovo campo token
 
     // Costruttore vuoto
     public PickupRequestDto() {
@@ -15,7 +16,7 @@ public class PickupRequestDto {
 
     // Costruttore completo
     public PickupRequestDto(String pickupDate, String pickupTime, String fullName,
-            String phone, String transportType, String loadAssistance) {
+            String phone, String transportType, String loadAssistance, String token) {
         this.pickupDate = pickupDate;
         this.pickupTime = pickupTime;
         this.fullName = fullName;
@@ -72,4 +73,13 @@ public class PickupRequestDto {
     public void setLoadAssistance(String loadAssistance) {
         this.loadAssistance = loadAssistance;
     }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
 }
