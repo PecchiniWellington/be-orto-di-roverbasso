@@ -154,17 +154,29 @@ public class CartController {
     }
 
     private String getCartTokenFromRequest(HttpServletRequest request) {
+        // 1. Prova a leggerlo dall'Authorization header
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7); // Rimuove "Bearer "
+        }
+
+        // 2. Prova dalla query string
         String cartToken = request.getParameter("cartToken");
-        if (cartToken == null) {
-            Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if ("cartToken".equals(cookie.getName())) {
-                        return cookie.getValue();
-                    }
+        if (cartToken != null) {
+            return cartToken;
+        }
+
+        // 3. Prova dai cookie
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("cartToken".equals(cookie.getName())) {
+                    return cookie.getValue();
                 }
             }
         }
-        return cartToken;
+
+        return null;
     }
+
 }

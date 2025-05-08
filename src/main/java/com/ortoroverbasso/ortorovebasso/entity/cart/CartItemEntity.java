@@ -1,7 +1,10 @@
 package com.ortoroverbasso.ortorovebasso.entity.cart;
 
+import java.time.LocalDateTime;
+
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,6 +27,9 @@ public class CartItemEntity {
     private ProductEntity product;
 
     private int quantity;
+
+    @Column(name = "added_at")
+    private LocalDateTime addedAt;
 
     // Getters e setters
     public Long getId() {
@@ -57,4 +63,13 @@ public class CartItemEntity {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+
+    public LocalDateTime getAddedAt() {
+        return addedAt;
+    }
+
+    public void setAddedAt(LocalDateTime addedAt) {
+        this.addedAt = addedAt;
+    }
+
 }

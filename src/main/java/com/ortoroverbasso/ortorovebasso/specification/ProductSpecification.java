@@ -6,10 +6,12 @@ import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFilterRequestDto;
+import com.ortoroverbasso.ortorovebasso.entity.category.CategoryEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
@@ -25,12 +27,7 @@ public class ProductSpecification {
             }
 
             // 🔍 Filtra per stringa di ricerca nel nome
-            /*
-             * if (filter.getSearch() != null && !filter.getSearch().isBlank()) {
-             * predicates.add(cb.like(cb.lower(root.get("reference")), "%" +
-             * filter.getSearch().toLowerCase() + "%"));
-             * }
-             */
+
             if (filter.getSearch() != null && !filter.getSearch().isBlank()) {
                 var infoJoin = root.join("productInformation"); // join con l'entità collegata
                 predicates.add(cb.like(cb.lower(infoJoin.get("name")), "%" + filter.getSearch().toLowerCase() + "%"));
@@ -56,6 +53,23 @@ public class ProductSpecification {
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    public static Specification<ProductEntity> hasCategory(CategoryEntity category) {
+        return (root, query, cb) -> cb.equal(root.get("category"), category);
+    }
+
+    public static Specification<ProductEntity> isActive() {
+        return (root, query, cb) -> cb.equal(root.get("active"), 1);
+    }
+
+    public static Specification<ProductEntity> fetchProductImages() {
+        return (root, query, cb) -> {
+            // Questo è importante per evitare duplicati e problemi di fetch multiplo
+            root.fetch("productImages", JoinType.LEFT);
+            query.distinct(true); // Altrimenti potresti avere prodotti duplicati
+            return null;
         };
     }
 }

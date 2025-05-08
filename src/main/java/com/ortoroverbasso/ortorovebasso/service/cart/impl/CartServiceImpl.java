@@ -1,6 +1,8 @@
 package com.ortoroverbasso.ortorovebasso.service.cart.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -80,8 +82,10 @@ public class CartServiceImpl implements ICartService {
     }
 
     private CartResponseDto getCartInternal(CartEntity cart) {
-        // Mappa i CartItemEntity in CartItemDto
+        // Ordina gli item per data di aggiunta
         List<CartItemDto> cartItems = cart.getItems().stream()
+                .sorted(Comparator.comparing(CartItemEntity::getAddedAt,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
                 .map(this::createCartItemDto)
                 .collect(Collectors.toList());
 
@@ -92,13 +96,9 @@ public class CartServiceImpl implements ICartService {
         cartResponseDto.setCartToken(cart.getCartToken());
         cartResponseDto.setItems(cartItems);
 
-        System.out.println("Cart ID: " + cart.getId());
-        System.out.println("Cart Token: " + cart.getCartToken());
-
         int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
         double totalPrice = cartItems.stream()
                 .mapToDouble(item -> {
-
                     try {
                         return item.getPrice() * item.getQuantity();
                     } catch (NumberFormatException e) {
@@ -106,9 +106,6 @@ public class CartServiceImpl implements ICartService {
                     }
                 })
                 .sum();
-
-        System.out.println("Total Quantity: " + totalQuantity);
-        System.out.println("Total Price: " + totalPrice);
 
         cartResponseDto.setTotalQuantity(totalQuantity);
         cartResponseDto.setTotalPrice(String.format("%.2f", totalPrice));
@@ -137,6 +134,7 @@ public class CartServiceImpl implements ICartService {
         cartRepository.save(cart);
 
         List<CartItemDto> cartItems = cart.getItems().stream()
+                .sorted(Comparator.comparing(CartItemEntity::getAddedAt)) // 👈 Ordina per ordine di aggiunta
                 .map(this::createCartItemDto)
                 .collect(Collectors.toList());
 
@@ -149,7 +147,8 @@ public class CartServiceImpl implements ICartService {
 
         int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
         double totalPrice = cartItems.stream()
-                .mapToDouble(item -> item.getPrice() * item.getQuantity()).sum();
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
 
         cartResponseDto.setTotalQuantity(totalQuantity);
         cartResponseDto.setTotalPrice(String.format("%.2f", totalPrice));
@@ -174,6 +173,7 @@ public class CartServiceImpl implements ICartService {
             newCartItem.setCart(cart);
             newCartItem.setProduct(product);
             newCartItem.setQuantity(cartRequestDto.getQuantity());
+            newCartItem.setAddedAt(LocalDateTime.now()); // 👈 aggiunto campo timestamp
             cart.getItems().add(newCartItem);
             cartItemRepository.save(newCartItem);
         }
@@ -181,6 +181,10 @@ public class CartServiceImpl implements ICartService {
         cartRepository.save(cart);
 
         List<CartItemDto> cartItems = cart.getItems().stream()
+                .sorted(Comparator.comparing(
+                        CartItemEntity::getAddedAt,
+                        Comparator.nullsLast(Comparator.naturalOrder()) // 👈 ordina in base ad addedAt
+                ))
                 .map(this::createCartItemDto)
                 .collect(Collectors.toList());
 
@@ -193,7 +197,8 @@ public class CartServiceImpl implements ICartService {
 
         int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
         double totalPrice = cartItems.stream()
-                .mapToDouble(item -> item.getPrice() * item.getQuantity()).sum();
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
 
         cartResponseDto.setTotalQuantity(totalQuantity);
         cartResponseDto.setTotalPrice(String.format("%.2f", totalPrice));
