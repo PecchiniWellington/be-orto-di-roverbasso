@@ -1,23 +1,34 @@
 package com.ortoroverbasso.ortorovebasso.dto.pickup;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 public class PickupResponseDto {
 
     private Long id;
-    private String pickupDate;
-    private String pickupTime;
+    private LocalDate pickupDate;
+    private LocalTime pickupTime;
     private String fullName;
     private String phone;
     private String transportType;
     private String loadAssistance;
     private String token;
+    private Long orderId; // Add this field
 
     // Costruttore vuoto
     public PickupResponseDto() {
     }
 
     // Costruttore completo
-    public PickupResponseDto(Long id, String pickupDate, String pickupTime, String fullName,
-            String phone, String transportType, String loadAssistance, String token) {
+    public PickupResponseDto(
+            Long id,
+            LocalDate pickupDate,
+            LocalTime pickupTime,
+            String fullName,
+            String phone,
+            String transportType,
+            String loadAssistance,
+            String token) {
         this.id = id;
         this.pickupDate = pickupDate;
         this.pickupTime = pickupTime;
@@ -37,19 +48,19 @@ public class PickupResponseDto {
         this.id = id;
     }
 
-    public String getPickupDate() {
+    public LocalDate getPickupDate() {
         return pickupDate;
     }
 
-    public void setPickupDate(String pickupDate) {
+    public void setPickupDate(LocalDate pickupDate) {
         this.pickupDate = pickupDate;
     }
 
-    public String getPickupTime() {
+    public LocalTime getPickupTime() {
         return pickupTime;
     }
 
-    public void setPickupTime(String pickupTime) {
+    public void setPickupTime(LocalTime pickupTime) {
         this.pickupTime = pickupTime;
     }
 
@@ -91,6 +102,14 @@ public class PickupResponseDto {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
 
 }

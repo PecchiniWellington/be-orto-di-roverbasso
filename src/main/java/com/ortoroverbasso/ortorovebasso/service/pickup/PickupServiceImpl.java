@@ -3,39 +3,76 @@ package com.ortoroverbasso.ortorovebasso.service.pickup;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ortoroverbasso.ortorovebasso.dto.cart.CartItemDto;
+import com.ortoroverbasso.ortorovebasso.dto.cart.CartResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.order_custom.OrderCustomRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.order_custom.OrderCustomResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.pickup.PickupRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.pickup.PickupResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.pickup.PickupEntity;
-import com.ortoroverbasso.ortorovebasso.mapper.piackup.PickupMapper;
+import com.ortoroverbasso.ortorovebasso.mapper.pickup.PickupMapper;
 import com.ortoroverbasso.ortorovebasso.repository.pickup.PickupRepository;
+import com.ortoroverbasso.ortorovebasso.service.cart.ICartService;
+import com.ortoroverbasso.ortorovebasso.service.ordercustom.IOrderCustomService;
 
 @Service
 public class PickupServiceImpl implements IPickupService {
 
-    private final PickupRepository pickupRepository;
-    private final PickupMapper pickupMapper;
+    private static final Logger logger = LoggerFactory.getLogger(PickupServiceImpl.class);
 
     @Autowired
-    public PickupServiceImpl(PickupRepository pickupRepository, PickupMapper pickupMapper) {
-        this.pickupRepository = pickupRepository;
-        this.pickupMapper = pickupMapper;
-    }
+    private PickupRepository pickupRepository;
+
+    @Autowired
+    private IOrderCustomService orderService;
+
+    @Autowired
+    private ICartService cartService;
 
     @Override
     public PickupResponseDto createPickup(PickupRequestDto pickupRequestDto) {
-        PickupEntity pickupEntity = pickupMapper.toEntity(pickupRequestDto);
+        logger.info("Creating pickup with token: {} and cartToken: {}",
+                pickupRequestDto.getToken(), pickupRequestDto.getCartToken());
+
+        if (pickupRequestDto.getToken() == null && pickupRequestDto.getCartToken() != null) {
+            pickupRequestDto.setToken(pickupRequestDto.getCartToken());
+        }
+
+        PickupEntity pickupEntity = PickupMapper.toEntity(pickupRequestDto);
         PickupEntity savedEntity = pickupRepository.save(pickupEntity);
-        return pickupMapper.toDto(savedEntity);
+
+        CartResponseDto cartResponse = cartService.getCart(pickupRequestDto.getToken());
+
+        OrderCustomRequestDto orderRequest = new OrderCustomRequestDto();
+        List<Long> productIds = cartResponse.getItems()
+                .stream()
+                .map(CartItemDto::getProductId)
+                .collect(Collectors.toList());
+
+        orderRequest.setProductIds(productIds);
+        orderRequest.setPickupOrder(savedEntity); // ← ora usi l'entità già salvata
+
+        OrderCustomResponseDto orderResponse = orderService.createOrderCustom(orderRequest);
+
+        savedEntity.setOrderId(orderResponse.getId());
+        savedEntity = pickupRepository.save(savedEntity);
+
+        PickupResponseDto response = PickupMapper.toDto(savedEntity);
+        response.setOrderId(orderResponse.getId());
+
+        return response;
     }
 
     @Override
     public List<PickupResponseDto> getAllPickups() {
         List<PickupEntity> entities = pickupRepository.findAll();
         return entities.stream()
-                .map(pickupMapper::toDto)
+                .map(PickupMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -43,7 +80,7 @@ public class PickupServiceImpl implements IPickupService {
     public PickupResponseDto getPickupById(Long id) {
         PickupEntity entity = pickupRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prenotazione con ID " + id + " non trovata"));
-        return pickupMapper.toDto(entity);
+        return PickupMapper.toDto(entity);
     }
 
     @Override
@@ -51,10 +88,10 @@ public class PickupServiceImpl implements IPickupService {
         PickupEntity existingEntity = pickupRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prenotazione con ID " + id + " non trovata"));
 
-        pickupMapper.updateEntityFromDto(pickupRequestDto, existingEntity);
+        PickupMapper.updateEntityFromDto(pickupRequestDto, existingEntity);
         PickupEntity updatedEntity = pickupRepository.save(existingEntity);
 
-        return pickupMapper.toDto(updatedEntity);
+        return PickupMapper.toDto(updatedEntity);
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.ortoroverbasso.ortorovebasso.mapper.product;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_features.ProductFeaturesResponseDto;
@@ -16,6 +18,7 @@ import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_information.ProductInformationMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_why_choose.ProductWhyChooseMapper;
 
+@Component
 public class ProductMapper {
 
         public static ProductEntity toEntity(ProductRequestDto dto) {

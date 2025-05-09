@@ -51,6 +51,7 @@ public class CartServiceImpl implements ICartService {
                 item.getProduct().getRetailPrice());
     }
 
+    @Override
     public String createCart() {
         CartEntity cart = new CartEntity();
         cart.setCartToken(UUID.randomUUID().toString());
@@ -296,6 +297,7 @@ public class CartServiceImpl implements ICartService {
 
     @Override
     public CartResponseDto getCart(String cartToken) {
+        System.out.println("Getting cart with token: " + cartToken);
         CartEntity cart = cartRepository.findByCartToken(cartToken)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 

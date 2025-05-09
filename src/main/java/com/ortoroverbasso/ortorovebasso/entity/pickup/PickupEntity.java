@@ -3,6 +3,7 @@ package com.ortoroverbasso.ortorovebasso.entity.pickup;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,7 +24,11 @@ public class PickupEntity {
     private String phone;
     private String transportType;
     private String loadAssistance;
+
+    @Column(name = "token")
     private String token; // Nuovo campo token
+
+    private Long orderId;
 
     // Costruttore vuoto
     public PickupEntity() {
@@ -104,5 +109,13 @@ public class PickupEntity {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
 }

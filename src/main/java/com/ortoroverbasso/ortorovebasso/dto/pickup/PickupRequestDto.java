@@ -1,44 +1,60 @@
 package com.ortoroverbasso.ortorovebasso.dto.pickup;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class PickupRequestDto {
 
-    private String pickupDate;
-    private String pickupTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate pickupDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    private LocalTime pickupTime;
     private String fullName;
     private String phone;
     private String transportType;
     private String loadAssistance;
-    private String token; // Nuovo campo token
+    private String token;
+    private String cartToken;
 
     // Costruttore vuoto
     public PickupRequestDto() {
     }
 
     // Costruttore completo
-    public PickupRequestDto(String pickupDate, String pickupTime, String fullName,
-            String phone, String transportType, String loadAssistance, String token) {
+    public PickupRequestDto(
+            LocalDate pickupDate,
+            LocalTime pickupTime,
+            String fullName,
+            String phone,
+            String transportType,
+            String loadAssistance,
+            String token) {
         this.pickupDate = pickupDate;
         this.pickupTime = pickupTime;
         this.fullName = fullName;
         this.phone = phone;
         this.transportType = transportType;
         this.loadAssistance = loadAssistance;
+        this.token = token;
     }
 
     // Getters e Setters
-    public String getPickupDate() {
+    public LocalDate getPickupDate() {
         return pickupDate;
     }
 
-    public void setPickupDate(String pickupDate) {
+    public void setPickupDate(LocalDate pickupDate) {
         this.pickupDate = pickupDate;
     }
 
-    public String getPickupTime() {
+    public LocalTime getPickupTime() {
         return pickupTime;
     }
 
-    public void setPickupTime(String pickupTime) {
+    public void setPickupTime(LocalTime pickupTime) {
         this.pickupTime = pickupTime;
     }
 
@@ -80,6 +96,14 @@ public class PickupRequestDto {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getCartToken() {
+        return cartToken;
+    }
+
+    public void setCartToken(String cartToken) {
+        this.cartToken = cartToken;
     }
 
 }
