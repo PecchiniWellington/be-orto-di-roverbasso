@@ -3,6 +3,8 @@ package com.ortoroverbasso.ortorovebasso.dto.user;
 import java.util.List;
 import java.util.Map;
 
+import com.ortoroverbasso.ortorovebasso.entity.user.Role;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class UserRequestDto {
@@ -19,8 +21,8 @@ public class UserRequestDto {
     @Schema(description = "Password of the user.")
     private String password;
 
-    @Schema(description = "Role of the user.")
-    private String role;
+    @Schema(description = "Role of the user (ADMIN, USER, CONTRIBUTOR).")
+    private Role role;
 
     @Schema(description = "Authentication token of the user.")
     private String token;
@@ -146,7 +148,7 @@ public class UserRequestDto {
             String name,
             String email,
             String password,
-            String role,
+            Role role,
             String token,
             String tokenExpirationDate,
             String createdAt,
@@ -263,11 +265,11 @@ public class UserRequestDto {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

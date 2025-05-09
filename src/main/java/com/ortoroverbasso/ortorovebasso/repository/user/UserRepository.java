@@ -11,4 +11,6 @@ import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Optional<UserEntity> findByEmail(String email);
 
+    boolean existsByEmail(String email);
+
 }

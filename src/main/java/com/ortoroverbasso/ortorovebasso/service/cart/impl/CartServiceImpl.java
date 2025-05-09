@@ -37,20 +37,6 @@ public class CartServiceImpl implements ICartService {
     @Autowired
     private ProductRepository productRepository;
 
-    private String getProductName(CartItemEntity item) {
-        return item.getProduct().getProductInformation() != null
-                ? item.getProduct().getProductInformation().getName()
-                : "Unknown Product";
-    }
-
-    private CartItemDto createCartItemDto(CartItemEntity item) {
-        return new CartItemDto(
-                item.getProduct().getId(),
-                getProductName(item),
-                item.getQuantity(),
-                item.getProduct().getRetailPrice());
-    }
-
     @Override
     public String createCart() {
         CartEntity cart = new CartEntity();
@@ -59,31 +45,22 @@ public class CartServiceImpl implements ICartService {
         return cart.getCartToken();
     }
 
+    @Override
+    public String createCart(Long userId) {
+        CartEntity cart = new CartEntity();
+        cart.setCartToken(UUID.randomUUID().toString());
+        cart.setUser(new UserEntity(userId));
+        cartRepository.save(cart);
+        return cart.getCartToken();
+    }
+
     private void calculateCartTotals(List<CartItemDto> cartItems) {
-        final int[] totalQuantity = { 0 };
-        final double[] totalPrice = { 0.0 };
-
         cartItems.forEach(item -> {
-            try {
-                Double priceString = item.getPrice();
-                double price = priceString;
-                totalPrice[0] += price * item.getQuantity();
-            } catch (NumberFormatException e) {
-                System.out.println("Error parsing price for product " + item.getProductId() + ": " + item.getPrice());
-            }
-
-            totalQuantity[0] += item.getQuantity();
-        });
-
-        System.out.println("Total Quantity: " + totalQuantity[0]);
-        System.out.println("Total Price: " + totalPrice[0]);
-
-        cartItems.forEach(item -> {
+            // no-op here; previously used for debugging
         });
     }
 
     private CartResponseDto getCartInternal(CartEntity cart) {
-        // Ordina gli item per data di aggiunta
         List<CartItemDto> cartItems = cart.getItems().stream()
                 .sorted(Comparator.comparing(CartItemEntity::getAddedAt,
                         Comparator.nullsLast(Comparator.naturalOrder())))
@@ -97,26 +74,28 @@ public class CartServiceImpl implements ICartService {
         cartResponseDto.setCartToken(cart.getCartToken());
         cartResponseDto.setItems(cartItems);
 
-        // Add OrderCustomId if there are any orders
         if (cart.getOrders() != null && !cart.getOrders().isEmpty()) {
             cartResponseDto.setOrderCustomId(cart.getOrders().get(0).getId());
         }
 
         int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
         double totalPrice = cartItems.stream()
-                .mapToDouble(item -> {
-                    try {
-                        return item.getPrice() * item.getQuantity();
-                    } catch (NumberFormatException e) {
-                        return 0.0;
-                    }
-                })
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
                 .sum();
 
         cartResponseDto.setTotalQuantity(totalQuantity);
         cartResponseDto.setTotalPrice(String.format("%.2f", totalPrice));
 
         return cartResponseDto;
+    }
+
+    private CartItemDto createCartItemDto(CartItemEntity item) {
+        return new CartItemDto(
+                item.getProduct().getId(),
+                item.getProduct().getProductInformation() != null ? item.getProduct().getProductInformation().getName()
+                        : "Unknown Product",
+                item.getQuantity(),
+                item.getProduct().getRetailPrice());
     }
 
     private void deleteCartItem(CartEntity cart, CartItemEntity cartItem) {
@@ -138,33 +117,7 @@ public class CartServiceImpl implements ICartService {
         }
 
         cartRepository.save(cart);
-
-        List<CartItemDto> cartItems = cart.getItems().stream()
-                .sorted(Comparator.comparing(CartItemEntity::getAddedAt)) // 👈 Ordina per ordine di aggiunta
-                .map(this::createCartItemDto)
-                .collect(Collectors.toList());
-
-        calculateCartTotals(cartItems);
-
-        CartResponseDto cartResponseDto = new CartResponseDto();
-        cartResponseDto.setCartId(cart.getId());
-        cartResponseDto.setCartToken(cart.getCartToken());
-        cartResponseDto.setItems(cartItems);
-
-        // Add OrderCustomId if there are any orders
-        if (cart.getOrders() != null && !cart.getOrders().isEmpty()) {
-            cartResponseDto.setOrderCustomId(cart.getOrders().get(0).getId());
-        }
-
-        int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
-        double totalPrice = cartItems.stream()
-                .mapToDouble(item -> item.getPrice() * item.getQuantity())
-                .sum();
-
-        cartResponseDto.setTotalQuantity(totalQuantity);
-        cartResponseDto.setTotalPrice(String.format("%.2f", totalPrice));
-
-        return cartResponseDto;
+        return getCartInternal(cart);
     }
 
     private CartResponseDto addItemToCartInternal(CartEntity cart, CartRequestDto cartRequestDto) {
@@ -184,74 +137,39 @@ public class CartServiceImpl implements ICartService {
             newCartItem.setCart(cart);
             newCartItem.setProduct(product);
             newCartItem.setQuantity(cartRequestDto.getQuantity());
-            newCartItem.setAddedAt(LocalDateTime.now()); // 👈 aggiunto campo timestamp
+            newCartItem.setAddedAt(LocalDateTime.now());
             cart.getItems().add(newCartItem);
             cartItemRepository.save(newCartItem);
         }
 
         cartRepository.save(cart);
-
-        List<CartItemDto> cartItems = cart.getItems().stream()
-                .sorted(Comparator.comparing(
-                        CartItemEntity::getAddedAt,
-                        Comparator.nullsLast(Comparator.naturalOrder()) // 👈 ordina in base ad addedAt
-                ))
-                .map(this::createCartItemDto)
-                .collect(Collectors.toList());
-
-        calculateCartTotals(cartItems);
-
-        CartResponseDto cartResponseDto = new CartResponseDto();
-        cartResponseDto.setCartId(cart.getId());
-        cartResponseDto.setCartToken(cart.getCartToken());
-        cartResponseDto.setItems(cartItems);
-
-        // Add OrderCustomId if there are any orders
-        if (cart.getOrders() != null && !cart.getOrders().isEmpty()) {
-            cartResponseDto.setOrderCustomId(cart.getOrders().get(0).getId());
-        }
-
-        int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
-        double totalPrice = cartItems.stream()
-                .mapToDouble(item -> item.getPrice() * item.getQuantity())
-                .sum();
-
-        cartResponseDto.setTotalQuantity(totalQuantity);
-        cartResponseDto.setTotalPrice(String.format("%.2f", totalPrice));
-
-        return cartResponseDto;
+        return getCartInternal(cart);
     }
 
     @Transactional
     private CartResponseDto clearCartInternal(CartEntity cart) {
-        System.out.println("Before deletion, cart contains: " + cart.getItems().size() + " items.");
-
         List<CartItemEntity> itemsToRemove = new ArrayList<>(cart.getItems());
         cart.getItems().clear();
 
         if (!itemsToRemove.isEmpty()) {
             cartItemRepository.deleteAll(itemsToRemove);
-            System.out.println("Items deleted from the database.");
         }
 
         cartRepository.save(cart);
 
-        CartResponseDto cartResponseDto = new CartResponseDto();
-        cartResponseDto.setCartId(cart.getId());
-        cartResponseDto.setCartToken(cart.getCartToken());
-        cartResponseDto.setItems(new ArrayList<>());
-
-        cartResponseDto.setTotalQuantity(0);
-        cartResponseDto.setTotalPrice("0.00");
-
-        return cartResponseDto;
+        CartResponseDto response = new CartResponseDto();
+        response.setCartId(cart.getId());
+        response.setCartToken(cart.getCartToken());
+        response.setItems(new ArrayList<>());
+        response.setTotalQuantity(0);
+        response.setTotalPrice("0.00");
+        return response;
     }
 
     @Override
     public CartResponseDto addItemToCart(String cartToken, CartRequestDto cartRequestDto) {
         CartEntity cart = cartRepository.findByCartToken(cartToken)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
-
         return addItemToCartInternal(cart, cartRequestDto);
     }
 
@@ -259,7 +177,6 @@ public class CartServiceImpl implements ICartService {
     public CartResponseDto addItemToCart(Long userId, CartRequestDto cartRequestDto) {
         CartEntity cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User cart not found"));
-
         return addItemToCartInternal(cart, cartRequestDto);
     }
 
@@ -267,7 +184,6 @@ public class CartServiceImpl implements ICartService {
     public CartResponseDto removeItemFromCart(Long userId, Long productId, int quantity) {
         CartEntity cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User cart not found"));
-
         return removeItemFromCartInternal(cart, productId, quantity);
     }
 
@@ -275,7 +191,6 @@ public class CartServiceImpl implements ICartService {
     public CartResponseDto removeItemFromCart(String cartToken, Long productId, int quantity) {
         CartEntity cart = cartRepository.findByCartToken(cartToken)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
-
         return removeItemFromCartInternal(cart, productId, quantity);
     }
 
@@ -283,7 +198,6 @@ public class CartServiceImpl implements ICartService {
     public CartResponseDto clearCart(Long userId) {
         CartEntity cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User cart not found"));
-
         return clearCartInternal(cart);
     }
 
@@ -291,7 +205,6 @@ public class CartServiceImpl implements ICartService {
     public CartResponseDto clearCart(String cartToken) {
         CartEntity cart = cartRepository.findByCartToken(cartToken)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
-
         return clearCartInternal(cart);
     }
 
@@ -312,17 +225,19 @@ public class CartServiceImpl implements ICartService {
 
     @Override
     public CartResponseDto getCart(String cartToken) {
-        System.out.println("Getting cart with token: " + cartToken);
         CartEntity cart = cartRepository.findByCartToken(cartToken)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
-
         return getCartInternal(cart);
     }
 
     @Override
     public CartResponseDto getCart(Long userId) {
-        CartEntity cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("User cart not found"));
+        CartEntity cart = cartRepository.findByUserId(userId).orElseGet(() -> {
+            CartEntity newCart = new CartEntity();
+            newCart.setUser(new UserEntity(userId));
+            newCart.setCartToken(UUID.randomUUID().toString());
+            return cartRepository.save(newCart);
+        });
 
         return getCartInternal(cart);
     }
@@ -337,7 +252,6 @@ public class CartServiceImpl implements ICartService {
     public CartResponseDto getCartById(Long cartId) {
         CartEntity cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Cart not found with id: " + cartId));
-
         return getCartInternal(cart);
     }
 }

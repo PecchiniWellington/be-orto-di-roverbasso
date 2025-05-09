@@ -1,46 +1,59 @@
 package com.ortoroverbasso.ortorovebasso.utils;
 
+import java.util.Base64;
 import java.util.Date;
 
+import javax.crypto.SecretKey;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
 
-    private String secretKey = "yourSecretKey"; // Set a strong secret key
+    @Value("${app.jwt-secret}")
+    private String secretKeyBase64; // Deve essere base64 encoded
 
-    // Method to generate a JWT token
+    private SecretKey getSigningKey() {
+        byte[] decodedKey = Base64.getDecoder().decode(secretKeyBase64);
+        return Keys.hmacShaKeyFor(decodedKey);
+    }
+
+    // Metodo per generare il token JWT
     public String generateToken(Long userId) {
         return Jwts.builder()
-                .setSubject(String.valueOf(userId)) // Set the userId as the subject (converted to String)
+                .setSubject(String.valueOf(userId))
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours expiration
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 ore
+                .signWith(getSigningKey(), SignatureAlgorithm.HS384)
                 .compact();
     }
 
-    // Method to extract userId from JWT token
+    // Estrai userId dal token
     public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(secretKey)
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
-        return Long.valueOf(claims.getSubject()); // Convert the subject to Long
+        return claims.get("userId", Long.class);
     }
 
-    // Validate the JWT token
+    // Valida il token JWT
     public boolean validateToken(String token) {
         try {
-            Jwts.parser()
-                    .setSigningKey(secretKey)
-                    .parseClaimsJws(token); // If token is valid, no exception will be thrown
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            return false; // Invalid token
+            return false;
         }
     }
 }

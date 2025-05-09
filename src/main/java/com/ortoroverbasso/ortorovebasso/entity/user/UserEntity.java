@@ -1,6 +1,8 @@
 package com.ortoroverbasso.ortorovebasso.entity.user;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,6 +19,9 @@ public class UserEntity {
     private String email;
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER; // Default role
+
     // Costruttore vuoto
     public UserEntity() {
     }
@@ -27,7 +32,7 @@ public class UserEntity {
         this.password = password != null ? password : "defaultPassword"; // Default password
     }
 
-    // Costruttore con solo ID (aggiungi questo costruttore)
+    // Costruttore con solo ID
     public UserEntity(Long id) {
         this.id = id;
     }
@@ -63,5 +68,13 @@ public class UserEntity {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

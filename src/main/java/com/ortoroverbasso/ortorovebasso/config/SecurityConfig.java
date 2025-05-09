@@ -1,11 +1,17 @@
 package com.ortoroverbasso.ortorovebasso.config;
 
-import org.springframework.boot.web.server.ErrorPage;
-import org.springframework.boot.web.server.ErrorPageRegistrar;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,63 +21,76 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.ortoroverbasso.ortorovebasso.security.JwtAuthenticationEntryPoint;
+import com.ortoroverbasso.ortorovebasso.security.JwtAuthenticationFilter;
+
 @Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
+  private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+  private final JwtAuthenticationFilter authenticationFilter;
+
+  private static final String[] WHITE_LIST_URLS = {
+      "/api/auth/**",
+      "/v2/api-docs",
+      "/v3/api-docs",
+      "/v3/api-docs/**",
+      "/swagger-resources",
+      "/swagger-resources/**",
+      "/swagger-ui/**",
+      "/swagger-ui.html"
+  };
+
+  public SecurityConfig(JwtAuthenticationEntryPoint authenticationEntryPoint,
+      JwtAuthenticationFilter authenticationFilter) {
+    this.authenticationEntryPoint = authenticationEntryPoint;
+    this.authenticationFilter = authenticationFilter;
+  }
+
   @Bean
-  public PasswordEncoder passwordEncoder() {
+  public static PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/api/**"))
-        .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless per le API
-        .authorizeHttpRequests(requests -> requests
-            .requestMatchers("/").permitAll() // Rendi disponibile la home
-            .requestMatchers("/api/**").permitAll() // Consenti accesso alle API senza login
-            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger
-            .requestMatchers("/admin").hasRole("ADMIN") // Solo per admin
-            .requestMatchers("/dashboard").hasRole("ADMIN") // Solo per admin
-            .requestMatchers("/cart").authenticated() // Proteggi la rotta del carrello
-            .requestMatchers("/cart/merge").authenticated() // Merge carrelli per utenti autenticati
-        )
-        .formLogin(login -> login.disable()) // Disabilita il login tradizionale
-        .logout(logout -> logout.disable()) // Disabilita il logout tradizionale
-        .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class); // Aggiungi il filtro di
-                                                                                              // autenticazione
-
-    return http.build();
-  }
-
-  // Crea un filtro per la gestione dell'autenticazione con token o sessione
-  @Bean
-  public AuthenticationFilter authenticationFilter() {
-    return new AuthenticationFilter();
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    return configuration.getAuthenticationManager();
   }
 
   @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration corsConfiguration = new CorsConfiguration();
-    corsConfiguration.addAllowedOrigin("http://localhost:3000"); // Consenti solo localhost:3000
-    corsConfiguration.addAllowedMethod("*"); // Permetti tutti i metodi HTTP
-    corsConfiguration.addAllowedHeader("*"); // Permetti tutti gli header
-    corsConfiguration.setAllowCredentials(true); // Consenti credenziali (cookie, auth headers, etc.)
+  CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(List.of("*")); // Allow all origins
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
+    configuration.setAllowCredentials(false);
+    configuration.setMaxAge(3600L);
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", corsConfiguration); // Applica la configurazione a tutte le route
+    source.registerCorsConfiguration("/**", configuration);
     return source;
   }
 
   @Bean
-  public ErrorPageRegistrar errorPageRegistrar() {
-    return (registry) -> {
-      registry.addErrorPages(
-          new ErrorPage(HttpStatus.FORBIDDEN, "/403"),
-          new ErrorPage(HttpStatus.NOT_FOUND, "/404"));
-    };
+  SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(AbstractHttpConfigurer::disable)
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(authorize -> authorize
+            .requestMatchers(WHITE_LIST_URLS).permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/users/all").hasAnyRole("ADMIN")
+            .requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("USER", "ADMIN", "CONTRIBUTOR")
+            .requestMatchers(HttpMethod.POST, "/api/users/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+            .anyRequest().authenticated());
+
+    http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+    return http.build();
   }
 }

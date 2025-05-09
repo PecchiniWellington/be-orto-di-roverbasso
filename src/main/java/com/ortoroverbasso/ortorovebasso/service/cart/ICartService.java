@@ -29,4 +29,6 @@ public interface ICartService {
 
     CartResponseDto getCartById(Long cartId);
 
+    String createCart(Long userId);
+
 }
