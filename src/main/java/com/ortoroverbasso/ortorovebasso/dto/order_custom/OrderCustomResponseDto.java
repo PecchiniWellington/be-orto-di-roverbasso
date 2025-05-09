@@ -3,16 +3,19 @@ package com.ortoroverbasso.ortorovebasso.dto.order_custom;
 import java.util.List;
 
 import com.ortoroverbasso.ortorovebasso.dto.pickup.PickupResponseDto;
-import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 
 public class OrderCustomResponseDto {
+
     private Long id;
     private String token;
-    private List<ProductResponseDto> products;
-    private PickupResponseDto pickupOrder;
     private String statusOrder;
+    private Long cartId;
 
-    // Getters and Setters
+    private PickupResponseDto pickupOrder;
+
+    private List<OrderCustomProductDto> products;
+
+    // Getters e Setters
     public Long getId() {
         return id;
     }
@@ -29,12 +32,12 @@ public class OrderCustomResponseDto {
         this.token = token;
     }
 
-    public List<ProductResponseDto> getProducts() {
-        return products;
+    public String getStatusOrder() {
+        return statusOrder;
     }
 
-    public void setProducts(List<ProductResponseDto> products) {
-        this.products = products;
+    public void setStatusOrder(String statusOrder) {
+        this.statusOrder = statusOrder;
     }
 
     public PickupResponseDto getPickupOrder() {
@@ -45,11 +48,19 @@ public class OrderCustomResponseDto {
         this.pickupOrder = pickupOrder;
     }
 
-    public String getStatusOrder() {
-        return statusOrder;
+    public List<OrderCustomProductDto> getProducts() {
+        return products;
     }
 
-    public void setStatusOrder(String statusOrder) {
-        this.statusOrder = statusOrder;
+    public void setProducts(List<OrderCustomProductDto> products) {
+        this.products = products;
+    }
+
+    public Long getCartId() {
+        return cartId;
+    }
+
+    public void setCartId(Long cartId) {
+        this.cartId = cartId;
     }
 }

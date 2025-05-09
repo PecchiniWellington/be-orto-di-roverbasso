@@ -2,9 +2,10 @@ package com.ortoroverbasso.ortorovebasso.entity.order_custom;
 
 import java.util.List;
 
+import com.ortoroverbasso.ortorovebasso.entity.cart.CartEntity;
 import com.ortoroverbasso.ortorovebasso.entity.pickup.PickupEntity;
-import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,9 +13,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -28,18 +28,20 @@ public class OrderCustomEntity {
     @Column(unique = true)
     private String token;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "order_custom_products", joinColumns = @JoinColumn(name = "order_custom_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
-    private List<ProductEntity> products;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderCustomProductEntity> orderProducts;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "pickup_id")
     private PickupEntity pickupOrder;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cart_id")
+    private CartEntity cart;
+
     @Column(name = "status_order")
     private String statusOrder;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -56,12 +58,12 @@ public class OrderCustomEntity {
         this.token = token;
     }
 
-    public List<ProductEntity> getProducts() {
-        return products;
+    public List<OrderCustomProductEntity> getOrderProducts() {
+        return orderProducts;
     }
 
-    public void setProducts(List<ProductEntity> products) {
-        this.products = products;
+    public void setOrderProducts(List<OrderCustomProductEntity> orderProducts) {
+        this.orderProducts = orderProducts;
     }
 
     public PickupEntity getPickupOrder() {
@@ -79,4 +81,13 @@ public class OrderCustomEntity {
     public void setStatusOrder(String statusOrder) {
         this.statusOrder = statusOrder;
     }
+
+    public CartEntity getCart() {
+        return cart;
+    }
+
+    public void setCart(CartEntity cart) {
+        this.cart = cart;
+    }
+
 }

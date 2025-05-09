@@ -38,11 +38,11 @@ public class OrderEntity {
     private ShippingAddressEntity shippingAddress;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id_test")
     private List<ProductEntity> products;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id_test")
     private List<CarriersEntity> carriers;
 
     // Getters and Setters

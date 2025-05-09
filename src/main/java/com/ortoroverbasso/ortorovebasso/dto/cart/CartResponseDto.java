@@ -6,6 +6,7 @@ public class CartResponseDto {
     private Long cartId;
     private String cartToken;
     private List<CartItemDto> items;
+    private Long orderCustomId; // Add this field to store the OrderCustom ID
 
     // Aggiungi questi campi
     private int totalQuantity;
@@ -50,5 +51,14 @@ public class CartResponseDto {
 
     public void setTotalPrice(String totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    // Getter and setter for orderCustomId
+    public Long getOrderCustomId() {
+        return orderCustomId;
+    }
+
+    public void setOrderCustomId(Long orderCustomId) {
+        this.orderCustomId = orderCustomId;
     }
 }

@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.repository;
+package com.ortoroverbasso.ortorovebasso.repository.order_custom;
 
 import java.util.List;
 import java.util.Optional;

@@ -18,6 +18,7 @@ public class CorsConfig {
         corsConfig.addAllowedOrigin("http://localhost:3000"); // Permetti richieste da localhost:3000
         corsConfig.addAllowedMethod("GET"); // Permetti GET
         corsConfig.addAllowedMethod("POST"); // Permetti POST
+        corsConfig.addAllowedMethod("PUT"); // Permetti POST
         corsConfig.addAllowedMethod("DELETE"); // Permetti POST
         corsConfig.addAllowedMethod("OPTIONS"); // Permetti OPTIONS (per la richiesta preflight)
         corsConfig.addAllowedHeader("*"); // Permetti tutte le intestazioni

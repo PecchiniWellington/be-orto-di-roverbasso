@@ -3,6 +3,7 @@ package com.ortoroverbasso.ortorovebasso.entity.cart;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ortoroverbasso.ortorovebasso.entity.order_custom.OrderCustomEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 
 import jakarta.persistence.CascadeType;
@@ -28,6 +29,9 @@ public class CartEntity {
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
     private List<CartItemEntity> items = new ArrayList<>();
+
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderCustomEntity> orders = new ArrayList<>();
 
     // Getters e setters
 
@@ -61,5 +65,13 @@ public class CartEntity {
 
     public void setItems(List<CartItemEntity> items) {
         this.items = items;
+    }
+
+    public List<OrderCustomEntity> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<OrderCustomEntity> orders) {
+        this.orders = orders;
     }
 }

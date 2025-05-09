@@ -57,7 +57,7 @@ public class ProductEntity {
     private List<ProductAttributesEntity> productAttributes;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    private List<ProductLargeQuantityPriceEntity> priceLargeQuantities;
+    private List<ProductLargeQuantityPriceEntity> priceLargeQuantities = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manufacturer_id", referencedColumnName = "id")

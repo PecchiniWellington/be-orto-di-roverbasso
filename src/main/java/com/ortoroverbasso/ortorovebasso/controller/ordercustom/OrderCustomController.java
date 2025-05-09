@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ortoroverbasso.ortorovebasso.dto.order_custom.OrderCustomRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.order_custom.OrderCustomResponseDto;
-import com.ortoroverbasso.ortorovebasso.service.ordercustom.IOrderCustomService;
+import com.ortoroverbasso.ortorovebasso.dto.order_custom.OrderCustomUpdateDto;
+import com.ortoroverbasso.ortorovebasso.service.order_custom.IOrderCustomService;
 
 @RestController
 @RequestMapping("/api/order-custom")
@@ -47,8 +48,8 @@ public class OrderCustomController {
     @PutMapping("/{id}")
     public ResponseEntity<OrderCustomResponseDto> updateOrderCustom(
             @PathVariable Long id,
-            @RequestBody OrderCustomRequestDto orderCustomRequestDto) {
-        OrderCustomResponseDto updatedOrderCustom = orderCustomService.updateOrderCustom(id, orderCustomRequestDto);
+            @RequestBody OrderCustomUpdateDto orderCustomUpdateDto) {
+        OrderCustomResponseDto updatedOrderCustom = orderCustomService.updateOrderCustom(id, orderCustomUpdateDto);
         return new ResponseEntity<>(updatedOrderCustom, HttpStatus.OK);
     }
 

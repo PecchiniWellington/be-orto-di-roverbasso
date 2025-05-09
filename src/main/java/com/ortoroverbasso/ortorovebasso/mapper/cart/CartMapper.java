@@ -1,17 +1,18 @@
 package com.ortoroverbasso.ortorovebasso.mapper.cart;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.ortoroverbasso.ortorovebasso.dto.cart.CartItemDto;
 import com.ortoroverbasso.ortorovebasso.dto.cart.CartResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.cart.CartEntity;
 import com.ortoroverbasso.ortorovebasso.entity.cart.CartItemEntity;
+import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
 public class CartMapper {
 
-    // Mappa una lista di CartItemEntity in una lista di CartItemDto
+    // Mappa da CartItemEntity a CartItemDto
     public static CartItemDto mapToCartItemDto(CartItemEntity cartItemEntity) {
-        // Ora otteniamo il nome dal ProductInformationEntity
         String productName = cartItemEntity.getProduct().getProductInformation().getName();
         Double productPrice = cartItemEntity.getProduct().getRetailPrice();
 
@@ -27,9 +28,38 @@ public class CartMapper {
         CartResponseDto cartResponseDto = new CartResponseDto();
         cartResponseDto.setCartId(cartEntity.getId());
         cartResponseDto.setCartToken(cartEntity.getCartToken());
+
         cartResponseDto.setItems(cartEntity.getItems().stream()
                 .map(CartMapper::mapToCartItemDto)
                 .collect(Collectors.toList()));
+
+        // Add the OrderCustom ID if there are any orders
+        if (cartEntity.getOrders() != null && !cartEntity.getOrders().isEmpty()) {
+            // Get the ID of the first order (you might want to change this logic depending
+            // on requirements)
+            cartResponseDto.setOrderCustomId(cartEntity.getOrders().get(0).getId());
+        }
+
         return cartResponseDto;
+    }
+
+    // ✅ NUOVO: Mappa da CartItemDto a CartItemEntity
+    public static CartItemEntity mapToCartItemEntity(CartItemDto dto) {
+        CartItemEntity entity = new CartItemEntity();
+        entity.setQuantity(dto.getQuantity());
+
+        // Costruiamo un ProductEntity con solo l'ID (verrà gestito come riferimento)
+        ProductEntity product = new ProductEntity();
+        product.setId(dto.getProductId());
+        entity.setProduct(product);
+
+        return entity;
+    }
+
+    // ✅ Opzionale: lista di CartItemDto ➝ CartItemEntity
+    public static List<CartItemEntity> mapToCartItemEntityList(List<CartItemDto> dtos) {
+        return dtos.stream()
+                .map(CartMapper::mapToCartItemEntity)
+                .collect(Collectors.toList());
     }
 }

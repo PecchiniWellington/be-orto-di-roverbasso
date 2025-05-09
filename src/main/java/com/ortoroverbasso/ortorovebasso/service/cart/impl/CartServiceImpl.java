@@ -97,6 +97,11 @@ public class CartServiceImpl implements ICartService {
         cartResponseDto.setCartToken(cart.getCartToken());
         cartResponseDto.setItems(cartItems);
 
+        // Add OrderCustomId if there are any orders
+        if (cart.getOrders() != null && !cart.getOrders().isEmpty()) {
+            cartResponseDto.setOrderCustomId(cart.getOrders().get(0).getId());
+        }
+
         int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
         double totalPrice = cartItems.stream()
                 .mapToDouble(item -> {
@@ -145,6 +150,11 @@ public class CartServiceImpl implements ICartService {
         cartResponseDto.setCartId(cart.getId());
         cartResponseDto.setCartToken(cart.getCartToken());
         cartResponseDto.setItems(cartItems);
+
+        // Add OrderCustomId if there are any orders
+        if (cart.getOrders() != null && !cart.getOrders().isEmpty()) {
+            cartResponseDto.setOrderCustomId(cart.getOrders().get(0).getId());
+        }
 
         int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
         double totalPrice = cartItems.stream()
@@ -196,6 +206,11 @@ public class CartServiceImpl implements ICartService {
         cartResponseDto.setCartToken(cart.getCartToken());
         cartResponseDto.setItems(cartItems);
 
+        // Add OrderCustomId if there are any orders
+        if (cart.getOrders() != null && !cart.getOrders().isEmpty()) {
+            cartResponseDto.setOrderCustomId(cart.getOrders().get(0).getId());
+        }
+
         int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
         double totalPrice = cartItems.stream()
                 .mapToDouble(item -> item.getPrice() * item.getQuantity())
@@ -226,8 +241,8 @@ public class CartServiceImpl implements ICartService {
         cartResponseDto.setCartToken(cart.getCartToken());
         cartResponseDto.setItems(new ArrayList<>());
 
-        calculateCartTotals(cartResponseDto.getItems());
-        System.out.println("Cart totals calculated (should be 0).");
+        cartResponseDto.setTotalQuantity(0);
+        cartResponseDto.setTotalPrice("0.00");
 
         return cartResponseDto;
     }
@@ -308,6 +323,20 @@ public class CartServiceImpl implements ICartService {
     public CartResponseDto getCart(Long userId) {
         CartEntity cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User cart not found"));
+
+        return getCartInternal(cart);
+    }
+
+    @Override
+    public CartEntity getCartEntityByToken(String cartToken) {
+        return cartRepository.findByCartToken(cartToken)
+                .orElseThrow(() -> new RuntimeException("Cart not found with token: " + cartToken));
+    }
+
+    @Override
+    public CartResponseDto getCartById(Long cartId) {
+        CartEntity cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Cart not found with id: " + cartId));
 
         return getCartInternal(cart);
     }

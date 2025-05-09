@@ -15,6 +15,8 @@ public class OrderCustomRequestDto {
     @NotNull(message = "Pickup information is required")
     private PickupEntity pickupOrder; // ← usa direttamente l'entità salvata
 
+    private String statusOrder;
+
     // Getter e Setter
     public List<Long> getProductIds() {
         return productIds;
@@ -30,5 +32,13 @@ public class OrderCustomRequestDto {
 
     public void setPickupOrder(PickupEntity pickupOrder) {
         this.pickupOrder = pickupOrder;
+    }
+
+    public String getStatusOrder() {
+        return statusOrder;
+    }
+
+    public void setStatusOrder(String statusOrder) {
+        this.statusOrder = statusOrder;
     }
 }

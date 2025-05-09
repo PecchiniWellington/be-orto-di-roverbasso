@@ -2,6 +2,7 @@ package com.ortoroverbasso.ortorovebasso.service.cart;
 
 import com.ortoroverbasso.ortorovebasso.dto.cart.CartRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.cart.CartResponseDto;
+import com.ortoroverbasso.ortorovebasso.entity.cart.CartEntity;
 
 public interface ICartService {
     CartResponseDto getCart(String cartToken);
@@ -23,4 +24,9 @@ public interface ICartService {
     CartResponseDto clearCart(String cartToken);
 
     String createCart();
+
+    CartEntity getCartEntityByToken(String cartToken);
+
+    CartResponseDto getCartById(Long cartId);
+
 }
