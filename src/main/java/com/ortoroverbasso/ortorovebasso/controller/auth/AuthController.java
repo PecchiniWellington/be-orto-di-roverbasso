@@ -1,6 +1,7 @@
 package com.ortoroverbasso.ortorovebasso.controller.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +27,8 @@ import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
 import com.ortoroverbasso.ortorovebasso.utils.EnvironmentConfig;
 import com.ortoroverbasso.ortorovebasso.utils.JwtCookieUtil;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
@@ -57,34 +60,67 @@ public class AuthController {
     private IUserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<JwtAuthResponseDto> login(@RequestBody LoginRequestDto loginDto,
+    public ResponseEntity<JwtAuthResponseDto> login(
+            @RequestBody LoginRequestDto loginDto,
+            HttpServletRequest request,
             HttpServletResponse response) {
-        System.out.println("[LOGIN DEBUG] Tentativo di login per: " + loginDto.getEmail());
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
+        try {
+            System.out.println("[LOGIN DEBUG] Tentativo di login per: " + loginDto.getEmail());
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        UserEntity user = userRepository.findByEmail(loginDto.getEmail()).orElseThrow();
-        System.out.println("[LOGIN DEBUG] Utente trovato: id=" + user.getId() + ", email=" + user.getEmail());
+            UserEntity user = userRepository.findByEmail(loginDto.getEmail()).orElseThrow();
+            System.out.println("[LOGIN DEBUG] Utente trovato: id=" + user.getId() + ", email=" + user.getEmail());
 
-        String token = tokenProvider.generateToken(user);
-        System.out.println("[LOGIN DEBUG] Token generato: " + token);
+            String token = tokenProvider.generateToken(user);
+            System.out.println("[LOGIN DEBUG] Token generato: " + token);
 
-        // ✅ Associa carrello se non esiste
-        cartService.getCart(user.getId());
+            // 🔍 Recupera cartToken dal cookie
+            String cartToken = null;
+            if (request.getCookies() != null) {
+                for (Cookie cookie : request.getCookies()) {
+                    if ("cartToken".equals(cookie.getName())) {
+                        cartToken = cookie.getValue();
+                        break;
+                    }
+                }
+            }
 
-        // 🔐 Imposta JWT nel cookie
-        ResponseCookie cookie = jwtCookieUtil.createJwtCookie(token, environmentConfig.isProduction());
-        response.addHeader("Set-Cookie", cookie.toString());
+            // 🧠 Merge se esiste carrello guest
+            if (cartToken != null && !cartToken.isBlank()) {
+                try {
+                    if (cartService.existsByCartToken(cartToken)) {
+                        System.out.println("[LOGIN DEBUG] Merging guest cart: " + cartToken);
+                        cartService.mergeCarts(user.getId(), cartToken);
+                    }
+                } catch (Exception e) {
+                    System.out.println("[LOGIN DEBUG] Errore nel merge: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
 
-        return ResponseEntity.ok(new JwtAuthResponseDto(
-                token,
-                user.getId(),
-                user.getEmail(),
-                user.getRole().name(),
-                tokenProvider.getExpirationDateFromToken(token)));
+            // ✅ Associa carrello all'utente se non esiste già
+            cartService.getCart(user.getId());
+
+            // 🔐 Imposta JWT nel cookie
+            ResponseCookie cookie = jwtCookieUtil.createJwtCookie(token, environmentConfig.isProduction());
+            response.addHeader("Set-Cookie", cookie.toString());
+
+            return ResponseEntity.ok(new JwtAuthResponseDto(
+                    token,
+                    user.getId(),
+                    user.getEmail(),
+                    user.getRole().name(),
+                    tokenProvider.getExpirationDateFromToken(token)));
+
+        } catch (Exception e) {
+            System.out.println("[LOGIN DEBUG] Errore generale: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @PostMapping("/register")
@@ -122,6 +158,14 @@ public class AuthController {
 
     @GetMapping("/check")
     public ResponseEntity<?> checkCurrentUser() {
-        return userService.getCurrentAuthenticatedUser();
+        try {
+            System.out.println("[AUTH CHECK] Checking current authenticated user");
+            return userService.getCurrentAuthenticatedUser();
+        } catch (Exception e) {
+            System.out.println("[AUTH CHECK] Error in check endpoint: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error checking authentication: " + e.getMessage());
+        }
     }
 }

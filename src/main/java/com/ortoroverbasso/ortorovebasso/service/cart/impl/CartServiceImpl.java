@@ -17,7 +17,6 @@ import com.ortoroverbasso.ortorovebasso.entity.cart.CartEntity;
 import com.ortoroverbasso.ortorovebasso.entity.cart.CartItemEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
-import com.ortoroverbasso.ortorovebasso.mapper.cart.CartMapper;
 import com.ortoroverbasso.ortorovebasso.repository.cart.CartItemRepository;
 import com.ortoroverbasso.ortorovebasso.repository.cart.CartRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
@@ -216,18 +215,115 @@ public class CartServiceImpl implements ICartService {
     }
 
     @Override
+    @Transactional
     public CartResponseDto mergeCarts(Long userId, String cartToken) {
-        CartEntity cart = cartRepository.findByCartToken(cartToken)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+        try {
+            // Log the merge attempt
+            System.out.println("[CART SERVICE] Attempting to merge guest cart token: " + cartToken +
+                    " with user cart for user ID: " + userId);
 
-        CartEntity userCart = cartRepository.findByUserId(userId).orElseGet(() -> {
-            CartEntity newCart = new CartEntity();
-            newCart.setUser(new UserEntity(userId));
-            return newCart;
-        });
+            // Validate inputs
+            if (userId == null || cartToken == null || cartToken.isEmpty()) {
+                System.out.println("[CART SERVICE] Invalid input: userId=" + userId + ", cartToken=" + cartToken);
+                throw new IllegalArgumentException("Both userId and cartToken must be provided");
+            }
 
-        cartRepository.save(userCart);
-        return CartMapper.mapToCartResponseDto(userCart);
+            // Check if guest cart exists
+            boolean cartExists = cartRepository.existsByCartToken(cartToken);
+            if (!cartExists) {
+                System.out.println("[CART SERVICE] Guest cart not found with token: " + cartToken);
+                return getCart(userId); // Return the user's cart instead
+            }
+
+            // Get the guest cart
+            CartEntity guestCart = cartRepository.findByCartToken(cartToken)
+                    .orElseThrow(() -> new RuntimeException("Guest cart not found with token: " + cartToken));
+
+            // Check if the guest cart has any items
+            if (guestCart.getItems() == null || guestCart.getItems().isEmpty()) {
+                System.out.println("[CART SERVICE] Guest cart is empty, no merge needed");
+                // Delete the empty guest cart
+                cartRepository.delete(guestCart);
+
+                // Return the user's cart (creating if needed)
+                return getCart(userId);
+            }
+
+            // Get or create the user's cart
+            CartEntity userCart = cartRepository.findByUserId(userId)
+                    .orElseGet(() -> {
+                        System.out.println("[CART SERVICE] Creating new cart for user: " + userId);
+                        CartEntity newCart = new CartEntity();
+                        newCart.setUser(new UserEntity(userId));
+                        newCart.setCartToken(UUID.randomUUID().toString());
+                        return cartRepository.save(newCart);
+                    });
+
+            // Log some info about the carts
+            System.out.println("[CART SERVICE] Found guest cart with " + guestCart.getItems().size() +
+                    " items and user cart with " + (userCart.getItems() != null ? userCart.getItems().size() : 0)
+                    + " items");
+
+            int itemsMerged = 0;
+            int quantityAdded = 0;
+
+            // Ensure user cart has initialized items collection
+            if (userCart.getItems() == null) {
+                userCart.setItems(new ArrayList<>());
+            }
+
+            // Merge: add or update items from guest cart to user cart
+            for (CartItemEntity guestItem : new ArrayList<>(guestCart.getItems())) {
+                // Check if product exists in user cart
+                CartItemEntity existingItem = userCart.getItems().stream()
+                        .filter(item -> item.getProduct().getId().equals(guestItem.getProduct().getId()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (existingItem != null) {
+                    // Product exists - add quantities
+                    int oldQuantity = existingItem.getQuantity();
+                    existingItem.setQuantity(existingItem.getQuantity() + guestItem.getQuantity());
+                    quantityAdded += guestItem.getQuantity();
+
+                    System.out.println("[CART SERVICE] Merged product: " + guestItem.getProduct().getId() +
+                            " - Quantity increased from " + oldQuantity + " to " + existingItem.getQuantity());
+
+                    cartItemRepository.save(existingItem);
+                } else {
+                    // Product doesn't exist - create new cart item
+                    CartItemEntity newItem = new CartItemEntity();
+                    newItem.setCart(userCart);
+                    newItem.setProduct(guestItem.getProduct());
+                    newItem.setQuantity(guestItem.getQuantity());
+                    newItem.setAddedAt(LocalDateTime.now()); // Set current time instead of keeping guest timestamp
+
+                    cartItemRepository.save(newItem);
+                    userCart.getItems().add(newItem);
+
+                    itemsMerged++;
+                    quantityAdded += guestItem.getQuantity();
+
+                    System.out.println("[CART SERVICE] Added new product to user cart: " +
+                            guestItem.getProduct().getId() + " with quantity " + guestItem.getQuantity());
+                }
+            }
+
+            // Save the updated user cart
+            cartRepository.save(userCart);
+
+            // Delete the guest cart after successful merge
+            cartRepository.delete(guestCart);
+
+            System.out.println("[CART SERVICE] Cart merge completed - Added " + itemsMerged +
+                    " new products and " + quantityAdded + " total items to user cart");
+
+            return getCartInternal(userCart);
+        } catch (Exception e) {
+            System.out.println("[CART SERVICE] Error merging carts: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error merging carts: " + e.getMessage(), e);
+        }
     }
 
     @Override

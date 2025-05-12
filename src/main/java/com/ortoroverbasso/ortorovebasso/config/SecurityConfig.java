@@ -47,7 +47,8 @@ public class SecurityConfig {
       "/api/cart/create",
       "/api/cart/*",
       "/api/categories/**",
-      "/api/products/**"
+      "/api/products/**",
+      "/api/auth/check",
   };
 
   public SecurityConfig(

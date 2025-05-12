@@ -1,5 +1,7 @@
 package com.ortoroverbasso.ortorovebasso.controller.cart;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -62,9 +64,27 @@ public class CartController {
 
     @PostMapping("/user/merge")
     @PreAuthorize("hasAnyRole('USER','ADMIN','CONTRIBUTOR')")
-    public ResponseEntity<CartResponseDto> mergeCarts(HttpServletRequest request) {
+    public ResponseEntity<CartResponseDto> mergeCarts(HttpServletRequest request,
+            @RequestBody(required = false) Map<String, String> payload) {
         Long userId = getAuthenticatedUserId();
+
+        // First try to get from request attribute (set by filter)
         String cartToken = (String) request.getAttribute("cartToken");
+
+        // If not found in attribute, try to get from request body
+        if (cartToken == null && payload != null && payload.containsKey("cartToken")) {
+            cartToken = payload.get("cartToken");
+        }
+
+        // If still null, try request parameter
+        if (cartToken == null) {
+            cartToken = request.getParameter("cartToken");
+        }
+
+        if (cartToken == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
         return ResponseEntity.ok(cartService.mergeCarts(userId, cartToken));
     }
 
