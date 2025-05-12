@@ -54,6 +54,14 @@ public class CartServiceImpl implements ICartService {
         return cart.getCartToken();
     }
 
+    @Override
+    public String createCart(String cartToken) {
+        CartEntity cart = new CartEntity();
+        cart.setCartToken(cartToken);
+        cartRepository.save(cart);
+        return cart.getCartToken();
+    }
+
     private void calculateCartTotals(List<CartItemDto> cartItems) {
         cartItems.forEach(item -> {
             // no-op here; previously used for debugging
@@ -253,5 +261,12 @@ public class CartServiceImpl implements ICartService {
         CartEntity cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Cart not found with id: " + cartId));
         return getCartInternal(cart);
+    }
+
+    @Override
+    public void createCartWithToken(String cartToken) {
+        CartEntity cart = new CartEntity();
+        cart.setCartToken(cartToken);
+        cartRepository.save(cart);
     }
 }

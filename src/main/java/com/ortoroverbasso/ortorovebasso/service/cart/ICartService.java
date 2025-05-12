@@ -31,4 +31,8 @@ public interface ICartService {
 
     String createCart(Long userId);
 
+    String createCart(String cartToken);
+
+    void createCartWithToken(String cartToken);
+
 }

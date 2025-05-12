@@ -5,8 +5,12 @@ import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
+import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -15,6 +19,9 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
+
+    @Autowired
+    UserRepository userRepository;
 
     @Value("${app.jwt-secret}")
     private String secretKeyBase64; // Deve essere base64 encoded
@@ -55,5 +62,11 @@ public class JwtUtil {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public Long getUserIdFromEmail(String email) {
+        // Se hai un UserRepository, puoi fare:
+        UserEntity user = userRepository.findByEmail(email).orElseThrow();
+        return user.getId();
     }
 }

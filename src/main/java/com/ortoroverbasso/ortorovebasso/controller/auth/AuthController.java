@@ -1,6 +1,7 @@
 package com.ortoroverbasso.ortorovebasso.controller.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +21,10 @@ import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
 import com.ortoroverbasso.ortorovebasso.security.JwtTokenProvider;
 import com.ortoroverbasso.ortorovebasso.service.cart.ICartService;
+import com.ortoroverbasso.ortorovebasso.utils.EnvironmentConfig;
+import com.ortoroverbasso.ortorovebasso.utils.JwtCookieUtil;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -40,8 +45,15 @@ public class AuthController {
     @Autowired
     private ICartService cartService;
 
+    @Autowired
+    private EnvironmentConfig environmentConfig;
+
+    @Autowired
+    private JwtCookieUtil jwtCookieUtil;
+
     @PostMapping("/login")
-    public ResponseEntity<JwtAuthResponseDto> login(@RequestBody LoginRequestDto loginDto) {
+    public ResponseEntity<JwtAuthResponseDto> login(@RequestBody LoginRequestDto loginDto,
+            HttpServletResponse response) {
         System.out.println("[LOGIN DEBUG] Tentativo di login per: " + loginDto.getEmail());
 
         Authentication authentication = authenticationManager.authenticate(
@@ -57,6 +69,10 @@ public class AuthController {
 
         // ✅ Associa carrello se non esiste
         cartService.getCart(user.getId());
+
+        // 🔐 Imposta JWT nel cookie
+        ResponseCookie cookie = jwtCookieUtil.createJwtCookie(token, environmentConfig.isProduction());
+        response.addHeader("Set-Cookie", cookie.toString());
 
         return ResponseEntity.ok(new JwtAuthResponseDto(
                 token,
@@ -88,9 +104,14 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<?> logout(HttpServletResponse response) {
         SecurityContextHolder.clearContext();
         System.out.println("[LOGOUT DEBUG] Logout effettuato, contesto di sicurezza pulito.");
+
+        // 🔐 Rimuovi cookie JWT
+        ResponseCookie cookie = jwtCookieUtil.clearJwtCookie(environmentConfig.isProduction());
+        response.addHeader("Set-Cookie", cookie.toString());
+
         return ResponseEntity.ok("Logout effettuato con successo");
     }
 }

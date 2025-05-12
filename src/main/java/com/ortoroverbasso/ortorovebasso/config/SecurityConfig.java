@@ -40,7 +40,12 @@ public class SecurityConfig {
       "/swagger-resources",
       "/swagger-resources/**",
       "/swagger-ui/**",
-      "/swagger-ui.html"
+      "/swagger-ui.html",
+      "/api/cart/guest/**",
+      "/api/cart/create",
+      "/api/cart/*",
+      "/api/categories/**",
+      "/api/products/**",
   };
 
   public SecurityConfig(JwtAuthenticationEntryPoint authenticationEntryPoint,
@@ -62,10 +67,10 @@ public class SecurityConfig {
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(List.of("*")); // Allow all origins
+    configuration.setAllowedOrigins(List.of("http://localhost:3000"));
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
-    configuration.setAllowCredentials(false);
+    configuration.setAllowCredentials(true);
     configuration.setMaxAge(3600L);
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -74,7 +79,7 @@ public class SecurityConfig {
   }
 
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
         .csrf(AbstractHttpConfigurer::disable)
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
