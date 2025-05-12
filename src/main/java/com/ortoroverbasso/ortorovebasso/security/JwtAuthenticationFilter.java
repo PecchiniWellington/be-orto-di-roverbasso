@@ -40,10 +40,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private ICartService cartService;
 
     private final List<String> skipCartTokenPaths = List.of(
-        "/api/products",
-        "/api/categories",
-        "/api/auth"
-    );
+            "/api/products",
+            "/api/categories",
+            "/api/auth");
 
     private final Object cartLock = new Object();
 
@@ -54,11 +53,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
         try {
-            // Autenticazione JWT
+            // ==== Autenticazione JWT ====
             String token = getJwtFromRequest(request);
 
             if (StringUtils.hasText(token) && tokenProvider.validateToken(token)) {
@@ -72,17 +71,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 
-            // Evita gestione cartToken per richieste irrilevanti
+            // ==== Salta gestione cartToken se non necessario ====
             String path = request.getRequestURI();
             if (skipCartTokenPaths.stream().anyMatch(path::startsWith)) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            // Gestione cartToken
-            String cartToken = null;
-            Cookie[] cookies = request.getCookies();
+            // ==== Gestione cartToken ====
+            boolean isAuthenticatedUser = SecurityContextHolder.getContext().getAuthentication() != null
+                    && SecurityContextHolder.getContext().getAuthentication().isAuthenticated()
+                    && !(SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof String);
 
+            String cartToken = null;
+
+            // Recupera cartToken dal cookie
+            Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if ("cartToken".equals(cookie.getName())) {
@@ -92,26 +96,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
 
-            if (cartToken == null || cartToken.isBlank()) {
-                cartToken = UUID.randomUUID().toString();
-                Cookie cookie = new Cookie("cartToken", cartToken);
-                cookie.setHttpOnly(true);
-                cookie.setSecure(environmentConfig.isProduction());
-                cookie.setPath("/");
-                cookie.setMaxAge(60 * 60 * 24 * 7);
-                response.addCookie(cookie);
-                logger.info("[JWT FILTER] Nuovo cartToken creato e settato: {}", cartToken);
+            // Utente autenticato → se non ha cartToken, non ne crea uno
+            if (isAuthenticatedUser && (cartToken == null || cartToken.isBlank())) {
+                logger.info("[JWT FILTER] Utente autenticato senza cartToken: nessun nuovo token generato.");
+                filterChain.doFilter(request, response);
+                return;
             }
 
-            request.setAttribute("cartToken", cartToken);
+            // Guest → crea nuovo cartToken se mancante
+            if (!isAuthenticatedUser && (cartToken == null || cartToken.isBlank())) {
+                cartToken = UUID.randomUUID().toString();
+                Cookie newCartCookie = new Cookie("cartToken", cartToken);
+                newCartCookie.setHttpOnly(true);
+                newCartCookie.setSecure(environmentConfig.isProduction());
+                newCartCookie.setPath("/");
+                newCartCookie.setMaxAge(60 * 60 * 24 * 7); // 7 giorni
+                response.addCookie(newCartCookie);
+                logger.info("[JWT FILTER] Nuovo cartToken creato per guest: {}", cartToken);
+            }
 
-            // ✅ Blocco sincronizzato per evitare creazioni multiple
-            synchronized (cartLock) {
-                if (!cartService.existsByCartToken(cartToken)) {
-                    cartService.createCartWithToken(cartToken);
-                    logger.info("[JWT FILTER] Cart creato per token: {}", cartToken);
-                } else {
-                    logger.info("[JWT FILTER] Cart già esistente per token: {}", cartToken);
+            if (cartToken != null) {
+                request.setAttribute("cartToken", cartToken);
+
+                synchronized (cartLock) {
+                    if (!cartService.existsByCartToken(cartToken)) {
+                        cartService.createCartWithToken(cartToken);
+                        logger.info("[JWT FILTER] Cart creato per token: {}", cartToken);
+                    } else {
+                        logger.info("[JWT FILTER] Cart già esistente per token: {}", cartToken);
+                    }
                 }
             }
 

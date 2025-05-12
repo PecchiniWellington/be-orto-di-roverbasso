@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ortoroverbasso.ortorovebasso.dto.auth.JwtAuthResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.auth.LoginRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.cart.CartResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.entity.user.Role;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
@@ -66,48 +67,50 @@ public class AuthController {
             HttpServletResponse response) {
 
         try {
-            System.out.println("[LOGIN DEBUG] Tentativo di login per: " + loginDto.getEmail());
-
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             UserEntity user = userRepository.findByEmail(loginDto.getEmail()).orElseThrow();
-            System.out.println("[LOGIN DEBUG] Utente trovato: id=" + user.getId() + ", email=" + user.getEmail());
-
             String token = tokenProvider.generateToken(user);
-            System.out.println("[LOGIN DEBUG] Token generato: " + token);
 
-            // 🔍 Recupera cartToken dal cookie
-            String cartToken = null;
+            // Recupera cartToken guest da cookie (se esiste)
+            String guestCartToken = null;
             if (request.getCookies() != null) {
                 for (Cookie cookie : request.getCookies()) {
                     if ("cartToken".equals(cookie.getName())) {
-                        cartToken = cookie.getValue();
+                        guestCartToken = cookie.getValue();
                         break;
                     }
                 }
             }
 
-            // 🧠 Merge se esiste carrello guest
-            if (cartToken != null && !cartToken.isBlank()) {
+            // Prova a fare il merge solo se guest cart esiste
+            if (guestCartToken != null && !guestCartToken.isBlank()) {
                 try {
-                    if (cartService.existsByCartToken(cartToken)) {
-                        System.out.println("[LOGIN DEBUG] Merging guest cart: " + cartToken);
-                        cartService.mergeCarts(user.getId(), cartToken);
+                    if (cartService.existsByCartToken(guestCartToken)) {
+                        cartService.mergeCarts(user.getId(), guestCartToken);
                     }
                 } catch (Exception e) {
-                    System.out.println("[LOGIN DEBUG] Errore nel merge: " + e.getMessage());
-                    e.printStackTrace();
+                    e.printStackTrace(); // logga ma continua
                 }
             }
 
-            // ✅ Associa carrello all'utente se non esiste già
-            cartService.getCart(user.getId());
+            // ✅ Ottieni o crea carrello utente
+            CartResponseDto userCart = cartService.getCart(user.getId());
+            String userCartToken = userCart.getCartToken();
 
-            // 🔐 Imposta JWT nel cookie
-            ResponseCookie cookie = jwtCookieUtil.createJwtCookie(token, environmentConfig.isProduction());
-            response.addHeader("Set-Cookie", cookie.toString());
+            // ✅ Imposta nuovo cartToken (autenticato)
+            Cookie cartCookie = new Cookie("cartToken", userCartToken);
+            cartCookie.setHttpOnly(true);
+            cartCookie.setSecure(environmentConfig.isProduction());
+            cartCookie.setPath("/");
+            cartCookie.setMaxAge(60 * 60 * 24 * 7); // 7 giorni
+            response.addCookie(cartCookie);
+
+            // ✅ Imposta cookie JWT
+            ResponseCookie jwtCookie = jwtCookieUtil.createJwtCookie(token, environmentConfig.isProduction());
+            response.addHeader("Set-Cookie", jwtCookie.toString());
 
             return ResponseEntity.ok(new JwtAuthResponseDto(
                     token,
@@ -117,7 +120,6 @@ public class AuthController {
                     tokenProvider.getExpirationDateFromToken(token)));
 
         } catch (Exception e) {
-            System.out.println("[LOGIN DEBUG] Errore generale: " + e.getMessage());
             e.printStackTrace();
             throw e;
         }
@@ -150,8 +152,18 @@ public class AuthController {
         System.out.println("[LOGOUT DEBUG] Logout effettuato, contesto di sicurezza pulito.");
 
         // 🔐 Rimuovi cookie JWT
-        ResponseCookie cookie = jwtCookieUtil.clearJwtCookie(environmentConfig.isProduction());
-        response.addHeader("Set-Cookie", cookie.toString());
+        ResponseCookie jwtCookie = jwtCookieUtil.clearJwtCookie(environmentConfig.isProduction());
+        response.addHeader("Set-Cookie", jwtCookie.toString());
+
+        // 🔐 Rimuovi cookie cartToken
+        ResponseCookie clearCartTokenCookie = ResponseCookie.from("cartToken", "")
+                .httpOnly(true)
+                .secure(environmentConfig.isProduction())
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+        response.addHeader("Set-Cookie", clearCartTokenCookie.toString());
 
         return ResponseEntity.ok("Logout effettuato con successo");
     }

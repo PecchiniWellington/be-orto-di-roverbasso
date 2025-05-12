@@ -27,4 +27,14 @@ public class JwtCookieUtil {
                 .sameSite("Strict")
                 .build();
     }
+
+    public ResponseCookie clearCartTokenCookie(boolean isSecure) {
+        return ResponseCookie.from("cartToken", "")
+                .httpOnly(true)
+                .secure(isSecure)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+    }
 }
