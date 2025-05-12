@@ -32,8 +32,10 @@ public class SecurityConfig {
   private final JwtAuthenticationEntryPoint authenticationEntryPoint;
   private final JwtAuthenticationFilter authenticationFilter;
 
+  // 🔐 SOLO login e registrazione sono pubblici
   private static final String[] WHITE_LIST_URLS = {
-      "/api/auth/**",
+      "/api/auth/login",
+      "/api/auth/register",
       "/v2/api-docs",
       "/v3/api-docs",
       "/v3/api-docs/**",
@@ -45,10 +47,11 @@ public class SecurityConfig {
       "/api/cart/create",
       "/api/cart/*",
       "/api/categories/**",
-      "/api/products/**",
+      "/api/products/**"
   };
 
-  public SecurityConfig(JwtAuthenticationEntryPoint authenticationEntryPoint,
+  public SecurityConfig(
+      JwtAuthenticationEntryPoint authenticationEntryPoint,
       JwtAuthenticationFilter authenticationFilter) {
     this.authenticationEntryPoint = authenticationEntryPoint;
     this.authenticationFilter = authenticationFilter;

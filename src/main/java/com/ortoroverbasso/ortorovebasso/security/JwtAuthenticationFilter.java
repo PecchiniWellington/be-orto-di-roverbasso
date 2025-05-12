@@ -1,6 +1,7 @@
 package com.ortoroverbasso.ortorovebasso.security;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -38,6 +39,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private ICartService cartService;
 
+    private final List<String> skipCartTokenPaths = List.of(
+        "/api/products",
+        "/api/categories",
+        "/api/auth"
+    );
+
+    private final Object cartLock = new Object();
+
     public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, UserDetailsService userDetailsService) {
         this.tokenProvider = tokenProvider;
         this.userDetailsService = userDetailsService;
@@ -45,8 +54,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
         try {
             // Autenticazione JWT
@@ -63,6 +72,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 
+            // Evita gestione cartToken per richieste irrilevanti
+            String path = request.getRequestURI();
+            if (skipCartTokenPaths.stream().anyMatch(path::startsWith)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             // Gestione cartToken
             String cartToken = null;
             Cookie[] cookies = request.getCookies();
@@ -77,33 +93,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             if (cartToken == null || cartToken.isBlank()) {
-                String newCartToken = UUID.randomUUID().toString();
-
-                // Verifica che non esista già nel DB
-                while (cartService.existsByCartToken(newCartToken)) {
-                    newCartToken = UUID.randomUUID().toString();
-                }
-
-                cartToken = newCartToken;
-
+                cartToken = UUID.randomUUID().toString();
                 Cookie cookie = new Cookie("cartToken", cartToken);
                 cookie.setHttpOnly(true);
-                cookie.setSecure(environmentConfig.isProduction()); // true in prod
+                cookie.setSecure(environmentConfig.isProduction());
                 cookie.setPath("/");
-                cookie.setMaxAge(60 * 60 * 24 * 7); // 7 giorni
+                cookie.setMaxAge(60 * 60 * 24 * 7);
                 response.addCookie(cookie);
-
-                logger.info("[JWT FILTER] Nuovo cartToken generato: " + cartToken);
+                logger.info("[JWT FILTER] Nuovo cartToken creato e settato: {}", cartToken);
             }
 
-            if (!request.isAsyncStarted() && request.getAttribute("cartToken") == null) {
-                request.setAttribute("cartToken", cartToken);
+            request.setAttribute("cartToken", cartToken);
 
-                // ✅ Evita duplicazione se esiste già nel DB
+            // ✅ Blocco sincronizzato per evitare creazioni multiple
+            synchronized (cartLock) {
                 if (!cartService.existsByCartToken(cartToken)) {
                     cartService.createCartWithToken(cartToken);
+                    logger.info("[JWT FILTER] Cart creato per token: {}", cartToken);
                 } else {
-                    logger.info("[JWT FILTER] Cart già esistente per token: " + cartToken);
+                    logger.info("[JWT FILTER] Cart già esistente per token: {}", cartToken);
                 }
             }
 
@@ -120,7 +128,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return bearerToken.substring(7);
         }
 
-        // Fallback: cookie "JWT"
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {

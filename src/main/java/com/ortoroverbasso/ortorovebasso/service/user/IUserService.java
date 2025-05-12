@@ -20,4 +20,6 @@ public interface IUserService {
 
     UserResponseDto getUserByEmail(String email);
 
+    // Add this new method for current authenticated user
+    ResponseEntity<?> getCurrentAuthenticatedUser();
 }

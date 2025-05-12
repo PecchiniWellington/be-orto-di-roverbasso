@@ -4,16 +4,21 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.ortoroverbasso.ortorovebasso.dto.auth.JwtAuthResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 import com.ortoroverbasso.ortorovebasso.exception.UserNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.user.UserMapper;
 import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
+import com.ortoroverbasso.ortorovebasso.security.JwtTokenProvider;
 import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
 
 import jakarta.transaction.Transactional;
@@ -23,6 +28,9 @@ public class UserServiceImpl implements IUserService {
 
     private final UserRepository userRepository;
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
+    @Autowired
+    private JwtTokenProvider tokenProvider;
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -91,4 +99,43 @@ public class UserServiceImpl implements IUserService {
         return UserMapper.toResponseDto(updatedUser);
     }
 
+    @Override
+    public ResponseEntity<?> getCurrentAuthenticatedUser() {
+        logger.info("Retrieving current authenticated user");
+
+        // Get the current authentication from the security context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Check if the user is authenticated (not anonymous)
+        if (authentication != null && authentication.isAuthenticated() &&
+                !(authentication.getPrincipal() instanceof String)) {
+
+            try {
+                // Retrieve the user based on the authentication
+                UserEntity user = userRepository.findByEmail(authentication.getName())
+                        .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+                logger.info("Current authenticated user found: id={}, email={}", user.getId(), user.getEmail());
+
+                // Generate a token (or use the existing one)
+                String token = tokenProvider.generateToken(user);
+
+                // Return user info
+                return ResponseEntity.ok(new JwtAuthResponseDto(
+                        token,
+                        user.getId(),
+                        user.getEmail(),
+                        user.getRole().name(),
+                        tokenProvider.getExpirationDateFromToken(token)));
+            } catch (Exception e) {
+                logger.error("Error retrieving authenticated user: {}", e.getMessage());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Error retrieving authenticated user: " + e.getMessage());
+            }
+        }
+
+        logger.warn("No authenticated user found");
+        // Return unauthorized if not authenticated
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+    }
 }

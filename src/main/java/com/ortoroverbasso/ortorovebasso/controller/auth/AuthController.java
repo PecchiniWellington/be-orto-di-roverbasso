@@ -8,6 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
 import com.ortoroverbasso.ortorovebasso.security.JwtTokenProvider;
 import com.ortoroverbasso.ortorovebasso.service.cart.ICartService;
+import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
 import com.ortoroverbasso.ortorovebasso.utils.EnvironmentConfig;
 import com.ortoroverbasso.ortorovebasso.utils.JwtCookieUtil;
 
@@ -50,6 +52,9 @@ public class AuthController {
 
     @Autowired
     private JwtCookieUtil jwtCookieUtil;
+
+    @Autowired
+    private IUserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponseDto> login(@RequestBody LoginRequestDto loginDto,
@@ -113,5 +118,10 @@ public class AuthController {
         response.addHeader("Set-Cookie", cookie.toString());
 
         return ResponseEntity.ok("Logout effettuato con successo");
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<?> checkCurrentUser() {
+        return userService.getCurrentAuthenticatedUser();
     }
 }
