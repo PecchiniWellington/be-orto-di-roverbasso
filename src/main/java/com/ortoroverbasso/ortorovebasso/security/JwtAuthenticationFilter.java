@@ -45,8 +45,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
         try {
             // Autenticazione JWT
@@ -77,7 +77,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             if (cartToken == null || cartToken.isBlank()) {
-                cartToken = UUID.randomUUID().toString();
+                String newCartToken = UUID.randomUUID().toString();
+
+                // Verifica che non esista già nel DB
+                while (cartService.existsByCartToken(newCartToken)) {
+                    newCartToken = UUID.randomUUID().toString();
+                }
+
+                cartToken = newCartToken;
 
                 Cookie cookie = new Cookie("cartToken", cartToken);
                 cookie.setHttpOnly(true);
@@ -86,12 +93,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 cookie.setMaxAge(60 * 60 * 24 * 7); // 7 giorni
                 response.addCookie(cookie);
 
-                // 👇 CREA SUBITO IL CARRELLO
-                cartService.createCartWithToken(cartToken);
+                logger.info("[JWT FILTER] Nuovo cartToken generato: " + cartToken);
             }
 
-            // Rendi il cartToken disponibile per i controller
-            request.setAttribute("cartToken", cartToken);
+            if (!request.isAsyncStarted() && request.getAttribute("cartToken") == null) {
+                request.setAttribute("cartToken", cartToken);
+
+                // ✅ Evita duplicazione se esiste già nel DB
+                if (!cartService.existsByCartToken(cartToken)) {
+                    cartService.createCartWithToken(cartToken);
+                } else {
+                    logger.info("[JWT FILTER] Cart già esistente per token: " + cartToken);
+                }
+            }
 
         } catch (Exception ex) {
             logger.error("[JWT FILTER] Errore durante l'elaborazione", ex);

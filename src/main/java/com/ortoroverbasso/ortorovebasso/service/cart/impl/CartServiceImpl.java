@@ -64,7 +64,6 @@ public class CartServiceImpl implements ICartService {
 
     private void calculateCartTotals(List<CartItemDto> cartItems) {
         cartItems.forEach(item -> {
-            // no-op here; previously used for debugging
         });
     }
 
@@ -234,7 +233,12 @@ public class CartServiceImpl implements ICartService {
     @Override
     public CartResponseDto getCart(String cartToken) {
         CartEntity cart = cartRepository.findByCartToken(cartToken)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseGet(() -> {
+                    CartEntity newCart = new CartEntity();
+                    newCart.setCartToken(cartToken);
+                    return cartRepository.save(newCart);
+                });
+
         return getCartInternal(cart);
     }
 
@@ -265,8 +269,20 @@ public class CartServiceImpl implements ICartService {
 
     @Override
     public void createCartWithToken(String cartToken) {
+        boolean exists = cartRepository.existsByCartToken(cartToken);
+        if (exists) {
+            System.out.println("[CART SERVICE] Cart esiste già per token: " + cartToken);
+            return;
+        }
+
         CartEntity cart = new CartEntity();
         cart.setCartToken(cartToken);
         cartRepository.save(cart);
+        System.out.println("[CART SERVICE] Cart creato con token: " + cartToken);
+    }
+
+    @Override
+    public boolean existsByCartToken(String cartToken) {
+        return cartRepository.existsByCartToken(cartToken);
     }
 }

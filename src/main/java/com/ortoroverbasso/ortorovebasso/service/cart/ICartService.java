@@ -35,4 +35,6 @@ public interface ICartService {
 
     void createCartWithToken(String cartToken);
 
+    boolean existsByCartToken(String cartToken);
+
 }
