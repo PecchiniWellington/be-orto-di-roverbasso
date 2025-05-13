@@ -10,10 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.ortoroverbasso.ortorovebasso.dto.auth.JwtAuthResponseDto;
-import com.ortoroverbasso.ortorovebasso.dto.images.ImagesDetailDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
@@ -76,9 +74,6 @@ public class UserServiceImpl implements IUserService {
         userEntity.setName(user.getName());
         userEntity.setEmail(user.getEmail());
         userEntity.setPassword(user.getPassword());
-        if (user.getAvatarId() != null) {
-            userEntity.setAvatarId(user.getAvatarId());
-        }
 
         UserEntity updatedUser = userRepository.save(userEntity);
 
@@ -149,80 +144,4 @@ public class UserServiceImpl implements IUserService {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
     }
 
-    @Override
-    @Transactional
-    public ResponseEntity<UserResponseDto> uploadAvatar(Long userId, MultipartFile file) {
-        logger.info("Uploading avatar for user ID: {}", userId);
-
-        // Find the user
-        UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-
-        try {
-            // Upload the image using the existing image service
-            ImagesDetailDto imageDetail = imagesDetailService.uploadImage(file);
-
-            if (imageDetail == null) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(null);
-            }
-
-            // Update the user's avatar ID
-            userEntity.setAvatarId(imageDetail.getId());
-            userRepository.save(userEntity);
-
-            // Return the updated user
-            UserResponseDto responseDto = UserMapper.toResponseDto(userEntity);
-            responseDto.setMessage("Avatar uploaded successfully");
-
-            return ResponseEntity.ok(responseDto);
-        } catch (Exception e) {
-            logger.error("Error uploading avatar: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
-        }
-    }
-
-    @Override
-    @Transactional
-    public ResponseEntity<UserResponseDto> updateAvatar(Long userId, Long imageId) {
-        logger.info("Updating avatar for user ID: {} with image ID: {}", userId, imageId);
-
-        // Find the user
-        UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-
-        // Update the user's avatar ID
-        userEntity.setAvatarId(imageId);
-        userRepository.save(userEntity);
-
-        // Return the updated user
-        UserResponseDto responseDto = UserMapper.toResponseDto(userEntity);
-        responseDto.setMessage("Avatar updated successfully");
-
-        return ResponseEntity.ok(responseDto);
-    }
-
-    @Override
-    @Transactional
-    public ResponseEntity<UserResponseDto> deleteAvatar(Long userId) {
-        logger.info("Deleting avatar for user ID: {}", userId);
-
-        // Find the user
-        UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-
-        // Store the avatar ID for possible deletion from storage
-        Long oldAvatarId = userEntity.getAvatarId();
-
-        // Remove the avatar reference
-        userEntity.setAvatarId(null);
-        userRepository.save(userEntity);
-
-        // Return the updated user
-        UserResponseDto responseDto = UserMapper.toResponseDto(userEntity);
-        responseDto.setMessage("Avatar deleted successfully");
-
-        return ResponseEntity.ok(responseDto);
-    }
 }

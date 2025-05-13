@@ -1,11 +1,22 @@
 package com.ortoroverbasso.ortorovebasso.entity.user;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.ortoroverbasso.ortorovebasso.entity.user.user_address.UserAddressEntity;
+import com.ortoroverbasso.ortorovebasso.entity.user.user_preferences.UserPreferencesEntity;
+import com.ortoroverbasso.ortorovebasso.entity.user.user_profile.UserProfileEntity;
+import com.ortoroverbasso.ortorovebasso.entity.user.user_security.UserSecurityEntity;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -13,32 +24,67 @@ import jakarta.persistence.Table;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
+
     private String name;
+
+    @Column(unique = true)
     private String email;
+
     private String password;
-    private Long avatarId; // Added field to store the image ID of the user's avatar
 
     @Enumerated(EnumType.STRING)
-    private Role role = Role.USER; // Default role
+    private Role role;
 
-    // Costruttore vuoto
+    @Enumerated(EnumType.STRING)
+    private AccountStatus accountStatus;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserProfileEntity profile;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserPreferencesEntity preferences;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserSecurityEntity security;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserAddressEntity> addresses = new ArrayList<>();
+
+    // Constructors
     public UserEntity() {
     }
 
-    // Costruttore con email e password
-    public UserEntity(String email, String password) {
-        this.email = email != null ? email : "defaultEmail@example.com"; // Default email
-        this.password = password != null ? password : "defaultPassword"; // Default password
-    }
-
-    // Costruttore con solo ID
     public UserEntity(Long id) {
         this.id = id;
     }
 
-    // Getter e setter per gli altri campi
+    public UserEntity(
+            Long id,
+            String name,
+            String email,
+            String password,
+            Role role,
+            AccountStatus accountStatus,
+            UserProfileEntity profile,
+            UserPreferencesEntity preferences,
+            UserSecurityEntity security,
+            List<UserAddressEntity> addresses) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.accountStatus = accountStatus;
+        this.profile = profile;
+        this.preferences = preferences;
+        this.security = security;
+        this.addresses = addresses;
+
+    }
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -79,11 +125,43 @@ public class UserEntity {
         this.role = role;
     }
 
-    public Long getAvatarId() {
-        return avatarId;
+    public AccountStatus getAccountStatus() {
+        return accountStatus;
     }
 
-    public void setAvatarId(Long avatarId) {
-        this.avatarId = avatarId;
+    public void setAccountStatus(AccountStatus accountStatus) {
+        this.accountStatus = accountStatus;
+    }
+
+    public UserProfileEntity getProfile() {
+        return profile;
+    }
+
+    public void setProfile(UserProfileEntity profile) {
+        this.profile = profile;
+    }
+
+    public UserPreferencesEntity getPreferences() {
+        return preferences;
+    }
+
+    public void setPreferences(UserPreferencesEntity preferences) {
+        this.preferences = preferences;
+    }
+
+    public UserSecurityEntity getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(UserSecurityEntity security) {
+        this.security = security;
+    }
+
+    public List<UserAddressEntity> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<UserAddressEntity> addresses) {
+        this.addresses = addresses;
     }
 }

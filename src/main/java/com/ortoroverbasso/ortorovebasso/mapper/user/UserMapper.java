@@ -18,6 +18,11 @@ public class UserMapper {
         entity.setName(dto.getName());
         entity.setEmail(dto.getEmail());
         entity.setPassword(dto.getPassword());
+        entity.setRole(dto.getRole());
+        entity.setAccountStatus(dto.getAccountStatus());
+
+        // Handle profile separately with ProfileMapper if needed
+        // Handle other relationships as needed
 
         return entity;
     }
@@ -31,7 +36,22 @@ public class UserMapper {
         response.setId(entity.getId());
         response.setName(entity.getName());
         response.setEmail(entity.getEmail());
-        response.setPassword(entity.getPassword());
+        // Don't include password in response
+        response.setRole(entity.getRole());
+        response.setAccountStatus(entity.getAccountStatus());
+
+        // Map related entities if needed
+        if (entity.getProfile() != null) {
+            response.setProfile(UserProfileMapper.toResponseDto(entity.getProfile()));
+        }
+
+        if (entity.getAddresses() != null && !entity.getAddresses().isEmpty()) {
+            response.setAddresses(UserAddressMapper.toResponseDto(entity.getAddresses()));
+        }
+
+        if (entity.getPreferences() != null) {
+            response.setPreferences(UserPreferencesMapper.toResponseDto(entity.getPreferences()));
+        }
 
         // Add additional mappings as needed
         return response;
