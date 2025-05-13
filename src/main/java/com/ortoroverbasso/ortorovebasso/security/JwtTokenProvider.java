@@ -33,6 +33,17 @@ public class JwtTokenProvider {
     private long jwtExpirationInMs;
 
     /**
+     * Removes the "Bearer " prefix from a token if present
+     */
+    private String cleanToken(String token) {
+        if (token != null && token.startsWith("Bearer ")) {
+            logger.debug("Removing Bearer prefix from token");
+            return token.substring(7);
+        }
+        return token;
+    }
+
+    /**
      * Creates a signing key from the JWT secret
      */
     private SecretKey getSigningKey() {
@@ -78,6 +89,7 @@ public class JwtTokenProvider {
     }
 
     public String getUsernameFromJWT(String token) {
+        token = cleanToken(token);
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -87,10 +99,12 @@ public class JwtTokenProvider {
     }
 
     public String getUserEmailFromToken(String token) {
+        token = cleanToken(token);
         return getUsernameFromJWT(token);
     }
 
     public Long getUserIdFromToken(String token) {
+        token = cleanToken(token);
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -100,6 +114,7 @@ public class JwtTokenProvider {
     }
 
     public String getRoleFromToken(String token) {
+        token = cleanToken(token);
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -109,6 +124,7 @@ public class JwtTokenProvider {
     }
 
     public String getNameFromToken(String token) {
+        token = cleanToken(token);
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -118,27 +134,36 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token) {
+        System.out.println("[JWT DEBUG] Validating token: " + token);
         try {
+            // Clean the token before validation
+            token = cleanToken(token);
+            System.out.println("[JWT DEBUG] Cleaned token for validation: " + token);
+
             Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token);
+            System.out.println("[JWT DEBUG] Token is valid.");
             return true;
         } catch (SignatureException ex) {
-            logger.error("Invalid JWT signature");
+            logger.error("Invalid JWT signature: {}", ex.getMessage());
         } catch (MalformedJwtException ex) {
-            logger.error("Invalid JWT token");
+            logger.error("Invalid JWT token: {}", ex.getMessage());
         } catch (ExpiredJwtException ex) {
-            logger.error("Expired JWT token");
+            logger.error("Expired JWT token: {}", ex.getMessage());
         } catch (UnsupportedJwtException ex) {
-            logger.error("Unsupported JWT token");
+            logger.error("Unsupported JWT token: {}", ex.getMessage());
         } catch (IllegalArgumentException ex) {
-            logger.error("JWT claims string is empty");
+            logger.error("JWT claims string is empty: {}", ex.getMessage());
+        } catch (Exception ex) {
+            logger.error("JWT token error: {}", ex.getMessage());
         }
         return false;
     }
 
     public Claims getAllClaimsFromToken(String token) {
+        token = cleanToken(token);
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -147,6 +172,7 @@ public class JwtTokenProvider {
     }
 
     public Date getExpirationDate(String token) {
+        token = cleanToken(token);
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -156,10 +182,12 @@ public class JwtTokenProvider {
     }
 
     public Date getExpirationDateFromToken(String token) {
+        token = cleanToken(token);
         return getExpirationDate(token);
     }
 
     public boolean isTokenExpired(String token) {
+        token = cleanToken(token);
         Date expiration = getExpirationDate(token);
         return expiration.before(new Date());
     }

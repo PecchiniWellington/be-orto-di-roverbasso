@@ -158,15 +158,15 @@
 		</dependency>
 
 
-
-
-
-		<!-- Dipendenza per Spring Boot Test (per i test di entità) -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
+			<groupId>com.vladmihalcea</groupId>
+			<artifactId>hibernate-types-60</artifactId>
+			<version>2.21.1</version>
 		</dependency>
+
+
+
+
 
 
 		<dependency>

@@ -91,11 +91,23 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(WHITE_LIST_URLS).permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/users/all").hasAnyRole("ADMIN")
+
+            // Gestione route per /api/users/me
+            .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
+
+            // Preferenze personali - chiunque sia autenticato può gestire le proprie
+            .requestMatchers("/api/users/*/preferences/**").authenticated()
+            .requestMatchers("/api/users/*/profile/**").authenticated()
+            .requestMatchers("/api/users/*/addresses/**").authenticated()
+
+            // Tutti gli utenti
+            .requestMatchers(HttpMethod.GET, "/api/users/all").hasRole("ADMIN")
             .requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("USER", "ADMIN", "CONTRIBUTOR")
             .requestMatchers(HttpMethod.POST, "/api/users/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+
+            // Tutto il resto richiede autenticazione
             .anyRequest().authenticated());
 
     http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);

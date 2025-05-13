@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.service.user.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -43,7 +44,6 @@ public class UserServiceImpl implements IUserService {
     @Override
     public List<UserResponseDto> getAllUsers() {
         List<UserEntity> usersEntity = userRepository.findAll();
-
         return usersEntity.stream().map(user -> UserMapper.toResponseDto(user)).toList();
     }
 
@@ -59,11 +59,7 @@ public class UserServiceImpl implements IUserService {
     public ResponseEntity<UserResponseDto> createUser(UserRequestDto userRequest) {
         UserEntity userEntity = UserMapper.toEntity(userRequest);
         userEntity = userRepository.save(userEntity);
-
-        // Crea il DTO di risposta
         UserResponseDto responseDto = UserMapper.toResponseDto(userEntity);
-
-        // Restituisci ResponseEntity con il DTO e status code 201 (CREATED)
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
@@ -76,22 +72,20 @@ public class UserServiceImpl implements IUserService {
         userEntity.setPassword(user.getPassword());
 
         UserEntity updatedUser = userRepository.save(userEntity);
-
         return UserMapper.toResponseDto(updatedUser);
     }
 
     @Override
     @Transactional
     public UserResponseDto deleteUser(Long id) {
-        logger.info("Attempting to delete user with ID: {}", id);
+        System.out.print("Attempting to delete user with ID: {}" + id);
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
         userRepository.delete(userEntity);
 
-        // Crea il DTO e imposta un messaggio
         UserResponseDto responseDto = UserMapper.toResponseDto(userEntity);
-
-        logger.info("User with ID {} and name {} has been deleted.", userEntity.getId(), userEntity.getName());
+        System.out.print("User with ID {}  has been deleted." + userEntity.getId());
+        System.out.print("name {} has been deleted." + userEntity.getName());
         responseDto.setMessage(
                 "User with ID " + userEntity.getId() + " and name " + userEntity.getName() + " has been deleted.");
         return responseDto;
@@ -106,42 +100,85 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ResponseEntity<?> getCurrentAuthenticatedUser() {
-        logger.info("Retrieving current authenticated user");
+        System.out.print("Retrieving current authenticated user from service");
 
-        // Get the current authentication from the security context
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        try {
+            // Get the current authentication from the security context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // Check if the user is authenticated (not anonymous)
-        if (authentication != null && authentication.isAuthenticated() &&
-                !(authentication.getPrincipal() instanceof String)) {
-
-            try {
-                // Retrieve the user based on the authentication
-                UserEntity user = userRepository.findByEmail(authentication.getName())
-                        .orElseThrow(() -> new UserNotFoundException("User not found"));
-
-                logger.info("Current authenticated user found: id={}, email={}", user.getId(), user.getEmail());
-
-                // Generate a token (or use the existing one)
-                String token = tokenProvider.generateToken(user);
-
-                // Return user info
-                return ResponseEntity.ok(new JwtAuthResponseDto(
-                        token,
-                        user.getId(),
-                        user.getEmail(),
-                        user.getRole().name(),
-                        tokenProvider.getExpirationDateFromToken(token)));
-            } catch (Exception e) {
-                logger.error("Error retrieving authenticated user: {}", e.getMessage());
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Error retrieving authenticated user: " + e.getMessage());
+            if (authentication == null) {
+                System.out.print("Authentication is null");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No authentication found");
             }
+
+            System.out.print("Authentication object: {}" + authentication);
+            System.out.print("Authentication name: {}" + authentication.getName());
+            System.out.print("Authentication principal: {}" + authentication.getPrincipal());
+            System.out.print("Authentication authorities: {}" + authentication.getAuthorities());
+
+            // Check for anonymous authentication
+            if (authentication.getPrincipal() instanceof String &&
+                    "anonymousUser".equals(authentication.getPrincipal())) {
+                System.out.print("Received anonymous authentication");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+            }
+
+            // Check if the user is authenticated
+            if (authentication.isAuthenticated()) {
+                try {
+                    String username = authentication.getName();
+                    System.out.print("Looking up user by email: {}" + username);
+
+                    // Verify the username is not null or empty
+                    if (username == null || username.isEmpty()) {
+                        System.out.print("Username is null or empty");
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .body("Invalid username in authentication");
+                    }
+
+                    // Retrieve the user based on the authentication
+                    UserEntity user = userRepository.findByEmail(username)
+                            .orElseThrow(() -> new UserNotFoundException("User not found with email: " + username));
+
+                    System.out.print("Current authenticated user found: id={}, email={}, role={}" + user.getId());
+                    System.out.print("Current authenticated user found: id={}, email={}, role={}" +
+                            user.getEmail());
+                    System.out.print("Current authenticated user found: id={}, email={}, role={}" + user.getRole());
+
+                    // Generate a token
+                    String token = tokenProvider.generateToken(user);
+                    System.out.print("Generated token for user");
+
+                    Date expiryDate = tokenProvider.getExpirationDateFromToken(token);
+                    System.out.print("Token expiry date: {}" + expiryDate);
+
+                    // Create response dto
+                    JwtAuthResponseDto responseDto = new JwtAuthResponseDto(
+                            token,
+                            user.getId(),
+                            user.getEmail(),
+                            user.getRole().name(),
+                            expiryDate);
+
+                    // Return user info
+                    return ResponseEntity.ok(responseDto);
+                } catch (UserNotFoundException e) {
+                    System.out.print("User not found: {}" + e.getMessage());
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("User not found: " + e.getMessage());
+                } catch (Exception e) {
+                    System.out.print("Error processing authenticated user: {}" + e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Error processing authenticated user: " + e.getMessage());
+                }
+            }
+
+            System.out.print("User is not authenticated");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        } catch (Exception e) {
+            System.out.print("Unexpected error in getCurrentAuthenticatedUser: {}" + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Unexpected error: " + e.getMessage());
         }
-
-        logger.warn("No authenticated user found");
-        // Return unauthorized if not authenticated
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
     }
-
 }

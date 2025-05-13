@@ -23,13 +23,17 @@ public class UserPreferencesController {
     private IUserPreferencesService preferencesService;
 
     @PostMapping
-    public ResponseEntity<UserPreferencesResponseDto> create(@PathVariable Long userId,
+    public ResponseEntity<UserPreferencesResponseDto> create(
+            @PathVariable Long userId,
             @RequestBody UserPreferencesRequestDto dto) {
+        System.out.println("[DEBUG CONTROLLER] Received DTO: " + dto);
+        System.out.println("[DEBUG CONTROLLER] privacySettings: " + dto.getPrivacySettings());
         return ResponseEntity.ok(preferencesService.create(userId, dto));
     }
 
     @PutMapping
-    public ResponseEntity<UserPreferencesResponseDto> update(@PathVariable Long userId,
+    public ResponseEntity<UserPreferencesResponseDto> update(
+            @PathVariable Long userId,
             @RequestBody UserPreferencesRequestDto dto) {
         return ResponseEntity.ok(preferencesService.update(userId, dto));
     }

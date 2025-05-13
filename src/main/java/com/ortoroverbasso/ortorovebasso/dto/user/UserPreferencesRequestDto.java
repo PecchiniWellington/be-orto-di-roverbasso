@@ -1,5 +1,7 @@
 package com.ortoroverbasso.ortorovebasso.dto.user;
 
+import java.util.Map;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class UserPreferencesRequestDto {
@@ -17,7 +19,7 @@ public class UserPreferencesRequestDto {
     private String preferredLanguage;
 
     @Schema(description = "Privacy settings as a JSON string.")
-    private String privacySettings;
+    private Map<String, Object> privacySettings;
 
     // Default constructor
     public UserPreferencesRequestDto() {
@@ -26,7 +28,7 @@ public class UserPreferencesRequestDto {
     // All-args constructor
     public UserPreferencesRequestDto(Long id, boolean emailNotificationsEnabled,
             boolean pushNotificationsEnabled, String preferredLanguage,
-            String privacySettings) {
+            Map<String, Object> privacySettings) {
         this.id = id;
         this.emailNotificationsEnabled = emailNotificationsEnabled;
         this.pushNotificationsEnabled = pushNotificationsEnabled;
@@ -67,11 +69,11 @@ public class UserPreferencesRequestDto {
         this.preferredLanguage = preferredLanguage;
     }
 
-    public String getPrivacySettings() {
+    public Map<String, Object> getPrivacySettings() {
         return privacySettings;
     }
 
-    public void setPrivacySettings(String privacySettings) {
+    public void setPrivacySettings(Map<String, Object> privacySettings) {
         this.privacySettings = privacySettings;
     }
 }

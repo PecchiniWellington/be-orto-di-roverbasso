@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,12 +19,8 @@ import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
 @RestController
 @RequestMapping("/api/users")
-@Tag(name = "User", description = "User management API")
 public class UserController {
 
     private final IUserService userService;
@@ -56,13 +54,24 @@ public class UserController {
         return userService.deleteUser(id);
     }
 
-    @Operation(summary = "Get current authenticated user", description = "Get details of the current authenticated user")
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentAuthenticatedUser() {
+        System.out.println("GET /api/users/me - Retrieving current authenticated user");
         try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null) {
+                System.out.println("Authentication found:" +
+                        auth.getName());
+                System.out.println("Authentication foundPRINCIPAL: {}" +
+
+                        auth.getPrincipal() != null ? auth.getPrincipal().getClass().getName() : "null");
+            } else {
+                System.out.println("No authentication found in SecurityContext");
+            }
+
             return userService.getCurrentAuthenticatedUser();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error in getCurrentAuthenticatedUser: {}" + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error checking authentication: " + e.getMessage());
         }

@@ -25,6 +25,7 @@ public class UserPreferencesServiceImpl implements IUserPreferencesService {
     @Override
     @Transactional
     public UserPreferencesResponseDto create(Long userId, UserPreferencesRequestDto dto) {
+        System.out.println("[DEBUG SERVICE] dto.getPrivacySettings(): " + dto.getPrivacySettings());
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
@@ -39,6 +40,7 @@ public class UserPreferencesServiceImpl implements IUserPreferencesService {
     @Override
     @Transactional
     public UserPreferencesResponseDto update(Long userId, UserPreferencesRequestDto dto) {
+        System.out.println("[DEBUG SERVICE] dto.getPrivacySettings(): " + dto.getPrivacySettings());
         UserPreferencesEntity preferences = userPreferencesRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Preferences not found"));
 

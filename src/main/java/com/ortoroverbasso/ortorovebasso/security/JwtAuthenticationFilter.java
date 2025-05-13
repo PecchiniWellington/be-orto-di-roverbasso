@@ -30,8 +30,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-    private final JwtTokenProvider tokenProvider;
-    private final UserDetailsService userDetailsService;
+    @Autowired
+    private JwtTokenProvider tokenProvider;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Autowired
     private EnvironmentConfig environmentConfig;
@@ -46,11 +49,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final Object cartLock = new Object();
 
-    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, UserDetailsService userDetailsService) {
-        this.tokenProvider = tokenProvider;
-        this.userDetailsService = userDetailsService;
-    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response,
@@ -59,16 +57,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             // ==== Autenticazione JWT ====
             String token = getJwtFromRequest(request);
+            logger.debug("JWT Token from request: {}", token);
 
             if (StringUtils.hasText(token) && tokenProvider.validateToken(token)) {
                 String userEmail = tokenProvider.getUserEmailFromToken(token);
+                logger.debug("Username from token: {}", userEmail);
+
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+                logger.debug("User details loaded: {}", userDetails.getUsername());
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                logger.debug("Authentication set in SecurityContext for user: {}", userEmail);
+
+                logger.info("Authentication: {}, Principal type: {}, Authorities: {}",
+                        authentication.getName(),
+                        authentication.getPrincipal().getClass().getName(),
+                        authentication.getAuthorities());
+            } else {
+                logger.debug("No valid JWT token found");
             }
 
             // ==== Salta gestione cartToken se non necessario ====
@@ -138,6 +148,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            logger.debug("Found JWT token in Authorization header");
             return bearerToken.substring(7);
         }
 
@@ -145,6 +156,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("JWT".equals(cookie.getName())) {
+                    logger.debug("Found JWT token in cookie");
                     return cookie.getValue();
                 }
             }

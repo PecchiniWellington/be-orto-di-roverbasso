@@ -10,9 +10,11 @@ import com.ortoroverbasso.ortorovebasso.entity.user.user_preferences.UserPrefere
 public class UserPreferencesMapper {
 
     public static UserPreferencesEntity toEntity(UserPreferencesRequestDto dto) {
+
         if (dto == null) {
             return null;
         }
+        System.out.println("[DEBUG MAPPER] Mapping privacySettings: " + dto.getPrivacySettings());
 
         UserPreferencesEntity entity = new UserPreferencesEntity();
         entity.setEmailNotificationsEnabled(dto.isEmailNotificationsEnabled());
