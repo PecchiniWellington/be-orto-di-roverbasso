@@ -18,6 +18,7 @@ public class UserEntity {
     private String name;
     private String email;
     private String password;
+    private Long avatarId; // Added field to store the image ID of the user's avatar
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER; // Default role
@@ -76,5 +77,13 @@ public class UserEntity {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public Long getAvatarId() {
+        return avatarId;
+    }
+
+    public void setAvatarId(Long avatarId) {
+        this.avatarId = avatarId;
     }
 }

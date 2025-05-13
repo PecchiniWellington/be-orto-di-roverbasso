@@ -138,6 +138,9 @@ public class UserRequestDto {
     @Schema(description = "Device history of the user.")
     private List<String> deviceHistory;
 
+    @Schema(description = "ID of the user's avatar image.")
+    private Long avatarId;
+
     // Default constructor
     public UserRequestDto() {
     }
@@ -186,7 +189,8 @@ public class UserRequestDto {
             String recoveryTokenExpiration,
             String country,
             String region,
-            List<String> deviceHistory) {
+            List<String> deviceHistory,
+            Long avatarId) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -230,6 +234,7 @@ public class UserRequestDto {
         this.country = country;
         this.region = region;
         this.deviceHistory = deviceHistory;
+        this.avatarId = avatarId;
     }
 
     // Getters and Setters
@@ -575,6 +580,14 @@ public class UserRequestDto {
 
     public void setDeviceHistory(List<String> deviceHistory) {
         this.deviceHistory = deviceHistory;
+    }
+
+    public Long getAvatarId() {
+        return avatarId;
+    }
+
+    public void setAvatarId(Long avatarId) {
+        this.avatarId = avatarId;
     }
 
 }
