@@ -1,3 +1,4 @@
+// UserAddressServiceImpl.java
 package com.ortoroverbasso.ortorovebasso.service.user.user_address;
 
 import java.util.List;
@@ -27,41 +28,19 @@ public class UserAddressServiceImpl implements IUserAddressService {
 
     @Override
     @Transactional
-    public UserAddressResponseDto createAddress(Long userId, UserAddressRequestDto dto) {
+    public UserAddressResponseDto create(Long userId, UserAddressRequestDto dto) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        UserAddressEntity address = UserAddressMapper.toEntity(dto);
-        address.setUser(user);
+        UserAddressEntity entity = UserAddressMapper.toEntity(dto);
+        entity.setUser(user);
 
-        // TODO: gestire logica per rendere un solo indirizzo primario
-
-        UserAddressEntity saved = userAddressRepository.save(address);
-        return UserAddressMapper.toResponseDto(saved);
-    }
-
-    @Override
-    public List<UserAddressResponseDto> getAllByUser(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("User not found");
-        }
-
-        return userAddressRepository.findAllByUserId(userId)
-                .stream()
-                .map(UserAddressMapper::toResponseDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public UserAddressResponseDto getById(Long addressId) {
-        UserAddressEntity entity = userAddressRepository.findById(addressId)
-                .orElseThrow(() -> new RuntimeException("Address not found"));
-        return UserAddressMapper.toResponseDto(entity);
+        return UserAddressMapper.toResponseDto(userAddressRepository.save(entity));
     }
 
     @Override
     @Transactional
-    public UserAddressResponseDto updateAddress(Long addressId, UserAddressRequestDto dto) {
+    public UserAddressResponseDto update(Long addressId, UserAddressRequestDto dto) {
         UserAddressEntity entity = userAddressRepository.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("Address not found"));
 
@@ -72,16 +51,29 @@ public class UserAddressServiceImpl implements IUserAddressService {
         entity.setCountry(dto.getCountry());
         entity.setPrimary(dto.isPrimary());
 
-        UserAddressEntity updated = userAddressRepository.save(entity);
-        return UserAddressMapper.toResponseDto(updated);
+        return UserAddressMapper.toResponseDto(userAddressRepository.save(entity));
     }
 
     @Override
     @Transactional
-    public void deleteAddress(Long addressId) {
+    public void delete(Long addressId) {
         if (!userAddressRepository.existsById(addressId)) {
             throw new RuntimeException("Address not found");
         }
         userAddressRepository.deleteById(addressId);
+    }
+
+    @Override
+    public UserAddressResponseDto getById(Long addressId) {
+        UserAddressEntity entity = userAddressRepository.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address not found"));
+        return UserAddressMapper.toResponseDto(entity);
+    }
+
+    @Override
+    public List<UserAddressResponseDto> getAllByUserId(Long userId) {
+        return userAddressRepository.findAllByUserId(userId).stream()
+                .map(UserAddressMapper::toResponseDto)
+                .collect(Collectors.toList());
     }
 }

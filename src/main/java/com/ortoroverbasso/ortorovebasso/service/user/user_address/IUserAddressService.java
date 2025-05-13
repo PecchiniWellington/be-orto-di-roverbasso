@@ -7,13 +7,13 @@ import com.ortoroverbasso.ortorovebasso.dto.user.UserAddressResponseDto;
 
 public interface IUserAddressService {
 
-    UserAddressResponseDto createAddress(Long userId, UserAddressRequestDto dto);
+    UserAddressResponseDto create(Long userId, UserAddressRequestDto dto);
 
-    UserAddressResponseDto updateAddress(Long id, UserAddressRequestDto dto);
+    UserAddressResponseDto update(Long addressId, UserAddressRequestDto dto);
 
-    void deleteAddress(Long id);
+    void delete(Long addressId);
 
-    UserAddressResponseDto getById(Long id);
+    UserAddressResponseDto getById(Long addressId);
 
-    List<UserAddressResponseDto> getAllByUser(Long userId);
+    List<UserAddressResponseDto> getAllByUserId(Long userId);
 }
