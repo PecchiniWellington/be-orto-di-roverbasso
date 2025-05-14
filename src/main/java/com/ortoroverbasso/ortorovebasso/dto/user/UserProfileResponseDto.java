@@ -24,22 +24,23 @@ public class UserProfileResponseDto {
     @Schema(description = "ID of the user's avatar image.")
     private Long avatarId;
 
-    // Default constructor
+    @Schema(description = "URL of the user's avatar image.")
+    private String avatarUrl;
+
     public UserProfileResponseDto() {
     }
 
-    // All-args constructor
     public UserProfileResponseDto(Long id, String bio, String phoneNumber, LocalDate birthDate,
-            Gender gender, Long avatarId) {
+            Gender gender, Long avatarId, String avatarUrl) {
         this.id = id;
         this.bio = bio;
         this.phoneNumber = phoneNumber;
         this.birthDate = birthDate;
         this.gender = gender;
         this.avatarId = avatarId;
+        this.avatarUrl = avatarUrl;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -86,5 +87,13 @@ public class UserProfileResponseDto {
 
     public void setAvatarId(Long avatarId) {
         this.avatarId = avatarId;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

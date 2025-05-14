@@ -8,6 +8,7 @@ import com.ortoroverbasso.ortorovebasso.dto.images.ImageConnectRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.images.ImageConnectResponse;
 import com.ortoroverbasso.ortorovebasso.dto.images.ImagesDetailDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesResponseDto;
+import com.ortoroverbasso.ortorovebasso.entity.images.ImagesDetailEntity;
 
 public interface IImagesDetailService {
     // Define the methods that will be implemented in the service class
@@ -28,6 +29,6 @@ public interface IImagesDetailService {
 
     void deleteImages(List<Long> imageIds);
 
-    // Add any other methods related to image processing or management
+    ImagesDetailEntity uploadAndReturnEntity(MultipartFile file);
 
 }

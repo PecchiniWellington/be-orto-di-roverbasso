@@ -1,63 +1,39 @@
 package com.ortoroverbasso.ortorovebasso.mapper.user;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.util.StringUtils;
-
 import com.ortoroverbasso.ortorovebasso.dto.user.UserProfileRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserProfileResponseDto;
+import com.ortoroverbasso.ortorovebasso.entity.images.ImagesDetailEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.user_profile.UserProfileEntity;
+import com.ortoroverbasso.ortorovebasso.repository.images.ImagesDetailRepository;
 
 public class UserProfileMapper {
 
-    public static UserProfileEntity toEntity(UserProfileRequestDto dto) {
-        if (dto == null)
-            return null;
+    public static UserProfileResponseDto toResponseDto(UserProfileEntity entity) {
+        Long avatarId = entity.getAvatar() != null ? entity.getAvatar().getId() : null;
+        String avatarUrl = entity.getAvatar() != null ? entity.getAvatar().getUrl() : null;
 
-        UserProfileEntity entity = new UserProfileEntity();
+        return new UserProfileResponseDto(
+                entity.getId(),
+                entity.getBio(),
+                entity.getPhoneNumber(),
+                entity.getBirthDate(),
+                entity.getGender(),
+                avatarId,
+                avatarUrl);
+    }
 
-        if (StringUtils.hasText(dto.getBio())) {
-            entity.setBio(dto.getBio());
-        }
-
-        if (StringUtils.hasText(dto.getPhoneNumber())) {
-            entity.setPhoneNumber(dto.getPhoneNumber());
-        }
-
-        if (dto.getBirthDate() != null) {
-            entity.setBirthDate(dto.getBirthDate());
-        }
-
-        if (dto.getGender() != null) {
-            entity.setGender(dto.getGender());
-        }
+    public static void updateEntity(UserProfileEntity entity, UserProfileRequestDto dto,
+            ImagesDetailRepository imagesDetailRepository) {
+        entity.setBio(dto.getBio());
+        entity.setPhoneNumber(dto.getPhoneNumber());
+        entity.setBirthDate(dto.getBirthDate());
+        entity.setGender(dto.getGender());
 
         if (dto.getAvatarId() != null) {
-            entity.setAvatarId(dto.getAvatarId());
+            ImagesDetailEntity avatar = imagesDetailRepository.findById(dto.getAvatarId())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Immagine avatar non trovata con ID: " + dto.getAvatarId()));
+            entity.setAvatar(avatar);
         }
-
-        return entity;
-    }
-
-    public static UserProfileResponseDto toResponseDto(UserProfileEntity entity) {
-        if (entity == null)
-            return null;
-
-        UserProfileResponseDto response = new UserProfileResponseDto();
-        response.setId(entity.getId());
-        response.setBio(entity.getBio());
-        response.setPhoneNumber(entity.getPhoneNumber());
-        response.setBirthDate(entity.getBirthDate());
-        response.setGender(entity.getGender());
-        response.setAvatarId(entity.getAvatarId());
-
-        return response;
-    }
-
-    public static List<UserProfileResponseDto> toResponseDto(List<UserProfileEntity> profiles) {
-        return profiles.stream()
-                .map(UserProfileMapper::toResponseDto)
-                .collect(Collectors.toList());
     }
 }

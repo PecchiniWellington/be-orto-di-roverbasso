@@ -21,16 +21,15 @@ public class UserProfileRequestDto {
     @Schema(description = "User's gender.")
     private Gender gender;
 
-    @Schema(description = "ID of the user's avatar image.")
+    @Schema(description = "ID of the user's avatar image (ImagesDetailEntity.id).")
     private Long avatarId;
 
-    // Default constructor
+    // Costruttori
     public UserProfileRequestDto() {
     }
 
-    // All-args constructor
-    public UserProfileRequestDto(Long id, String bio, String phoneNumber, LocalDate birthDate,
-            Gender gender, Long avatarId) {
+    public UserProfileRequestDto(Long id, String bio, String phoneNumber, LocalDate birthDate, Gender gender,
+            Long avatarId) {
         this.id = id;
         this.bio = bio;
         this.phoneNumber = phoneNumber;
@@ -39,7 +38,7 @@ public class UserProfileRequestDto {
         this.avatarId = avatarId;
     }
 
-    // Getters and Setters
+    // Getters e Setters
     public Long getId() {
         return id;
     }

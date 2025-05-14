@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ortoroverbasso.ortorovebasso.dto.user.UserProfileRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserProfileResponseDto;
@@ -23,13 +25,15 @@ public class UserProfileController {
     private IUserProfileService profileService;
 
     @PostMapping
-    public ResponseEntity<UserProfileResponseDto> create(@PathVariable Long userId,
+    public ResponseEntity<UserProfileResponseDto> create(
+            @PathVariable Long userId,
             @RequestBody UserProfileRequestDto dto) {
         return ResponseEntity.ok(profileService.create(userId, dto));
     }
 
     @PutMapping
-    public ResponseEntity<UserProfileResponseDto> update(@PathVariable Long userId,
+    public ResponseEntity<UserProfileResponseDto> update(
+            @PathVariable Long userId,
             @RequestBody UserProfileRequestDto dto) {
         return ResponseEntity.ok(profileService.update(userId, dto));
     }
@@ -43,5 +47,24 @@ public class UserProfileController {
     public ResponseEntity<Void> delete(@PathVariable Long userId) {
         profileService.delete(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/avatar/{avatarId}")
+    public ResponseEntity<UserProfileResponseDto> updateAvatar(
+            @PathVariable Long userId,
+            @PathVariable Long avatarId) {
+
+        UserProfileRequestDto dto = new UserProfileRequestDto();
+        dto.setAvatarId(avatarId);
+
+        return ResponseEntity.ok(profileService.update(userId, dto));
+    }
+
+    @PutMapping("/avatar/upload")
+    public ResponseEntity<UserProfileResponseDto> uploadAndSetAvatar(
+            @PathVariable Long userId,
+            @RequestParam("file") MultipartFile file) {
+
+        return ResponseEntity.ok(profileService.uploadAndSetAvatar(userId, file));
     }
 }

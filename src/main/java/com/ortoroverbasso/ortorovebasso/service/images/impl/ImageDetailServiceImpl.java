@@ -206,6 +206,13 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
     }
 
     @Override
+    public ImagesDetailEntity uploadAndReturnEntity(MultipartFile file) {
+        ImagesDetailDto dto = uploadImage(file);
+        return imagesDetailRepository.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException("Errore dopo upload"));
+    }
+
+    @Override
     public void deleteFileFromB2(String fileName) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'deleteFileFromB2'");

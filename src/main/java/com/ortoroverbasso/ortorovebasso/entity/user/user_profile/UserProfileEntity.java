@@ -1,10 +1,13 @@
+// Aggiornamento UserProfileEntity.java
 package com.ortoroverbasso.ortorovebasso.entity.user.user_profile;
 
 import java.time.LocalDate;
 
 import com.ortoroverbasso.ortorovebasso.dto.user.Gender;
+import com.ortoroverbasso.ortorovebasso.entity.images.ImagesDetailEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -39,7 +42,9 @@ public class UserProfileEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    private Long avatarId;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "avatar_image_id", foreignKey = @ForeignKey(name = "fk_user_avatar_image"))
+    private ImagesDetailEntity avatar;
 
     // Getters and setters
 
@@ -91,25 +96,25 @@ public class UserProfileEntity {
         this.gender = gender;
     }
 
-    public Long getAvatarId() {
-        return avatarId;
+    public ImagesDetailEntity getAvatar() {
+        return avatar;
     }
 
-    public void setAvatarId(Long avatarId) {
-        this.avatarId = avatarId;
+    public void setAvatar(ImagesDetailEntity avatar) {
+        this.avatar = avatar;
     }
 
     public UserProfileEntity() {
     }
 
     public UserProfileEntity(Long id, UserEntity user, String bio, String phoneNumber, LocalDate birthDate,
-            Gender gender, Long avatarId) {
+            Gender gender, ImagesDetailEntity avatar) {
         this.id = id;
         this.user = user;
         this.bio = bio;
         this.phoneNumber = phoneNumber;
         this.birthDate = birthDate;
         this.gender = gender;
-        this.avatarId = avatarId;
+        this.avatar = avatar;
     }
 }
