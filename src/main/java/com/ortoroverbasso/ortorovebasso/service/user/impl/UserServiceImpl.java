@@ -3,8 +3,6 @@ package com.ortoroverbasso.ortorovebasso.service.user.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +24,6 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class UserServiceImpl implements IUserService {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final UserRepository userRepository;
 
@@ -64,9 +60,18 @@ public class UserServiceImpl implements IUserService {
     public UserResponseDto updateUser(Long id, UserRequestDto user) {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-        userEntity.setName(user.getName());
-        userEntity.setEmail(user.getEmail());
-        userEntity.setPassword(user.getPassword());
+
+        if (user.getName() != null && !user.getName().isBlank()) {
+            userEntity.setName(user.getName());
+        }
+
+        if (user.getEmail() != null && !user.getEmail().isBlank()) {
+            userEntity.setEmail(user.getEmail());
+        }
+
+        if (user.getPassword() != null && !user.getPassword().isBlank()) {
+            userEntity.setPassword(user.getPassword());
+        }
 
         UserEntity updatedUser = userRepository.save(userEntity);
         return UserMapper.toResponseDto(updatedUser);
@@ -75,13 +80,13 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public UserResponseDto deleteUser(Long id) {
-        logger.info("Attempting to delete user with ID: {}", id);
+
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
         userRepository.delete(userEntity);
 
         UserResponseDto responseDto = UserMapper.toResponseDto(userEntity);
-        logger.info("User deleted: id={}, name={}", userEntity.getId(), userEntity.getName());
+
         responseDto.setMessage(
                 "User with ID " + userEntity.getId() + " and name " + userEntity.getName() + " has been deleted.");
         return responseDto;
@@ -96,20 +101,19 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ResponseEntity<?> getCurrentAuthenticatedUser() {
-        logger.info("Retrieving current authenticated user from service");
 
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (authentication == null || !authentication.isAuthenticated()
                     || "anonymousUser".equals(authentication.getPrincipal())) {
-                logger.warn("User not authenticated");
+
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
             }
 
             String username = authentication.getName();
             if (username == null || username.isEmpty()) {
-                logger.warn("Username is null or empty");
+
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username in authentication");
             }
 
@@ -128,15 +132,14 @@ public class UserServiceImpl implements IUserService {
 
             return ResponseEntity.ok(responseDto);
         } catch (UserNotFoundException e) {
-            logger.error("User not found: {}", e.getMessage());
+
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + e.getMessage());
         } catch (Exception e) {
-            logger.error("Error processing authenticated user: {}", e.getMessage());
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
 
-    // ✅ Metodo spostato da JwtUtil
     @Override
     public Long getUserIdFromEmail(String email) {
         UserEntity user = userRepository.findByEmail(email)

@@ -16,7 +16,6 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public class AuthenticationFilter extends GenericFilterBean {
 
-    // Decodifica il token e ottieni l'utente (placeholder per la logica JWT)
     private Authentication getAuthenticationFromToken(String token) {
         if (token != null && !token.isEmpty()) {
             String user = decodeToken(token);
@@ -28,7 +27,7 @@ public class AuthenticationFilter extends GenericFilterBean {
     }
 
     private String decodeToken(String token) {
-        return "exampleUser"; // Placeholder per l'utente decodificato
+        return "exampleUser";
     }
 
     @Override

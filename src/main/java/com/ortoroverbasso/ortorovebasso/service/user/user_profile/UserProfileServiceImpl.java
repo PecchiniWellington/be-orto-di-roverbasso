@@ -41,11 +41,21 @@ public class UserProfileServiceImpl implements IUserProfileService {
         UserProfileEntity profile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
 
-        profile.setBio(dto.getBio());
-        profile.setPhoneNumber(dto.getPhoneNumber());
-        profile.setBirthDate(dto.getBirthDate());
-        profile.setGender(dto.getGender());
-        profile.setAvatarId(dto.getAvatarId());
+        if (dto.getBio() != null && !dto.getBio().isBlank()) {
+            profile.setBio(dto.getBio());
+        }
+        if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
+            profile.setPhoneNumber(dto.getPhoneNumber());
+        }
+        if (dto.getBirthDate() != null) {
+            profile.setBirthDate(dto.getBirthDate());
+        }
+        if (dto.getGender() != null) {
+            profile.setGender(dto.getGender());
+        }
+        if (dto.getAvatarId() != null) {
+            profile.setAvatarId(dto.getAvatarId());
+        }
 
         userProfileRepository.save(profile);
         return UserProfileMapper.toResponseDto(profile);

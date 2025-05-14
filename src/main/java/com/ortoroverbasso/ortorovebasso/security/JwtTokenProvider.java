@@ -29,16 +29,14 @@ public class JwtTokenProvider {
     @Value("${app.jwt-secret}")
     private String jwtSecret;
 
-    @Value("${app.jwt-expiration-milliseconds:86400000}") // 24h default
+    @Value("${app.jwt-expiration-milliseconds:86400000}")
     private long jwtExpirationInMs;
 
-    // 🔐 Estrae e decodifica la chiave segreta
     private SecretKey getSigningKey() {
         byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // 🔐 Rimuove il prefisso Bearer se presente
     private String cleanToken(String token) {
         if (token != null && token.startsWith("Bearer ")) {
             logger.debug("Rimozione prefisso Bearer dal token");
@@ -47,7 +45,6 @@ public class JwtTokenProvider {
         return token;
     }
 
-    // ✅ Genera token con info utente
     public String generateToken(UserEntity user) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
@@ -63,36 +60,30 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // ✅ Estrai email (subject) dal token
     public String getUserEmailFromToken(String token) {
         return getUsernameFromToken(token);
     }
 
-    // ✅ Estrai username/email (subject) dal token
     public String getUsernameFromToken(String token) {
         token = cleanToken(token);
         return getAllClaimsFromToken(token).getSubject();
     }
 
-    // ✅ Estrai ID utente
     public Long getUserIdFromToken(String token) {
         token = cleanToken(token);
         return getAllClaimsFromToken(token).get("userId", Long.class);
     }
 
-    // ✅ Estrai ruolo
     public String getRoleFromToken(String token) {
         token = cleanToken(token);
         return getAllClaimsFromToken(token).get("role", String.class);
     }
 
-    // ✅ Estrai nome
     public String getNameFromToken(String token) {
         token = cleanToken(token);
         return getAllClaimsFromToken(token).get("name", String.class);
     }
 
-    // ✅ Ottieni claims completi
     public Claims getAllClaimsFromToken(String token) {
         token = cleanToken(token);
         return Jwts.parserBuilder()
@@ -102,18 +93,15 @@ public class JwtTokenProvider {
                 .getBody();
     }
 
-    // ✅ Ottieni data di scadenza
     public Date getExpirationDateFromToken(String token) {
         token = cleanToken(token);
         return getAllClaimsFromToken(token).getExpiration();
     }
 
-    // ✅ Verifica se scaduto
     public boolean isTokenExpired(String token) {
         return getExpirationDateFromToken(token).before(new Date());
     }
 
-    // ✅ Valida il token
     public boolean validateToken(String token) {
         try {
             token = cleanToken(token);

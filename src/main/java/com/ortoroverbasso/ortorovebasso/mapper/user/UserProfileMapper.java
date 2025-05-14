@@ -3,6 +3,8 @@ package com.ortoroverbasso.ortorovebasso.mapper.user;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.util.StringUtils;
+
 import com.ortoroverbasso.ortorovebasso.dto.user.UserProfileRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserProfileResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.user.user_profile.UserProfileEntity;
@@ -10,24 +12,37 @@ import com.ortoroverbasso.ortorovebasso.entity.user.user_profile.UserProfileEnti
 public class UserProfileMapper {
 
     public static UserProfileEntity toEntity(UserProfileRequestDto dto) {
-        if (dto == null) {
+        if (dto == null)
             return null;
-        }
 
         UserProfileEntity entity = new UserProfileEntity();
-        entity.setBio(dto.getBio());
-        entity.setPhoneNumber(dto.getPhoneNumber());
-        entity.setBirthDate(dto.getBirthDate());
-        entity.setGender(dto.getGender());
-        entity.setAvatarId(dto.getAvatarId());
+
+        if (StringUtils.hasText(dto.getBio())) {
+            entity.setBio(dto.getBio());
+        }
+
+        if (StringUtils.hasText(dto.getPhoneNumber())) {
+            entity.setPhoneNumber(dto.getPhoneNumber());
+        }
+
+        if (dto.getBirthDate() != null) {
+            entity.setBirthDate(dto.getBirthDate());
+        }
+
+        if (dto.getGender() != null) {
+            entity.setGender(dto.getGender());
+        }
+
+        if (dto.getAvatarId() != null) {
+            entity.setAvatarId(dto.getAvatarId());
+        }
 
         return entity;
     }
 
     public static UserProfileResponseDto toResponseDto(UserProfileEntity entity) {
-        if (entity == null) {
+        if (entity == null)
             return null;
-        }
 
         UserProfileResponseDto response = new UserProfileResponseDto();
         response.setId(entity.getId());
