@@ -17,7 +17,6 @@ public class PickupRequestDto {
     private String transportType;
     private String loadAssistance;
     private String token;
-    private String cartToken;
 
     // Costruttore vuoto
     public PickupRequestDto() {
@@ -96,14 +95,6 @@ public class PickupRequestDto {
 
     public void setToken(String token) {
         this.token = token;
-    }
-
-    public String getCartToken() {
-        return cartToken;
-    }
-
-    public void setCartToken(String cartToken) {
-        this.cartToken = cartToken;
     }
 
 }

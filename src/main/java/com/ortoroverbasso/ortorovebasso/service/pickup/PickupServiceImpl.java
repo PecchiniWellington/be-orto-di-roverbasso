@@ -1,5 +1,3 @@
-// File: PickupServiceImpl.java
-
 package com.ortoroverbasso.ortorovebasso.service.pickup;
 
 import java.util.List;
@@ -37,22 +35,17 @@ public class PickupServiceImpl implements IPickupService {
 
     @Override
     public PickupResponseDto createPickup(PickupRequestDto pickupRequestDto) {
-        logger.info("Creating pickup with token: {} and cartToken: {}",
-                pickupRequestDto.getToken(), pickupRequestDto.getCartToken());
+        String cartToken = pickupRequestDto.getToken();
 
-        if (pickupRequestDto.getToken() == null && pickupRequestDto.getCartToken() != null) {
-            pickupRequestDto.setToken(pickupRequestDto.getCartToken());
+        if (cartToken == null || cartToken.isBlank()) {
+            throw new IllegalArgumentException("Token (cartToken) mancante nel request o nel cookie");
         }
+
+        logger.info("Creating pickup with cart token: {}", cartToken);
 
         PickupEntity pickupEntity = PickupMapper.toEntity(pickupRequestDto);
         PickupEntity savedEntity = pickupRepository.save(pickupEntity);
         logger.info("Initial pickup entity saved with ID: {}", savedEntity.getId());
-
-        String cartToken = pickupRequestDto.getToken() != null
-                ? pickupRequestDto.getToken()
-                : pickupRequestDto.getCartToken();
-
-        logger.info("Using cart token: {} to retrieve cart", cartToken);
 
         CartEntity cartEntity = cartService.getCartEntityByToken(cartToken);
         List<CartItemEntity> cartItems = cartEntity.getItems();
@@ -100,11 +93,6 @@ public class PickupServiceImpl implements IPickupService {
         logger.info("Updating pickup with ID: {}", id);
         PickupEntity existingEntity = pickupRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prenotazione con ID " + id + " non trovata"));
-
-        if (pickupRequestDto.getToken() == null && pickupRequestDto.getCartToken() != null) {
-            pickupRequestDto.setToken(pickupRequestDto.getCartToken());
-            logger.info("Setting token from cartToken: {}", pickupRequestDto.getCartToken());
-        }
 
         PickupMapper.updateEntityFromDto(pickupRequestDto, existingEntity);
         PickupEntity updatedEntity = pickupRepository.save(existingEntity);

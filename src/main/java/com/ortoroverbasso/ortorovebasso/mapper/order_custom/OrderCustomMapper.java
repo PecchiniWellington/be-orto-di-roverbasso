@@ -33,7 +33,6 @@ public class OrderCustomMapper {
         dto.setToken(entity.getToken());
         dto.setStatusOrder(entity.getStatusOrder());
 
-        // Set cartId from the cart entity
         if (entity.getCart() != null) {
             dto.setCartId(entity.getCart().getId());
         }
@@ -57,16 +56,13 @@ public class OrderCustomMapper {
     }
 
     public OrderCustomEntity updateEntityFromDto(OrderCustomUpdateDto dto, OrderCustomEntity entity) {
-        if (dto == null || entity == null) {
+        if (dto == null || entity == null)
             return entity;
-        }
 
-        // Aggiorna il pickup
         if (dto.getPickupOrder() != null) {
             entity.setPickupOrder(PickupMapper.toEntity(dto.getPickupOrder()));
         }
 
-        // Ricostruisci la lista di OrderProductEntity
         if (dto.getProducts() != null && !dto.getProducts().isEmpty()) {
             List<OrderCustomProductEntity> updatedProducts = dto.getProducts().stream()
                     .map(pq -> {
@@ -76,12 +72,12 @@ public class OrderCustomMapper {
                         op.setQuantity(pq.getQuantity());
                         return op;
                     })
-                    .filter(op -> op.getProduct() != null) // evita null pointer se il prodotto non esiste
+                    .filter(op -> op.getProduct() != null)
                     .collect(Collectors.toList());
 
             entity.getOrderProducts().clear();
             for (OrderCustomProductEntity updatedProduct : updatedProducts) {
-                updatedProduct.setOrder(entity); // reimposta la relazione padre
+                updatedProduct.setOrder(entity);
                 entity.getOrderProducts().add(updatedProduct);
             }
         }
@@ -94,7 +90,7 @@ public class OrderCustomMapper {
         order.setToken(UUID.randomUUID().toString());
         order.setStatusOrder("PENDING");
         order.setPickupOrder(pickup);
-        order.setCart(cart); // ✅ collega il carrello
+        order.setCart(cart);
 
         List<OrderCustomProductEntity> orderProducts = cartItems.stream().map(item -> {
             OrderCustomProductEntity op = new OrderCustomProductEntity();

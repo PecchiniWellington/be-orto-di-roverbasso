@@ -27,4 +27,6 @@ public interface IOrderCustomService {
 
     OrderCustomEntity saveOrder(OrderCustomEntity order);
 
+    OrderCustomResponseDto updateOrderStatus(Long id, String statusOrder);
+
 }

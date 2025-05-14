@@ -10,9 +10,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.ortoroverbasso.ortorovebasso.dto.auth.JwtAuthResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.user.UserSessionDto;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 import com.ortoroverbasso.ortorovebasso.exception.UserNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.user.UserMapper;
@@ -101,41 +101,40 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ResponseEntity<?> getCurrentAuthenticatedUser() {
-
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (authentication == null || !authentication.isAuthenticated()
                     || "anonymousUser".equals(authentication.getPrincipal())) {
-
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
             }
 
             String username = authentication.getName();
             if (username == null || username.isEmpty()) {
-
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username in authentication");
             }
 
             UserEntity user = userRepository.findByEmail(username)
                     .orElseThrow(() -> new UserNotFoundException("User not found with email: " + username));
 
+            // ✅ Qui usi il tuo mapper per ottenere tutti i dati (incluso profile e avatar)
+            UserResponseDto userDto = UserMapper.toResponseDto(user);
+
+            // ✅ Rigeneri token e scadenza
             String token = tokenProvider.generateToken(user);
-            Date expiryDate = tokenProvider.getExpirationDateFromToken(token);
+            Date expiry = tokenProvider.getExpirationDateFromToken(token);
 
-            JwtAuthResponseDto responseDto = new JwtAuthResponseDto(
-                    token,
-                    user.getId(),
-                    user.getEmail(),
-                    user.getRole().name(),
-                    expiryDate);
+            // ✅ Costruisci oggetto con tutto
+            UserSessionDto session = new UserSessionDto();
+            session.setToken(token);
+            session.setExpiry(expiry);
+            session.setUser(userDto);
 
-            return ResponseEntity.ok(responseDto);
+            return ResponseEntity.ok(session);
+
         } catch (UserNotFoundException e) {
-
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + e.getMessage());
         } catch (Exception e) {
-
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }

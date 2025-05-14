@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -57,5 +58,14 @@ public class OrderCustomController {
     public ResponseEntity<Void> deleteOrderCustom(@PathVariable Long id) {
         orderCustomService.deleteOrderCustom(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<OrderCustomResponseDto> updateOrderStatus(
+            @PathVariable Long id,
+            String statusOrder) {
+
+        OrderCustomResponseDto updatedOrder = orderCustomService.updateOrderStatus(id, statusOrder);
+        return ResponseEntity.ok(updatedOrder);
     }
 }

@@ -29,7 +29,6 @@ public class OrderCustomServiceImpl implements IOrderCustomService {
     @Override
     @Transactional
     public OrderCustomResponseDto createOrderCustom(OrderCustomRequestDto orderCustomRequestDto) {
-        // Deprecated/Non più coerente con struttura con quantità
         throw new UnsupportedOperationException("Use createOrderCustomFromCart instead.");
     }
 
@@ -46,15 +45,9 @@ public class OrderCustomServiceImpl implements IOrderCustomService {
         }
         OrderCustomEntity order = OrderCustomMapper.fromCart(cart, cartItems, savedPickup);
 
-        // ✅ set cart lato Order (relazione diretta)
         order.setCart(cart);
-
-        // ✅ aggiorna lista ordini lato Cart (se vuoi mantenere la relazione
-        // bidirezionale aggiornata)
         cart.getOrders().add(order);
 
-        order.setCart(cart);
-        // Salva solo l'ordine (Cascade ALL dovrebbe propagare sul cart)
         OrderCustomEntity savedOrder = orderCustomRepository.save(order);
 
         return OrderCustomMapper.toDto(savedOrder);
@@ -109,6 +102,21 @@ public class OrderCustomServiceImpl implements IOrderCustomService {
     @Transactional
     public OrderCustomEntity saveOrder(OrderCustomEntity order) {
         return orderCustomRepository.save(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderCustomResponseDto updateOrderStatus(Long id, String statusOrder) {
+        OrderCustomEntity existing = orderCustomRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("OrderCustom not found with id: " + id));
+
+        existing.setStatusOrder(statusOrder);
+        orderCustomRepository.save(existing);
+
+        OrderCustomEntity refreshed = orderCustomRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("OrderCustom not found after update with id: " + id));
+
+        return OrderCustomMapper.toDto(refreshed);
     }
 
 }

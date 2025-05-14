@@ -2,11 +2,10 @@ package com.ortoroverbasso.ortorovebasso.controller.pickup;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,21 +23,18 @@ import com.ortoroverbasso.ortorovebasso.service.pickup.IPickupService;
 @RequestMapping("/api/pickups")
 public class PickupController {
 
-    private static final Logger logger = LoggerFactory.getLogger(PickupController.class);
-    private final IPickupService pickupService;
-
     @Autowired
-    public PickupController(IPickupService pickupService) {
-        this.pickupService = pickupService;
-    }
+    private IPickupService pickupService;
 
     @PostMapping
-    public ResponseEntity<PickupResponseDto> createPickup(@RequestBody PickupRequestDto pickupRequestDto) {
-        logger.info("Received pickup request:");
-        logger.info("Token: {}", pickupRequestDto.getToken());
-        logger.info("CartToken: {}", pickupRequestDto.getCartToken());
-        logger.info("FullName: {}", pickupRequestDto.getFullName());
-        logger.info("PickupDate: {}", pickupRequestDto.getPickupDate());
+    public ResponseEntity<PickupResponseDto> createPickup(
+            @RequestBody PickupRequestDto pickupRequestDto,
+            @CookieValue(value = "cartToken", required = false) String cartTokenFromCookie) {
+
+        if ((pickupRequestDto.getToken() == null || pickupRequestDto.getToken().isBlank())
+                && cartTokenFromCookie != null) {
+            pickupRequestDto.setToken(cartTokenFromCookie);
+        }
 
         PickupResponseDto createdPickup = pickupService.createPickup(pickupRequestDto);
         return new ResponseEntity<>(createdPickup, HttpStatus.CREATED);
