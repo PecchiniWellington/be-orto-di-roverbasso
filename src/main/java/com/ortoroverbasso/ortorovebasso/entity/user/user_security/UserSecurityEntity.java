@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -29,7 +28,6 @@ public class UserSecurityEntity {
 
     private boolean mfaEnabled;
 
-    @Column(columnDefinition = "JSONB")
     private String recoveryKeys;
 
     private LocalDateTime lastLoginAt;

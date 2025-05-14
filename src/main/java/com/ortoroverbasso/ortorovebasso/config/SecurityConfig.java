@@ -32,7 +32,7 @@ public class SecurityConfig {
   private final JwtAuthenticationEntryPoint authenticationEntryPoint;
   private final JwtAuthenticationFilter authenticationFilter;
 
-  // 🔐 SOLO login e registrazione sono pubblici
+  // Rotte pubbliche
   private static final String[] WHITE_LIST_URLS = {
       "/api/auth/login",
       "/api/auth/register",
@@ -48,7 +48,7 @@ public class SecurityConfig {
       "/api/cart/*",
       "/api/categories/**",
       "/api/products/**",
-      "/api/auth/check",
+      "/api/auth/check"
   };
 
   public SecurityConfig(
@@ -74,7 +74,7 @@ public class SecurityConfig {
     configuration.setAllowedOrigins(List.of("http://localhost:3000"));
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
-    configuration.setAllowCredentials(true);
+    configuration.setAllowCredentials(true); // fondamentale per usare i cookie
     configuration.setMaxAge(3600L);
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -92,15 +92,15 @@ public class SecurityConfig {
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(WHITE_LIST_URLS).permitAll()
 
-            // Gestione route per /api/users/me
+            // Info personale
             .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
 
-            // Preferenze personali - chiunque sia autenticato può gestire le proprie
+            // Preferenze, profilo, indirizzi (utente autenticato)
             .requestMatchers("/api/users/*/preferences/**").authenticated()
             .requestMatchers("/api/users/*/profile/**").authenticated()
             .requestMatchers("/api/users/*/addresses/**").authenticated()
 
-            // Tutti gli utenti
+            // Gestione utenti (admin e contributor)
             .requestMatchers(HttpMethod.GET, "/api/users/all").hasRole("ADMIN")
             .requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("USER", "ADMIN", "CONTRIBUTOR")
             .requestMatchers(HttpMethod.POST, "/api/users/**").hasRole("ADMIN")

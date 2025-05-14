@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ortoroverbasso.ortorovebasso.dto.cart.CartRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.cart.CartResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.cart.ICartService;
-import com.ortoroverbasso.ortorovebasso.utils.JwtUtil;
+import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -30,7 +30,7 @@ public class CartController {
     private ICartService cartService;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private IUserService userService;
 
     // ==== USER ENDPOINTS ====
 
@@ -130,11 +130,9 @@ public class CartController {
         return ResponseEntity.ok(cartService.createCart());
     }
 
-    // ==== UTILS ====
-
     private Long getAuthenticatedUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName(); // email = username
-        return jwtUtil.getUserIdFromEmail(email);
+        String email = authentication.getName();
+        return userService.getUserIdFromEmail(email);
     }
 }

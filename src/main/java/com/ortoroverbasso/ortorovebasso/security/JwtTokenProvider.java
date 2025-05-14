@@ -8,7 +8,6 @@ import javax.crypto.SecretKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
@@ -24,144 +23,76 @@ import io.jsonwebtoken.security.SignatureException;
 
 @Component
 public class JwtTokenProvider {
+
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
     @Value("${app.jwt-secret}")
     private String jwtSecret;
 
-    @Value("${app.jwt-expiration-milliseconds:86400000}") // 24 hours default
+    @Value("${app.jwt-expiration-milliseconds:86400000}") // 24h default
     private long jwtExpirationInMs;
 
-    /**
-     * Removes the "Bearer " prefix from a token if present
-     */
+    // 🔐 Estrae e decodifica la chiave segreta
+    private SecretKey getSigningKey() {
+        byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    // 🔐 Rimuove il prefisso Bearer se presente
     private String cleanToken(String token) {
         if (token != null && token.startsWith("Bearer ")) {
-            logger.debug("Removing Bearer prefix from token");
+            logger.debug("Rimozione prefisso Bearer dal token");
             return token.substring(7);
         }
         return token;
     }
 
-    /**
-     * Creates a signing key from the JWT secret
-     */
-    private SecretKey getSigningKey() {
-        System.out.println("[JWT DEBUG] jwtSecret (raw): " + jwtSecret);
-        byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);
-        SecretKey key = Keys.hmacShaKeyFor(keyBytes);
-        System.out.println("[JWT DEBUG] Signing key generated: " + key);
-        return key;
-    }
-
-    /**
-     * Generate token from UserEntity
-     */
+    // ✅ Genera token con info utente
     public String generateToken(UserEntity user) {
-        Date currentDate = new Date();
-        Date expireDate = new Date(currentDate.getTime() + jwtExpirationInMs);
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
         return Jwts.builder()
                 .setSubject(user.getEmail())
                 .claim("userId", user.getId())
                 .claim("role", user.getRole().name())
                 .claim("name", user.getName() != null ? user.getName() : "")
-                .setIssuedAt(currentDate)
-                .setExpiration(expireDate)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS384)
                 .compact();
     }
 
-    /**
-     * Generate token from Authentication
-     */
-    public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
-        Date currentDate = new Date();
-        Date expireDate = new Date(currentDate.getTime() + jwtExpirationInMs);
-
-        return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(currentDate)
-                .setExpiration(expireDate)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS384)
-                .compact();
-    }
-
-    public String getUsernameFromJWT(String token) {
-        token = cleanToken(token);
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getSubject();
-    }
-
+    // ✅ Estrai email (subject) dal token
     public String getUserEmailFromToken(String token) {
-        token = cleanToken(token);
-        return getUsernameFromJWT(token);
+        return getUsernameFromToken(token);
     }
 
+    // ✅ Estrai username/email (subject) dal token
+    public String getUsernameFromToken(String token) {
+        token = cleanToken(token);
+        return getAllClaimsFromToken(token).getSubject();
+    }
+
+    // ✅ Estrai ID utente
     public Long getUserIdFromToken(String token) {
         token = cleanToken(token);
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.get("userId", Long.class);
+        return getAllClaimsFromToken(token).get("userId", Long.class);
     }
 
+    // ✅ Estrai ruolo
     public String getRoleFromToken(String token) {
         token = cleanToken(token);
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.get("role", String.class);
+        return getAllClaimsFromToken(token).get("role", String.class);
     }
 
+    // ✅ Estrai nome
     public String getNameFromToken(String token) {
         token = cleanToken(token);
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.get("name", String.class);
+        return getAllClaimsFromToken(token).get("name", String.class);
     }
 
-    public boolean validateToken(String token) {
-        System.out.println("[JWT DEBUG] Validating token: " + token);
-        try {
-            // Clean the token before validation
-            token = cleanToken(token);
-            System.out.println("[JWT DEBUG] Cleaned token for validation: " + token);
-
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token);
-            System.out.println("[JWT DEBUG] Token is valid.");
-            return true;
-        } catch (SignatureException ex) {
-            logger.error("Invalid JWT signature: {}", ex.getMessage());
-        } catch (MalformedJwtException ex) {
-            logger.error("Invalid JWT token: {}", ex.getMessage());
-        } catch (ExpiredJwtException ex) {
-            logger.error("Expired JWT token: {}", ex.getMessage());
-        } catch (UnsupportedJwtException ex) {
-            logger.error("Unsupported JWT token: {}", ex.getMessage());
-        } catch (IllegalArgumentException ex) {
-            logger.error("JWT claims string is empty: {}", ex.getMessage());
-        } catch (Exception ex) {
-            logger.error("JWT token error: {}", ex.getMessage());
-        }
-        return false;
-    }
-
+    // ✅ Ottieni claims completi
     public Claims getAllClaimsFromToken(String token) {
         token = cleanToken(token);
         return Jwts.parserBuilder()
@@ -171,24 +102,40 @@ public class JwtTokenProvider {
                 .getBody();
     }
 
-    public Date getExpirationDate(String token) {
-        token = cleanToken(token);
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getExpiration();
-    }
-
+    // ✅ Ottieni data di scadenza
     public Date getExpirationDateFromToken(String token) {
         token = cleanToken(token);
-        return getExpirationDate(token);
+        return getAllClaimsFromToken(token).getExpiration();
     }
 
+    // ✅ Verifica se scaduto
     public boolean isTokenExpired(String token) {
-        token = cleanToken(token);
-        Date expiration = getExpirationDate(token);
-        return expiration.before(new Date());
+        return getExpirationDateFromToken(token).before(new Date());
+    }
+
+    // ✅ Valida il token
+    public boolean validateToken(String token) {
+        try {
+            token = cleanToken(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
+            logger.debug("Token JWT valido.");
+            return true;
+        } catch (SignatureException ex) {
+            logger.error("Firma non valida: {}", ex.getMessage());
+        } catch (MalformedJwtException ex) {
+            logger.error("Token malformato: {}", ex.getMessage());
+        } catch (ExpiredJwtException ex) {
+            logger.error("Token scaduto: {}", ex.getMessage());
+        } catch (UnsupportedJwtException ex) {
+            logger.error("Token non supportato: {}", ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            logger.error("Token vuoto o nullo: {}", ex.getMessage());
+        } catch (Exception ex) {
+            logger.error("Errore generico sul token JWT: {}", ex.getMessage());
+        }
+        return false;
     }
 }

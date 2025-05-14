@@ -23,4 +23,6 @@ public interface IUserService {
     // Add this new method for current authenticated user
     ResponseEntity<?> getCurrentAuthenticatedUser();
 
+    Long getUserIdFromEmail(String email);
+
 }
