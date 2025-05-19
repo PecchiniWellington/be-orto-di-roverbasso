@@ -4,10 +4,13 @@ import java.util.List;
 
 import com.ortoroverbasso.ortorovebasso.entity.cart.CartEntity;
 import com.ortoroverbasso.ortorovebasso.entity.pickup.PickupEntity;
+import com.ortoroverbasso.ortorovebasso.enums.StatusOrderEnum;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -39,8 +42,9 @@ public class OrderCustomEntity {
     @JoinColumn(name = "cart_id")
     private CartEntity cart;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status_order")
-    private String statusOrder;
+    StatusOrderEnum statusOrder;
 
     public Long getId() {
         return id;
@@ -74,11 +78,11 @@ public class OrderCustomEntity {
         this.pickupOrder = pickupOrder;
     }
 
-    public String getStatusOrder() {
+    public StatusOrderEnum getStatusOrder() {
         return statusOrder;
     }
 
-    public void setStatusOrder(String statusOrder) {
+    public void setStatusOrder(StatusOrderEnum statusOrder) {
         this.statusOrder = statusOrder;
     }
 

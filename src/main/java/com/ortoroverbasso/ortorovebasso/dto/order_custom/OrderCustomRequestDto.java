@@ -3,6 +3,7 @@ package com.ortoroverbasso.ortorovebasso.dto.order_custom;
 import java.util.List;
 
 import com.ortoroverbasso.ortorovebasso.entity.pickup.PickupEntity;
+import com.ortoroverbasso.ortorovebasso.enums.StatusOrderEnum;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +16,7 @@ public class OrderCustomRequestDto {
     @NotNull(message = "Pickup information is required")
     private PickupEntity pickupOrder; // ← usa direttamente l'entità salvata
 
-    private String statusOrder;
+    StatusOrderEnum statusOrder;
 
     // Getter e Setter
     public List<Long> getProductIds() {
@@ -34,11 +35,11 @@ public class OrderCustomRequestDto {
         this.pickupOrder = pickupOrder;
     }
 
-    public String getStatusOrder() {
+    public StatusOrderEnum getStatusOrder() {
         return statusOrder;
     }
 
-    public void setStatusOrder(String statusOrder) {
+    public void setStatusOrder(StatusOrderEnum statusOrder) {
         this.statusOrder = statusOrder;
     }
 }

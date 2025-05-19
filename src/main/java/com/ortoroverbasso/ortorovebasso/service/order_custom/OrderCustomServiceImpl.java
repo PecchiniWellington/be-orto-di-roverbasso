@@ -14,6 +14,7 @@ import com.ortoroverbasso.ortorovebasso.entity.cart.CartEntity;
 import com.ortoroverbasso.ortorovebasso.entity.cart.CartItemEntity;
 import com.ortoroverbasso.ortorovebasso.entity.order_custom.OrderCustomEntity;
 import com.ortoroverbasso.ortorovebasso.entity.pickup.PickupEntity;
+import com.ortoroverbasso.ortorovebasso.enums.StatusOrderEnum;
 import com.ortoroverbasso.ortorovebasso.exception.ResourceNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.order_custom.OrderCustomMapper;
 import com.ortoroverbasso.ortorovebasso.repository.order_custom.OrderCustomRepository;
@@ -106,7 +107,7 @@ public class OrderCustomServiceImpl implements IOrderCustomService {
 
     @Override
     @Transactional
-    public OrderCustomResponseDto updateOrderStatus(Long id, String statusOrder) {
+    public OrderCustomResponseDto updateOrderStatus(Long id, StatusOrderEnum statusOrder) {
         OrderCustomEntity existing = orderCustomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("OrderCustom not found with id: " + id));
 

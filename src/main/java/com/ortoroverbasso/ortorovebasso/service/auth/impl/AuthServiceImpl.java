@@ -98,7 +98,7 @@ public class AuthServiceImpl implements IAuthService {
         cartCookie.setMaxAge(60 * 60 * 24 * 7);
         response.addCookie(cartCookie);
 
-        ResponseCookie jwtCookie = jwtCookieUtil.createJwtCookie(token, environmentConfig.isProduction());
+        ResponseCookie jwtCookie = jwtCookieUtil.createJwtCookie(token);
         response.addHeader("Set-Cookie", jwtCookie.toString());
 
         return ResponseEntity.ok(new JwtAuthResponseDto(
@@ -144,10 +144,10 @@ public class AuthServiceImpl implements IAuthService {
     public ResponseEntity<?> logout(HttpServletResponse response) {
         SecurityContextHolder.clearContext();
 
-        ResponseCookie jwtCookie = jwtCookieUtil.clearJwtCookie(environmentConfig.isProduction());
+        ResponseCookie jwtCookie = jwtCookieUtil.clearJwtCookie();
         response.addHeader("Set-Cookie", jwtCookie.toString());
 
-        ResponseCookie clearCartTokenCookie = jwtCookieUtil.clearCartTokenCookie(environmentConfig.isProduction());
+        ResponseCookie clearCartTokenCookie = jwtCookieUtil.clearCartTokenCookie();
         response.addHeader("Set-Cookie", clearCartTokenCookie.toString());
 
         String newGuestCartToken = UUID.randomUUID().toString();

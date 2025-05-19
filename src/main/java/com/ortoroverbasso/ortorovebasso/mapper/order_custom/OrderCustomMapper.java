@@ -15,6 +15,7 @@ import com.ortoroverbasso.ortorovebasso.entity.cart.CartItemEntity;
 import com.ortoroverbasso.ortorovebasso.entity.order_custom.OrderCustomEntity;
 import com.ortoroverbasso.ortorovebasso.entity.order_custom.OrderCustomProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.pickup.PickupEntity;
+import com.ortoroverbasso.ortorovebasso.enums.StatusOrderEnum;
 import com.ortoroverbasso.ortorovebasso.mapper.pickup.PickupMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.product.ProductMapper;
 import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
@@ -88,7 +89,7 @@ public class OrderCustomMapper {
     public static OrderCustomEntity fromCart(CartEntity cart, List<CartItemEntity> cartItems, PickupEntity pickup) {
         OrderCustomEntity order = new OrderCustomEntity();
         order.setToken(UUID.randomUUID().toString());
-        order.setStatusOrder("PENDING");
+        order.setStatusOrder(StatusOrderEnum.PENDING);
         order.setPickupOrder(pickup);
         order.setCart(cart);
 

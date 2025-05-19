@@ -3,12 +3,13 @@ package com.ortoroverbasso.ortorovebasso.dto.order_custom;
 import java.util.List;
 
 import com.ortoroverbasso.ortorovebasso.dto.pickup.PickupResponseDto;
+import com.ortoroverbasso.ortorovebasso.enums.StatusOrderEnum;
 
 public class OrderCustomResponseDto {
 
     private Long id;
     private String token;
-    private String statusOrder;
+    StatusOrderEnum statusOrder;
     private Long cartId;
 
     private PickupResponseDto pickupOrder;
@@ -32,11 +33,11 @@ public class OrderCustomResponseDto {
         this.token = token;
     }
 
-    public String getStatusOrder() {
+    public StatusOrderEnum getStatusOrder() {
         return statusOrder;
     }
 
-    public void setStatusOrder(String statusOrder) {
+    public void setStatusOrder(StatusOrderEnum statusOrder) {
         this.statusOrder = statusOrder;
     }
 

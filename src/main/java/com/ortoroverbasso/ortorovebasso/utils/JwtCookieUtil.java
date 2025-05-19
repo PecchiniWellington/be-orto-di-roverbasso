@@ -2,13 +2,17 @@ package com.ortoroverbasso.ortorovebasso.utils;
 
 import java.time.Duration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtCookieUtil {
 
-    public ResponseCookie createJwtCookie(String token, boolean isSecure) {
+    @Value("${app.jwt-cookie-secure}")
+    private boolean isSecure;
+
+    public ResponseCookie createJwtCookie(String token) {
         return ResponseCookie.from("JWT", token)
                 .httpOnly(true)
                 .secure(isSecure)
@@ -18,7 +22,7 @@ public class JwtCookieUtil {
                 .build();
     }
 
-    public ResponseCookie clearJwtCookie(boolean isSecure) {
+    public ResponseCookie clearJwtCookie() {
         return ResponseCookie.from("JWT", "")
                 .httpOnly(true)
                 .secure(isSecure)
@@ -28,7 +32,7 @@ public class JwtCookieUtil {
                 .build();
     }
 
-    public ResponseCookie clearCartTokenCookie(boolean isSecure) {
+    public ResponseCookie clearCartTokenCookie() {
         return ResponseCookie.from("cartToken", "")
                 .httpOnly(true)
                 .secure(isSecure)
@@ -37,4 +41,5 @@ public class JwtCookieUtil {
                 .sameSite("Strict")
                 .build();
     }
+
 }

@@ -8,6 +8,7 @@ import com.ortoroverbasso.ortorovebasso.dto.order_custom.OrderCustomUpdateDto;
 import com.ortoroverbasso.ortorovebasso.entity.cart.CartItemEntity;
 import com.ortoroverbasso.ortorovebasso.entity.order_custom.OrderCustomEntity;
 import com.ortoroverbasso.ortorovebasso.entity.pickup.PickupEntity;
+import com.ortoroverbasso.ortorovebasso.enums.StatusOrderEnum;
 
 public interface IOrderCustomService {
 
@@ -27,6 +28,6 @@ public interface IOrderCustomService {
 
     OrderCustomEntity saveOrder(OrderCustomEntity order);
 
-    OrderCustomResponseDto updateOrderStatus(Long id, String statusOrder);
+    OrderCustomResponseDto updateOrderStatus(Long id, StatusOrderEnum statusOrder);
 
 }
