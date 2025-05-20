@@ -14,10 +14,14 @@ import com.ortoroverbasso.ortorovebasso.entity.cart.CartEntity;
 import com.ortoroverbasso.ortorovebasso.entity.cart.CartItemEntity;
 import com.ortoroverbasso.ortorovebasso.entity.order_custom.OrderCustomEntity;
 import com.ortoroverbasso.ortorovebasso.entity.pickup.PickupEntity;
+import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 import com.ortoroverbasso.ortorovebasso.enums.StatusOrderEnum;
 import com.ortoroverbasso.ortorovebasso.exception.ResourceNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.order_custom.OrderCustomMapper;
 import com.ortoroverbasso.ortorovebasso.repository.order_custom.OrderCustomRepository;
+import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class OrderCustomServiceImpl implements IOrderCustomService {
@@ -26,6 +30,8 @@ public class OrderCustomServiceImpl implements IOrderCustomService {
     private OrderCustomRepository orderCustomRepository;
     @Autowired
     private OrderCustomMapper orderCustomMapper;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     @Transactional
@@ -107,17 +113,29 @@ public class OrderCustomServiceImpl implements IOrderCustomService {
 
     @Override
     @Transactional
-    public OrderCustomResponseDto updateOrderStatus(Long id, StatusOrderEnum statusOrder) {
-        OrderCustomEntity existing = orderCustomRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("OrderCustom not found with id: " + id));
+    public OrderCustomResponseDto updateOrderStatus(Long orderId, StatusOrderEnum statusOrder, Long userId) {
+        OrderCustomEntity order = orderCustomRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Ordine non trovato"));
 
-        existing.setStatusOrder(statusOrder);
-        orderCustomRepository.save(existing);
+        order.setStatusOrder(statusOrder);
 
-        OrderCustomEntity refreshed = orderCustomRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("OrderCustom not found after update with id: " + id));
+        if (userId != null) {
+            UserEntity user = userRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("Utente non trovato"));
+            order.setUser(user);
+        }
 
-        return OrderCustomMapper.toDto(refreshed);
+        OrderCustomEntity saved = orderCustomRepository.save(order);
+        return OrderCustomMapper.toDto(saved);
+    }
+
+    @Override
+    public List<OrderCustomResponseDto> getAllOrderCustomsByUserId(Long userId) {
+        List<OrderCustomEntity> orders = orderCustomRepository.findByUser_Id(userId);
+
+        return orders.stream()
+                .map(order -> OrderCustomMapper.toDto(order))
+                .collect(Collectors.toList());
     }
 
 }

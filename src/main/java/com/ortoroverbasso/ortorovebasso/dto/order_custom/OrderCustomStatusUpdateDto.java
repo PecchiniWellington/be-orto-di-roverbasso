@@ -8,6 +8,7 @@ public class OrderCustomStatusUpdateDto {
 
     @NotBlank(message = "Status order cannot be blank")
     private StatusOrderEnum statusOrder;
+    private Long userId;
 
     public StatusOrderEnum getStatusOrder() {
         return statusOrder;
@@ -15,5 +16,13 @@ public class OrderCustomStatusUpdateDto {
 
     public void setStatusOrder(StatusOrderEnum statusOrder) {
         this.statusOrder = statusOrder;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

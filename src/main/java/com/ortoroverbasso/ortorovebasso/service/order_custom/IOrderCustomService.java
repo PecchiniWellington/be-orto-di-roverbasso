@@ -16,6 +16,8 @@ public interface IOrderCustomService {
 
     List<OrderCustomResponseDto> getAllOrderCustoms();
 
+    List<OrderCustomResponseDto> getAllOrderCustomsByUserId(Long userId);
+
     OrderCustomResponseDto getOrderCustomById(Long id);
 
     OrderCustomResponseDto getOrderCustomByToken(String token);
@@ -28,6 +30,6 @@ public interface IOrderCustomService {
 
     OrderCustomEntity saveOrder(OrderCustomEntity order);
 
-    OrderCustomResponseDto updateOrderStatus(Long id, StatusOrderEnum statusOrder);
+    OrderCustomResponseDto updateOrderStatus(Long id, StatusOrderEnum statusOrder, Long userId);
 
 }

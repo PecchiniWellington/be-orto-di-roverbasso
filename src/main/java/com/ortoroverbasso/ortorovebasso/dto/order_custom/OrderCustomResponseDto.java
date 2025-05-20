@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.dto.order_custom;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.ortoroverbasso.ortorovebasso.dto.pickup.PickupResponseDto;
@@ -15,6 +16,10 @@ public class OrderCustomResponseDto {
     private PickupResponseDto pickupOrder;
 
     private List<OrderCustomProductDto> products;
+
+    private Long userId;
+
+    private LocalDateTime createdAt;
 
     // Getters e Setters
     public Long getId() {
@@ -64,4 +69,21 @@ public class OrderCustomResponseDto {
     public void setCartId(Long cartId) {
         this.cartId = cartId;
     }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
 }

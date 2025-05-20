@@ -33,6 +33,7 @@ public class OrderCustomMapper {
         dto.setId(entity.getId());
         dto.setToken(entity.getToken());
         dto.setStatusOrder(entity.getStatusOrder());
+        dto.setCreatedAt(entity.getCreatedAt());
 
         if (entity.getCart() != null) {
             dto.setCartId(entity.getCart().getId());
@@ -40,6 +41,9 @@ public class OrderCustomMapper {
 
         if (entity.getPickupOrder() != null) {
             dto.setPickupOrder(PickupMapper.toDto(entity.getPickupOrder()));
+        }
+        if (entity.getUser() != null) {
+            dto.setUserId(entity.getUser().getId());
         }
 
         if (entity.getOrderProducts() != null) {

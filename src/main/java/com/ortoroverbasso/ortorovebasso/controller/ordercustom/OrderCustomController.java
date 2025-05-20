@@ -41,6 +41,12 @@ public class OrderCustomController {
         return new ResponseEntity<>(orderCustoms, HttpStatus.OK);
     }
 
+    @GetMapping("/user/{id}")
+    public ResponseEntity<List<OrderCustomResponseDto>> getAllOrderCustomsByUserId(@PathVariable Long id) {
+        List<OrderCustomResponseDto> orderCustoms = orderCustomService.getAllOrderCustomsByUserId(id);
+        return new ResponseEntity<>(orderCustoms, HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<OrderCustomResponseDto> getOrderCustomById(@PathVariable Long id) {
         OrderCustomResponseDto orderCustom = orderCustomService.getOrderCustomById(id);
@@ -66,8 +72,10 @@ public class OrderCustomController {
             @PathVariable Long id,
             @RequestBody OrderCustomStatusUpdateDto statusUpdateDto) {
 
-        OrderCustomResponseDto updatedOrder = orderCustomService.updateOrderStatus(id,
-                statusUpdateDto.getStatusOrder());
+        OrderCustomResponseDto updatedOrder = orderCustomService.updateOrderStatus(
+                id,
+                statusUpdateDto.getStatusOrder(),
+                statusUpdateDto.getUserId());
         return ResponseEntity.ok(updatedOrder);
     }
 }

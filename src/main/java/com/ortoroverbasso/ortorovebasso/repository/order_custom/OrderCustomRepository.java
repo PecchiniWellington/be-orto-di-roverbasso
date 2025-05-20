@@ -13,4 +13,7 @@ public interface OrderCustomRepository extends JpaRepository<OrderCustomEntity, 
     Optional<OrderCustomEntity> findByToken(String token);
 
     List<OrderCustomEntity> findAllByOrderByIdDesc();
+
+    List<OrderCustomEntity> findByUser_Id(Long userId);
+
 }
