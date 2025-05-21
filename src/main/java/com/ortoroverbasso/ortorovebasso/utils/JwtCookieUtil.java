@@ -22,6 +22,16 @@ public class JwtCookieUtil {
                 .build();
     }
 
+    public ResponseCookie deleteJwtCookie() {
+        return ResponseCookie.from("JWT", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(0)
+                .build();
+    }
+
     public ResponseCookie clearJwtCookie() {
         return ResponseCookie.from("JWT", "")
                 .httpOnly(true)

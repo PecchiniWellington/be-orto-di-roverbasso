@@ -5,12 +5,15 @@ import org.springframework.stereotype.Service;
 
 import com.ortoroverbasso.ortorovebasso.dto.user.UserSecurityRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserSecurityResponseDto;
+import com.ortoroverbasso.ortorovebasso.entity.images.ImagesDetailEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
+import com.ortoroverbasso.ortorovebasso.entity.user.user_profile.UserProfileEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.user_security.UserSecurityEntity;
 import com.ortoroverbasso.ortorovebasso.exception.UserNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.user.UserSecurityMapper;
 import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
 import com.ortoroverbasso.ortorovebasso.repository.user.user_security.UserSecurityRepository;
+import com.ortoroverbasso.ortorovebasso.service.images.IImagesDetailService;
 
 import jakarta.transaction.Transactional;
 
@@ -22,6 +25,8 @@ public class UserSecurityServiceImpl implements IUserSecurityService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private IImagesDetailService imageDetailService;
 
     @Override
     @Transactional
@@ -69,6 +74,18 @@ public class UserSecurityServiceImpl implements IUserSecurityService {
     @Override
     @Transactional
     public void deleteByUserId(Long userId) {
-        userSecurityRepository.deleteByUserId(userId);
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        // Elimina avatar da B2 se esiste
+        UserProfileEntity profile = user.getProfile();
+        if (profile != null && profile.getAvatar() != null) {
+            ImagesDetailEntity avatar = profile.getAvatar();
+            if (avatar.getFileId() != null) {
+                imageDetailService.deleteImage(avatar.getId());
+            }
+        }
+
+        userRepository.delete(user);
     }
 }

@@ -2,8 +2,11 @@
 package com.ortoroverbasso.ortorovebasso.controller.user;
 
 import java.util.List;
+import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -16,13 +19,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ortoroverbasso.ortorovebasso.config.EnvironmentConfig;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
+import com.ortoroverbasso.ortorovebasso.service.cart.ICartService;
 import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
+import com.ortoroverbasso.ortorovebasso.utils.JwtCookieUtil;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+
+    @Autowired
+    private JwtCookieUtil jwtCookieUtil;
+    @Autowired
+    private EnvironmentConfig environmentConfig;
+    @Autowired
+    private ICartService cartService;
 
     private final IUserService userService;
 
@@ -51,8 +67,28 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public UserResponseDto deleteUser(@PathVariable Long id) {
-        return userService.deleteUser(id);
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id, HttpServletResponse response) {
+        userService.deleteUser(id);
+
+        // 🔴 Cancella cookie JWT e cartToken
+        ResponseCookie jwtCookie = jwtCookieUtil.clearJwtCookie();
+        response.addHeader("Set-Cookie", jwtCookie.toString());
+
+        ResponseCookie cartTokenCookie = jwtCookieUtil.clearCartTokenCookie();
+        response.addHeader("Set-Cookie", cartTokenCookie.toString());
+
+        // 🔄 Imposta un nuovo cartToken da guest
+        String newGuestCartToken = UUID.randomUUID().toString();
+        cartService.createCartWithToken(newGuestCartToken);
+
+        Cookie newCartCookie = new Cookie("cartToken", newGuestCartToken);
+        newCartCookie.setHttpOnly(true);
+        newCartCookie.setSecure(environmentConfig.isProduction());
+        newCartCookie.setPath("/");
+        newCartCookie.setMaxAge(60 * 60 * 24 * 7);
+        response.addCookie(newCartCookie);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")

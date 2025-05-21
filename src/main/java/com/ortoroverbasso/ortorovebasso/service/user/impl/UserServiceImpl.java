@@ -91,10 +91,23 @@ public class UserServiceImpl implements IUserService {
     public UserResponseDto deleteUser(Long id) {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        // 1️⃣ Elimina immagine avatar se presente
+        UserProfileEntity profile = userEntity.getProfile();
+        if (profile != null) {
+            ImagesDetailEntity avatar = profile.getAvatar();
+            System.err.println("Avatar: " + avatar);
+            System.err.println("Avatar fileId: " + (avatar != null ? avatar.getFileId() : "null"));
+            if (avatar != null && avatar.getFileId() != null && !avatar.getFileId().isBlank()) {
+                imageDetailService.deleteImage(avatar.getId());
+            }
+        }
+
+        // 2️⃣ Cancella utente
         userRepository.delete(userEntity);
 
+        // 3️⃣ Ritorna risposta
         UserResponseDto responseDto = UserMapper.toResponseDto(userEntity);
-
         responseDto.setMessage(
                 "User with ID " + userEntity.getId() + " and name " + userEntity.getName() + " has been deleted.");
         return responseDto;
