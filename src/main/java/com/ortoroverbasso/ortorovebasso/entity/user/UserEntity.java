@@ -3,6 +3,7 @@ package com.ortoroverbasso.ortorovebasso.entity.user;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ortoroverbasso.ortorovebasso.entity.cart.CartEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.user_address.UserAddressEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.user_preferences.UserPreferencesEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.user_profile.UserProfileEntity;
@@ -54,6 +55,9 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAddressEntity> addresses = new ArrayList<>();
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CartEntity cart;
+
     // Constructors
     public UserEntity() {
     }
@@ -73,7 +77,8 @@ public class UserEntity {
             UserPreferencesEntity preferences,
             UserSecurityEntity security,
             List<UserAddressEntity> addresses,
-            String provider) {
+            String provider,
+            CartEntity cart) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -85,6 +90,7 @@ public class UserEntity {
         this.security = security;
         this.addresses = addresses;
         this.provider = provider;
+        this.cart = cart;
 
     }
 
@@ -175,6 +181,14 @@ public class UserEntity {
 
     public String getProvider() {
         return provider;
+    }
+
+    public CartEntity getCart() {
+        return cart;
+    }
+
+    public void setCart(CartEntity cart) {
+        this.cart = cart;
     }
 
 }

@@ -2,6 +2,7 @@ package com.ortoroverbasso.ortorovebasso.dto.user;
 
 import java.util.List;
 
+import com.ortoroverbasso.ortorovebasso.dto.cart.CartResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.user.AccountStatus;
 import com.ortoroverbasso.ortorovebasso.entity.user.Role;
 
@@ -18,6 +19,7 @@ public class UserResponseDto {
     private UserSecurityResponseDto security;
     private List<UserAddressResponseDto> addresses;
     private String provider;
+    private CartResponseDto cart;
 
     private String message; // opzionale per feedback (es. "Utente creato correttamente")
 
@@ -111,6 +113,14 @@ public class UserResponseDto {
 
     public void setProvider(String provider) {
         this.provider = provider;
+    }
+
+    public CartResponseDto getCart() {
+        return cart;
+    }
+
+    public void setCart(CartResponseDto cart) {
+        this.cart = cart;
     }
 
 }

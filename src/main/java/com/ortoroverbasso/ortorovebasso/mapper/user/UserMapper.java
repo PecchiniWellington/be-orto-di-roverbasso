@@ -58,20 +58,13 @@ public class UserMapper {
         response.setProvider(entity.getProvider());
 
         if (entity.getProfile() != null) {
-            response.setProfile(UserProfileMapper.toResponseDto(entity.getProfile()));
+            UserProfileResponseDto profileDto = UserProfileMapper.toResponseDto(entity.getProfile());
 
-            if (entity.getProfile().getAvatar() != null) {
-                UserProfileResponseDto profileDto = UserProfileMapper.toResponseDto(entity.getProfile());
-
-                if (entity.getProfile().getAvatar() != null && entity.getProfile().getAvatar().getUrl() != null) {
-                    profileDto.setAvatarUrl(entity.getProfile().getAvatar().getUrl());
-                } else if (entity.getSecurity() != null
-                        && entity.getSecurity().getUser().getProfile().getAvatar() != null) {
-                    profileDto.setAvatarUrl(entity.getSecurity().getUser().getProfile().getAvatar().getUrl());
-                }
-
-                response.setProfile(profileDto);
+            if (entity.getProfile().getAvatar() != null && entity.getProfile().getAvatar().getUrl() != null) {
+                profileDto.setAvatarUrl(entity.getProfile().getAvatar().getUrl());
             }
+
+            response.setProfile(profileDto);
         }
 
         if (entity.getAddresses() != null && !entity.getAddresses().isEmpty()) {

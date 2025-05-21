@@ -9,10 +9,9 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import com.ortoroverbasso.ortorovebasso.entity.images.ImagesDetailEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
-import com.ortoroverbasso.ortorovebasso.service.auth.impl.OAuth2Service;
+import com.ortoroverbasso.ortorovebasso.service.images.IImagesDetailService;
 import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
 
 import jakarta.servlet.ServletException;
@@ -23,17 +22,14 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
-    private final OAuth2Service userProcessingService;
     @Autowired
     private IUserService userService;
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
     @Autowired
+    private IImagesDetailService imageDetailService;
+    @Autowired
     private UserRepository userRepository;
-
-    public CustomOAuth2SuccessHandler(OAuth2Service userProcessingService) {
-        this.userProcessingService = userProcessingService;
-    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -55,17 +51,10 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         // Trova o crea utente
         UserEntity user = userService.findOrCreateFromGoogle(email, name, picture);
 
-        // ✅ Se il profilo esiste ma l’avatar è vuoto e il provider lo fornisce
-        if (user.getProfile() != null && user.getProfile().getAvatar() == null && picture != null) {
-            ImagesDetailEntity avatar = new ImagesDetailEntity();
-            avatar.setName("avatar_provider");
-            avatar.setUrl(picture);
-            avatar.setIsCover(false);
-            avatar.setPosition(0);
+        System.out.println("User found or created: " + user.getEmail());
+        System.out.println("User Name: " + user.getName());
 
-            user.getProfile().setAvatar(avatar);
-            userRepository.save(user);
-        }
+        userService.assignProviderAvatarIfMissing(user, picture);
 
         String token = jwtTokenProvider.generateToken(user);
 

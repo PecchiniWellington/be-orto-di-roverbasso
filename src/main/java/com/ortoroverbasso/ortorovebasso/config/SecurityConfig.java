@@ -109,7 +109,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("USER", "ADMIN", "CONTRIBUTOR")
             .requestMatchers(HttpMethod.POST, "/api/users/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAnyRole("USER", "ADMIN", "CONTRIBUTOR")
             .anyRequest().authenticated())
         .oauth2Login(oauth2 -> oauth2
             .authorizationEndpoint(auth -> auth

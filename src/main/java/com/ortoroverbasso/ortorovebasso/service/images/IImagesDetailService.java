@@ -29,6 +29,7 @@ public interface IImagesDetailService {
 
     void deleteImages(List<Long> imageIds);
 
-    ImagesDetailEntity uploadAndReturnEntity(MultipartFile file);
+    ImagesDetailEntity uploadFromUrl(String imageUrl, String name);
 
+    ImagesDetailEntity uploadAndReturnEntity(MultipartFile file);
 }

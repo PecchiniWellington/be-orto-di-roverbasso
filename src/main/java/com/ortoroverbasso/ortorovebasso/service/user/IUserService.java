@@ -30,4 +30,6 @@ public interface IUserService {
 
     ResponseEntity<?> getCurrentAuthenticatedUserByEmail(String email);
 
+    void assignProviderAvatarIfMissing(UserEntity user, String pictureUrl);
+
 }

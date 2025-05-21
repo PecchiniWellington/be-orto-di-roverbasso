@@ -21,7 +21,7 @@ public class UserSecurityEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = true)
     private UserEntity user;
 
     private String otpSecret;

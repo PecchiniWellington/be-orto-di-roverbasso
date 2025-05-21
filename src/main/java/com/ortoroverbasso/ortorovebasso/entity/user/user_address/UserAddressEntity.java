@@ -19,7 +19,7 @@ public class UserAddressEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = true)
     private UserEntity user;
 
     private String streetAddress;
@@ -37,8 +37,15 @@ public class UserAddressEntity {
     public UserAddressEntity() {
     }
 
-    public UserAddressEntity(Long id, UserEntity user, String streetAddress, String city, String state,
-            String postalCode, String country, boolean isPrimary) {
+    public UserAddressEntity(
+            Long id,
+            UserEntity user,
+            String streetAddress,
+            String city,
+            String state,
+            String postalCode,
+            String country,
+            boolean isPrimary) {
         this.id = id;
         this.user = user;
         this.streetAddress = streetAddress;

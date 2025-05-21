@@ -26,7 +26,7 @@ public class UserPreferencesEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_user_preferences_user"))
+    @JoinColumn(name = "user_id", nullable = true, foreignKey = @ForeignKey(name = "fk_user_preferences_user"))
     private UserEntity user;
 
     private boolean emailNotificationsEnabled;

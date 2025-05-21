@@ -56,7 +56,12 @@ public class CartServiceImpl implements ICartService {
     @Override
     public String createCart(String cartToken) {
         CartEntity cart = new CartEntity();
-        cart.setCartToken(cartToken);
+        if (cart.getCartToken() == null) {
+            cart.setCartToken(UUID.randomUUID().toString());
+        } else {
+            cart.setCartToken(cartToken);
+        }
+
         cartRepository.save(cart);
         return cart.getCartToken();
     }

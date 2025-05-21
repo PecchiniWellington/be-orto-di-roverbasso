@@ -26,9 +26,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
+        // Gestione password null (es. per utenti OAuth2)
+        String password = (user.getPassword() != null && !user.getPassword().isBlank())
+                ? user.getPassword()
+                : "OAUTH2_NO_PASSWORD";
+
         return new User(
                 user.getEmail(),
-                user.getPassword(),
+                password,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())));
     }
 }

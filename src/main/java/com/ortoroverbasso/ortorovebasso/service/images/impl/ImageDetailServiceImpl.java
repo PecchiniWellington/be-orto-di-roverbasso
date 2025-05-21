@@ -1,6 +1,7 @@
 package com.ortoroverbasso.ortorovebasso.service.images.impl;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,7 @@ import com.ortoroverbasso.ortorovebasso.repository.images.ImagesDetailRepository
 import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_images.ProductImagesRepository;
 import com.ortoroverbasso.ortorovebasso.service.images.IImagesDetailService;
+import com.ortoroverbasso.ortorovebasso.utils.BytesMultipartFile;
 
 import jakarta.transaction.Transactional;
 
@@ -41,6 +43,7 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
 
     @Autowired
     private B2StorageClientImpl b2StorageClient;
+
     @Autowired
     private ProductImagesRepository productImageRepository;
 
@@ -88,8 +91,11 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
             ImagesDetailEntity imageEntity = new ImagesDetailEntity();
             imageEntity.setName(filename);
             imageEntity.setUrl(fileUrl);
-            imageEntity.setFileId(response.getFileId()); // Salva il fileId
+            imageEntity.setFileId(response.getFileId());
             ImagesDetailEntity savedImage = imagesDetailRepository.save(imageEntity);
+
+            System.out.println("🚀 Upload su Backblaze: " + filename + " - dimensione: " + file.getSize());
+            System.out.println("✅ Immagine salvata: " + fileUrl + " - ID DB: " + savedImage.getId());
 
             return ImagesMapper.toResponse(savedImage);
 
@@ -112,7 +118,7 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
         try {
             ImagesDetailEntity image = findImageOrThrow(imageId);
             String filename = image.getName();
-            String fileId = image.getFileId(); // Ottieni il fileId da ImageEntity
+            String fileId = image.getFileId();
 
             if (fileId == null || fileId.isBlank()) {
                 throw new RuntimeException("fileId mancante per l'immagine con ID: " + imageId);
@@ -206,6 +212,22 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
     }
 
     @Override
+    public ImagesDetailEntity uploadFromUrl(String imageUrl, String name) {
+        try {
+            URL url = new URL(imageUrl);
+            String fileName = name + ".jpg";
+            byte[] imageBytes = url.openStream().readAllBytes();
+            System.out.println("📥 Scaricata immagine da: " + imageUrl + " - dimensione: " + imageBytes.length);
+
+            MultipartFile multipartFile = new BytesMultipartFile(fileName, imageBytes);
+
+            return uploadAndReturnEntity(multipartFile);
+        } catch (IOException e) {
+            throw new RuntimeException("Errore durante il download dell'immagine da URL", e);
+        }
+    }
+
+    @Override
     public ImagesDetailEntity uploadAndReturnEntity(MultipartFile file) {
         ImagesDetailDto dto = uploadImage(file);
         return imagesDetailRepository.findById(dto.getId())
@@ -214,14 +236,11 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
 
     @Override
     public void deleteFileFromB2(String fileName) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'deleteFileFromB2'");
     }
 
     @Override
     public byte[] downloadImage(String filename) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'downloadImage'");
     }
-
 }

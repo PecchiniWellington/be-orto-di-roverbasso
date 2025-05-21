@@ -3,6 +3,7 @@ package com.ortoroverbasso.ortorovebasso.service.user.impl;
 import java.util.Date;
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import com.ortoroverbasso.ortorovebasso.exception.UserNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.user.UserMapper;
 import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
 import com.ortoroverbasso.ortorovebasso.security.JwtTokenProvider;
+import com.ortoroverbasso.ortorovebasso.service.images.IImagesDetailService;
 import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
 
 import jakarta.transaction.Transactional;
@@ -34,6 +36,8 @@ public class UserServiceImpl implements IUserService {
 
     @Autowired
     private JwtTokenProvider tokenProvider;
+    @Autowired
+    private IImagesDetailService imageDetailService;
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -203,4 +207,41 @@ public class UserServiceImpl implements IUserService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
+
+    @Transactional
+    @Override
+    public void assignProviderAvatarIfMissing(UserEntity user, String pictureUrl) {
+        System.out.println("👉 Metodo chiamato con pictureUrl = " + pictureUrl);
+
+        // Rendi l'utente gestito dalla sessione
+        UserEntity managedUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        UserProfileEntity profile = managedUser.getProfile();
+
+        if (profile != null) {
+            ImagesDetailEntity currentAvatar = profile.getAvatar();
+
+            if (currentAvatar != null) {
+                Hibernate.initialize(currentAvatar);
+            }
+
+            boolean shouldUpload = (currentAvatar == null)
+                    || (currentAvatar.getFileId() == null || currentAvatar.getFileId().isBlank());
+
+            if (shouldUpload && pictureUrl != null && !pictureUrl.isBlank()) {
+                System.out.println("🎯 Inizio upload immagine da URL");
+
+                ImagesDetailEntity avatar = imageDetailService.uploadFromUrl(pictureUrl, "avatar_provider");
+
+                profile.setAvatar(avatar);
+                userRepository.save(managedUser);
+            } else {
+                System.out.println("⛔️ Condizione non soddisfatta per l'upload avatar");
+            }
+        } else {
+            System.out.println("⛔️ Profilo utente nullo");
+        }
+    }
+
 }
