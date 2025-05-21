@@ -39,4 +39,5 @@ public class AuthController {
     public ResponseEntity<?> logout(HttpServletResponse response) {
         return authService.logout(response);
     }
+
 }
