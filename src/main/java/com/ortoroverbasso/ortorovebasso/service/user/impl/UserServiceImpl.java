@@ -8,14 +8,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserSessionDto;
+import com.ortoroverbasso.ortorovebasso.entity.images.ImagesDetailEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.AccountStatus;
 import com.ortoroverbasso.ortorovebasso.entity.user.Role;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
+import com.ortoroverbasso.ortorovebasso.entity.user.user_profile.UserProfileEntity;
 import com.ortoroverbasso.ortorovebasso.exception.UserNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.user.UserMapper;
 import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
@@ -82,7 +85,6 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public UserResponseDto deleteUser(Long id) {
-
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
         userRepository.delete(userEntity);
@@ -106,12 +108,18 @@ public class UserServiceImpl implements IUserService {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            if (authentication == null || !authentication.isAuthenticated()
-                    || "anonymousUser".equals(authentication.getPrincipal())) {
+            if (authentication == null || !authentication.isAuthenticated()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
             }
 
-            String username = authentication.getName();
+            String username;
+
+            if (authentication.getPrincipal() instanceof OAuth2User oauth2User) {
+                username = (String) oauth2User.getAttributes().get("email");
+            } else {
+                username = authentication.getName();
+            }
+
             if (username == null || username.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username in authentication");
             }
@@ -119,14 +127,11 @@ public class UserServiceImpl implements IUserService {
             UserEntity user = userRepository.findByEmail(username)
                     .orElseThrow(() -> new UserNotFoundException("User not found with email: " + username));
 
-            // ✅ Qui usi il tuo mapper per ottenere tutti i dati (incluso profile e avatar)
             UserResponseDto userDto = UserMapper.toResponseDto(user);
 
-            // ✅ Rigeneri token e scadenza
             String token = tokenProvider.generateToken(user);
             Date expiry = tokenProvider.getExpirationDateFromToken(token);
 
-            // ✅ Costruisci oggetto con tutto
             UserSessionDto session = new UserSessionDto();
             session.setToken(token);
             session.setExpiry(expiry);
@@ -149,16 +154,53 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public UserEntity findOrCreateFromGoogle(String email, String name) {
+    public UserEntity findOrCreateFromGoogle(String email, String name, String pictureUrl) {
         return userRepository.findByEmail(email)
                 .orElseGet(() -> {
                     UserEntity user = new UserEntity();
                     user.setEmail(email);
                     user.setName(name);
                     user.setProvider("GOOGLE");
-                    user.setRole(Role.USER); // default
-                    user.setAccountStatus(AccountStatus.ACTIVE); // default
+                    user.setRole(Role.USER);
+                    user.setAccountStatus(AccountStatus.ACTIVE);
+
+                    UserProfileEntity profile = new UserProfileEntity();
+                    profile.setUser(user);
+
+                    // Solo se è presente una picture valida e non c’è già un avatar
+                    if (pictureUrl != null && !pictureUrl.isBlank()) {
+                        ImagesDetailEntity avatar = new ImagesDetailEntity();
+                        avatar.setUrl(pictureUrl);
+                        avatar.setName("avatar_google_oauth.jpg");
+                        profile.setAvatar(avatar);
+                    }
+
+                    user.setProfile(profile);
+
                     return userRepository.save(user);
                 });
+    }
+
+    @Override
+    public ResponseEntity<?> getCurrentAuthenticatedUserByEmail(String email) {
+        try {
+            UserEntity user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+
+            UserResponseDto userDto = UserMapper.toResponseDto(user);
+            String token = tokenProvider.generateToken(user);
+            Date expiry = tokenProvider.getExpirationDateFromToken(token);
+
+            UserSessionDto session = new UserSessionDto();
+            session.setToken(token);
+            session.setExpiry(expiry);
+            session.setUser(userDto);
+
+            return ResponseEntity.ok(session);
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
     }
 }

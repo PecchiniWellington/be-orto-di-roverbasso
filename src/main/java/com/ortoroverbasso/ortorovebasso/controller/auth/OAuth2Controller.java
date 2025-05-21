@@ -30,6 +30,7 @@ public class OAuth2Controller {
 
         String email = (String) attributes.get("email");
         String name = (String) attributes.get("name");
+        String pictureUrl = (String) attributes.get("picture"); // Questo è l'avatar dinamico
 
         if (email == null || name == null) {
             return ResponseEntity.badRequest().body("Dati Google mancanti: email o nome non trovati");
@@ -37,7 +38,7 @@ public class OAuth2Controller {
 
         try {
             // Cerca o crea l’utente nel DB
-            UserEntity user = userService.findOrCreateFromGoogle(email, name);
+            UserEntity user = userService.findOrCreateFromGoogle(email, name, pictureUrl);
 
             // Genera token JWT
             String token = jwtTokenProvider.generateToken(user);

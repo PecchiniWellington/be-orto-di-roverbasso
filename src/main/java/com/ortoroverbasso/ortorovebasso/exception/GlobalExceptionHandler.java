@@ -8,6 +8,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -78,6 +79,12 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse errorResponse = new ErrorResponse("PRODUCT_NOT_FOUND", ex.getMessage(), status.value());
         return new ResponseEntity<>(errorResponse, status);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxSizeException(MaxUploadSizeExceededException exc) {
+        ErrorResponse response = new ErrorResponse("MAX_FILE_SIZE_EXCEEDED", "File troppo grande", 400);
+        return ResponseEntity.badRequest().body(response);
     }
 
 }

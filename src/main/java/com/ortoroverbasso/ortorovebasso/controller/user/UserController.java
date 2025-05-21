@@ -1,7 +1,7 @@
+// UserController.java
 package com.ortoroverbasso.ortorovebasso.controller.user;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,17 +56,16 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentAuthenticatedUser() {
+    public ResponseEntity<?> getCurrentAuthenticatedUser(@AuthenticationPrincipal OAuth2User principal) {
         try {
+            if (principal != null && principal.getAttributes() != null) {
+                String email = (String) principal.getAttributes().get("email");
+                return userService.getCurrentAuthenticatedUserByEmail(email);
+            }
             return userService.getCurrentAuthenticatedUser();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error checking authentication: " + e.getMessage());
         }
-    }
-
-    @GetMapping("/oauth2/me")
-    public ResponseEntity<Map<String, Object>> getFacebookUser(@AuthenticationPrincipal OAuth2User principal) {
-        return ResponseEntity.ok(principal.getAttributes());
     }
 }

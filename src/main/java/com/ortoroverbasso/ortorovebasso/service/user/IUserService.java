@@ -26,6 +26,8 @@ public interface IUserService {
 
     Long getUserIdFromEmail(String email);
 
-    UserEntity findOrCreateFromGoogle(String email, String name);
+    public UserEntity findOrCreateFromGoogle(String email, String name, String pictureUrl);
+
+    ResponseEntity<?> getCurrentAuthenticatedUserByEmail(String email);
 
 }

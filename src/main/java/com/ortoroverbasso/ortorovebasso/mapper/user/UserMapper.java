@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.util.StringUtils;
 
+import com.ortoroverbasso.ortorovebasso.dto.user.UserProfileResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
@@ -58,6 +59,19 @@ public class UserMapper {
 
         if (entity.getProfile() != null) {
             response.setProfile(UserProfileMapper.toResponseDto(entity.getProfile()));
+
+            if (entity.getProfile().getAvatar() != null) {
+                UserProfileResponseDto profileDto = UserProfileMapper.toResponseDto(entity.getProfile());
+
+                if (entity.getProfile().getAvatar() != null && entity.getProfile().getAvatar().getUrl() != null) {
+                    profileDto.setAvatarUrl(entity.getProfile().getAvatar().getUrl());
+                } else if (entity.getSecurity() != null
+                        && entity.getSecurity().getUser().getProfile().getAvatar() != null) {
+                    profileDto.setAvatarUrl(entity.getSecurity().getUser().getProfile().getAvatar().getUrl());
+                }
+
+                response.setProfile(profileDto);
+            }
         }
 
         if (entity.getAddresses() != null && !entity.getAddresses().isEmpty()) {
