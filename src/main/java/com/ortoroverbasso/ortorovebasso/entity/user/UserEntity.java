@@ -40,6 +40,8 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     private AccountStatus accountStatus;
 
+    private String provider;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserProfileEntity profile;
 
@@ -70,7 +72,8 @@ public class UserEntity {
             UserProfileEntity profile,
             UserPreferencesEntity preferences,
             UserSecurityEntity security,
-            List<UserAddressEntity> addresses) {
+            List<UserAddressEntity> addresses,
+            String provider) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -81,6 +84,7 @@ public class UserEntity {
         this.preferences = preferences;
         this.security = security;
         this.addresses = addresses;
+        this.provider = provider;
 
     }
 
@@ -164,4 +168,13 @@ public class UserEntity {
     public void setAddresses(List<UserAddressEntity> addresses) {
         this.addresses = addresses;
     }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
 }

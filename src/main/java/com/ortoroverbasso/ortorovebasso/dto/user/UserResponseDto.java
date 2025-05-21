@@ -17,6 +17,7 @@ public class UserResponseDto {
     private UserPreferencesResponseDto preferences;
     private UserSecurityResponseDto security;
     private List<UserAddressResponseDto> addresses;
+    private String provider;
 
     private String message; // opzionale per feedback (es. "Utente creato correttamente")
 
@@ -103,4 +104,13 @@ public class UserResponseDto {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
 }

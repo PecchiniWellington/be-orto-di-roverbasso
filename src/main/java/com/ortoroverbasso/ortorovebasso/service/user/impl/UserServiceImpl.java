@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserSessionDto;
+import com.ortoroverbasso.ortorovebasso.entity.user.AccountStatus;
+import com.ortoroverbasso.ortorovebasso.entity.user.Role;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 import com.ortoroverbasso.ortorovebasso.exception.UserNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.user.UserMapper;
@@ -144,5 +146,19 @@ public class UserServiceImpl implements IUserService {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
         return user.getId();
+    }
+
+    @Override
+    public UserEntity findOrCreateFromGoogle(String email, String name) {
+        return userRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    UserEntity user = new UserEntity();
+                    user.setEmail(email);
+                    user.setName(name);
+                    user.setProvider("GOOGLE");
+                    user.setRole(Role.USER); // default
+                    user.setAccountStatus(AccountStatus.ACTIVE); // default
+                    return userRepository.save(user);
+                });
     }
 }

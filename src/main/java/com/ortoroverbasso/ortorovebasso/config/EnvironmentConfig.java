@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.utils;
+package com.ortoroverbasso.ortorovebasso.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

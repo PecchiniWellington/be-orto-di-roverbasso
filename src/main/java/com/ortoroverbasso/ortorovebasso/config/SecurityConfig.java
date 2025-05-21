@@ -20,6 +20,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.ortoroverbasso.ortorovebasso.security.CookieOAuth2AuthorizationRequestRepository;
+import com.ortoroverbasso.ortorovebasso.security.CustomOAuth2SuccessHandler;
 import com.ortoroverbasso.ortorovebasso.security.JwtAuthenticationEntryPoint;
 import com.ortoroverbasso.ortorovebasso.security.JwtAuthenticationFilter;
 
@@ -72,6 +74,11 @@ public class SecurityConfig {
   }
 
   @Bean
+  public CookieOAuth2AuthorizationRequestRepository cookieOAuth2AuthorizationRequestRepository() {
+    return new CookieOAuth2AuthorizationRequestRepository();
+  }
+
+  @Bean
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(List.of("http://localhost:3000"));
@@ -91,7 +98,7 @@ public class SecurityConfig {
         .csrf(csrf -> csrf.disable())
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ❗ NO JSESSIONID
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(WHITE_LIST_URLS).permitAll()
             .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
@@ -105,7 +112,10 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
             .anyRequest().authenticated())
         .oauth2Login(oauth2 -> oauth2
-            .successHandler(customOAuth2SuccessHandler) // ✅ token in cookie
+            .authorizationEndpoint(auth -> auth
+                .authorizationRequestRepository(cookieOAuth2AuthorizationRequestRepository()))
+            .successHandler(customOAuth2SuccessHandler)
+
         );
 
     http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);

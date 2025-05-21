@@ -18,6 +18,7 @@ public class UserRequestDto {
     private UserPreferencesRequestDto preferences;
     private UserSecurityRequestDto security;
     private List<UserAddressRequestDto> addresses;
+    private String provider;
 
     public UserRequestDto() {
     }
@@ -101,5 +102,13 @@ public class UserRequestDto {
 
     public void setAddresses(List<UserAddressRequestDto> addresses) {
         this.addresses = addresses;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 }

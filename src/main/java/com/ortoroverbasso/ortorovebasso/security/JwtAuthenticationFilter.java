@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.ortoroverbasso.ortorovebasso.config.EnvironmentConfig;
 import com.ortoroverbasso.ortorovebasso.service.cart.ICartService;
-import com.ortoroverbasso.ortorovebasso.utils.EnvironmentConfig;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -37,6 +37,10 @@ public class UserMapper {
             entity.setAccountStatus(dto.getAccountStatus());
         }
 
+        if (StringUtils.hasText(dto.getProvider())) {
+            entity.setProvider(dto.getProvider());
+        }
+
         return entity;
     }
 
@@ -50,6 +54,7 @@ public class UserMapper {
         response.setEmail(entity.getEmail());
         response.setRole(entity.getRole());
         response.setAccountStatus(entity.getAccountStatus());
+        response.setProvider(entity.getProvider());
 
         if (entity.getProfile() != null) {
             response.setProfile(UserProfileMapper.toResponseDto(entity.getProfile()));

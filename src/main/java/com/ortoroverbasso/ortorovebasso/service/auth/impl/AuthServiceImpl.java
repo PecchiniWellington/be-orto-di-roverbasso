@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ortoroverbasso.ortorovebasso.config.EnvironmentConfig;
 import com.ortoroverbasso.ortorovebasso.dto.auth.JwtAuthResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.auth.LoginRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.cart.CartResponseDto;
@@ -27,7 +28,6 @@ import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
 import com.ortoroverbasso.ortorovebasso.security.JwtTokenProvider;
 import com.ortoroverbasso.ortorovebasso.service.auth.IAuthService;
 import com.ortoroverbasso.ortorovebasso.service.cart.ICartService;
-import com.ortoroverbasso.ortorovebasso.utils.EnvironmentConfig;
 import com.ortoroverbasso.ortorovebasso.utils.JwtCookieUtil;
 
 import jakarta.servlet.http.Cookie;

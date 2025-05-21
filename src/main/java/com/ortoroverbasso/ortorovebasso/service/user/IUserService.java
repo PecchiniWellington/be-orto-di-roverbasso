@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
+import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 
 public interface IUserService {
     List<UserResponseDto> getAllUsers();
@@ -24,5 +25,7 @@ public interface IUserService {
     ResponseEntity<?> getCurrentAuthenticatedUser();
 
     Long getUserIdFromEmail(String email);
+
+    UserEntity findOrCreateFromGoogle(String email, String name);
 
 }
