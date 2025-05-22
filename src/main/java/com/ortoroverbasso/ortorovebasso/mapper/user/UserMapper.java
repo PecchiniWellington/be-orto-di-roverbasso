@@ -56,6 +56,7 @@ public class UserMapper {
         response.setRole(entity.getRole());
         response.setAccountStatus(entity.getAccountStatus());
         response.setProvider(entity.getProvider());
+        response.setEmailVerified(entity.isEmailVerified());
 
         if (entity.getProfile() != null) {
             UserProfileResponseDto profileDto = UserProfileMapper.toResponseDto(entity.getProfile());

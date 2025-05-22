@@ -20,6 +20,7 @@ public class UserResponseDto {
     private List<UserAddressResponseDto> addresses;
     private String provider;
     private CartResponseDto cart;
+    private boolean emailVerified; // opzionale per feedback (es. "Email verificata")
 
     private String message; // opzionale per feedback (es. "Utente creato correttamente")
 
@@ -121,6 +122,14 @@ public class UserResponseDto {
 
     public void setCart(CartResponseDto cart) {
         this.cart = cart;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
     }
 
 }

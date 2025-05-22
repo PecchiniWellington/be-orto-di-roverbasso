@@ -21,6 +21,8 @@ public interface IUserService {
 
     UserResponseDto getUserByEmail(String email);
 
+    UserEntity findByEmail(String email);
+
     // Add this new method for current authenticated user
     ResponseEntity<?> getCurrentAuthenticatedUser();
 

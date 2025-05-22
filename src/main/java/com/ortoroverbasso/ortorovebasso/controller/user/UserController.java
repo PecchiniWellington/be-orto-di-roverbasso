@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ortoroverbasso.ortorovebasso.config.EnvironmentConfig;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
+import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 import com.ortoroverbasso.ortorovebasso.service.cart.ICartService;
 import com.ortoroverbasso.ortorovebasso.service.email.IEmailVerificationService;
 import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
@@ -118,5 +120,22 @@ public class UserController {
         } else {
             return ResponseEntity.badRequest().body("Token non valido o scaduto");
         }
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> resendVerificationEmail(Authentication authentication) {
+        String userEmail = authentication.getName(); // email dall’utente autenticato
+
+        UserEntity user = userService.findByEmail(userEmail);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non trovato");
+        }
+
+        if (user.isEmailVerified()) {
+            return ResponseEntity.badRequest().body("Email già verificata");
+        }
+
+        emailVerificationService.sendVerificationToken(user);
+        return ResponseEntity.ok("Email di verifica inviata");
     }
 }
