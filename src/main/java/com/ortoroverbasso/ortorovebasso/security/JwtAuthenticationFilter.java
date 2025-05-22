@@ -42,6 +42,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private ICartService cartService;
 
+    private final List<String> publicPaths = List.of(
+            "/api/email/send",
+            "/api/auth/login",
+            "/api/auth/register",
+            "/api/auth/check",
+            "/swagger",
+            "/v3/api-docs");
+
     private final List<String> skipCartTokenPaths = List.of(
             "/api/products",
             "/api/categories",
@@ -53,6 +61,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
+
+        String path = request.getRequestURI();
+
+        // ⛔ Escludi richieste pubbliche dalla logica di autenticazione
+        if (publicPaths.stream().anyMatch(path::startsWith)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         try {
             // ==== Autenticazione JWT ====
@@ -68,13 +84,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            } else {
-
             }
 
             // ==== Salta gestione cartToken se non necessario ====
-            String path = request.getRequestURI();
             if (skipCartTokenPaths.stream().anyMatch(path::startsWith)) {
                 filterChain.doFilter(request, response);
                 return;
@@ -98,14 +110,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
 
-            // Utente autenticato → se non ha cartToken, non ne crea uno
+            // Utente autenticato → non generare cartToken
             if (isAuthenticatedUser && (cartToken == null || cartToken.isBlank())) {
                 logger.info("[JWT FILTER] Utente autenticato senza cartToken: nessun nuovo token generato.");
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            // Guest → crea nuovo cartToken se mancante
+            // Guest → crea cartToken se mancante
             if (!isAuthenticatedUser && (cartToken == null || cartToken.isBlank())) {
                 cartToken = UUID.randomUUID().toString();
                 Cookie newCartCookie = new Cookie("cartToken", cartToken);
@@ -147,7 +159,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("JWT".equals(cookie.getName())) {
-
                     return cookie.getValue();
                 }
             }

@@ -51,7 +51,8 @@ public class SecurityConfig {
       "/oauth2/**",
       "/login/oauth2/**",
       "/oauth2/authorization/**",
-      "/login**"
+      "/login**",
+      "/api/email/send",
   };
 
   public SecurityConfig(
