@@ -23,6 +23,7 @@ import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImages
 import com.ortoroverbasso.ortorovebasso.entity.images.ImagesDetailEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_images.ProductImageEntity;
+import com.ortoroverbasso.ortorovebasso.enums.ImageExtension;
 import com.ortoroverbasso.ortorovebasso.exception.ImageNotFoundException;
 import com.ortoroverbasso.ortorovebasso.exception.ProductNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.images.ImagesMapper;
@@ -32,32 +33,31 @@ import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.product_images.ProductImagesRepository;
 import com.ortoroverbasso.ortorovebasso.service.images.IImagesDetailService;
 import com.ortoroverbasso.ortorovebasso.utils.BytesMultipartFile;
+import com.ortoroverbasso.ortorovebasso.utils.ImageExtensionUtil;
 
 import jakarta.transaction.Transactional;
 
 @Service
 public class ImageDetailServiceImpl implements IImagesDetailService {
 
+    private static final String BACKBLAZE_BASE_URL = "https://f003.backblazeb2.com/file/";
+    private static final String FILE_TOO_LARGE_MSG = "File troppo grande.";
+
     @Autowired
     private ProductRepository productRepository;
-
     @Autowired
     private B2StorageClientImpl b2StorageClient;
-
     @Autowired
     private ProductImagesRepository productImageRepository;
+    @Autowired
+    private ImagesDetailRepository imagesDetailRepository;
 
     @Value("${backblaze.bucket-name}")
     private String bucketName;
-
     @Value("${backblaze.bucket-id}")
     private String bucketId;
-
     @Value("${app.upload.max-file-size-bytes}")
     private long maxFileSize;
-
-    @Autowired
-    private ImagesDetailRepository imagesDetailRepository;
 
     private ImagesDetailEntity findImageOrThrow(Long id) {
         return imagesDetailRepository.findById(id)
@@ -71,22 +71,45 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
 
     @Override
     public ImagesDetailDto uploadImage(MultipartFile file) {
+        return uploadImage(file, null);
+    }
+
+    @Override
+    public ImagesDetailDto uploadImage(MultipartFile file, String customFileName) {
         try {
             if (file.getSize() > maxFileSize) {
                 throw new IllegalArgumentException("File troppo grande.");
             }
 
-            String filename = file.getOriginalFilename();
+            // Prendi il content type reale del file
+            String contentType = file.getContentType();
+            String extension = ImageExtension.getExtensionForMimeType(contentType);
+
+            // originalName dal MultipartFile
+            String originalName = file.getOriginalFilename();
+
+            // Costruisci nome file con estensione coerente
+            String baseName = (customFileName != null && !customFileName.isBlank())
+                    ? customFileName
+                    : (originalName != null ? originalName : "file");
+
+            int dotIndex = baseName.lastIndexOf('.');
+            if (dotIndex > 0) {
+                baseName = baseName.substring(0, dotIndex);
+            }
+
+            String filename = baseName + extension;
+
             byte[] fileBytes = file.getBytes();
             B2ContentSource contentSource = B2ByteArrayContentSource.builder(fileBytes).build();
 
             B2UploadFileRequest request = B2UploadFileRequest
-                    .builder(bucketId, filename, file.getContentType(), contentSource)
+                    .builder(bucketId, filename, contentType, contentSource)
                     .build();
 
             var response = b2StorageClient.uploadSmallFile(request);
 
-            String fileUrl = "https://f003.backblazeb2.com/file/" + bucketName + "/" + filename;
+            String fileUrl = BACKBLAZE_BASE_URL + bucketName + "/" + filename;
 
             ImagesDetailEntity imageEntity = new ImagesDetailEntity();
             imageEntity.setName(filename);
@@ -106,33 +129,24 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
 
     @Override
     public List<ImagesDetailDto> uploadImages(List<MultipartFile> files) {
-        List<ImagesDetailDto> uploadedImages = new ArrayList<>();
-        for (MultipartFile file : files) {
-            uploadedImages.add(uploadImage(file));
-        }
-        return uploadedImages;
+        return files.stream()
+                .map(this::uploadImage)
+                .toList();
     }
 
     @Override
     public void deleteImage(Long imageId) {
         try {
             ImagesDetailEntity image = findImageOrThrow(imageId);
-            String filename = image.getName();
-            String fileId = image.getFileId();
-
-            if (fileId == null || fileId.isBlank()) {
+            if (image.getFileId() == null || image.getFileId().isBlank())
                 throw new RuntimeException("fileId mancante per l'immagine con ID: " + imageId);
-            }
 
-            B2DeleteFileVersionRequest deleteRequest = B2DeleteFileVersionRequest
-                    .builder(filename, fileId)
-                    .build();
+            var deleteRequest = B2DeleteFileVersionRequest.builder(image.getName(), image.getFileId()).build();
 
             b2StorageClient.deleteFileVersion(deleteRequest);
             imagesDetailRepository.delete(image);
 
-            System.out.println("✅ File eliminato da B2 (via fileId): " + filename);
-
+            System.out.println("✅ File eliminato da B2 (via fileId): " + image.getName());
         } catch (B2Exception e) {
             System.err.println("Errore durante la cancellazione su B2: " + e.getMessage());
             e.printStackTrace();
@@ -143,65 +157,48 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
     @Transactional
     @Override
     public void deleteImages(List<Long> imageIds) {
-        for (Long id : imageIds) {
-            deleteImage(id);
-        }
+        imageIds.forEach(this::deleteImage);
     }
 
     @Transactional
     @Override
-    public List<ProductImagesResponseDto> connectImageToProduct(ImageConnectRequestDto imagesRequestDto) {
-        ProductEntity product = findProductOrThrow(imagesRequestDto.getIdConnect());
+    public List<ProductImagesResponseDto> connectImageToProduct(ImageConnectRequestDto dto) {
+        ProductEntity product = findProductOrThrow(dto.getIdConnect());
         List<ProductImagesResponseDto> connected = new ArrayList<>();
 
-        for (Long imageId : imagesRequestDto.getImageIds()) {
+        for (Long imageId : dto.getImageIds()) {
             ImagesDetailEntity imageEntity = findImageOrThrow(imageId);
             ImagesDetailDto imageDto = ImagesMapper.toResponse(imageEntity);
 
-            ProductImageEntity entity = ProductImagesMapper.toEntity(
-                    imageDto,
-                    imageDto.getName(),
-                    imageDto.getUrl(),
-                    product.getId());
-
-            productImageRepository.save(entity);
+            ProductImageEntity productImage = ProductImagesMapper.toEntity(imageDto, imageDto.getName(),
+                    imageDto.getUrl(), product.getId());
+            productImageRepository.save(productImage);
             imagesDetailRepository.delete(imageEntity);
-            connected.add(ProductImagesMapper.toResponse(entity));
-        }
 
+            connected.add(ProductImagesMapper.toResponse(productImage));
+        }
         return connected;
     }
 
     @Transactional
     @Override
-    public ImageConnectResponse disconnectImagesFromProduct(ImageConnectRequestDto imagesRequestDto) {
-        Long productId = imagesRequestDto.getIdConnect();
-        List<Long> imageIds = imagesRequestDto.getImageIds();
+    public ImageConnectResponse disconnectImagesFromProduct(ImageConnectRequestDto dto) {
+        Long productId = dto.getIdConnect();
+        List<Long> imageIds = dto.getImageIds();
         List<ImagesDetailDto> restoredImages = new ArrayList<>();
 
         for (Long imageId : imageIds) {
             ProductImageEntity productImage = productImageRepository.findByProductIdAndId(productId, imageId);
-            if (productImage != null) {
-                ImagesDetailEntity restored = new ImagesDetailEntity();
-                restored.setName(productImage.getName());
-                restored.setUrl(productImage.getUrl());
-                restored.setIsCover(productImage.isCover());
-                restored.setLogo(productImage.isLogo());
-                restored.setWhiteBackground(productImage.isWhiteBackground());
-                restored.setPosition(productImage.getPosition());
-                restored.setEnergyEfficiency(productImage.getEnergyEfficiency());
-                restored.setIcon(productImage.getIcon());
-                restored.setMarketingPhoto(productImage.getMarketingPhoto());
-                restored.setPackagingPhoto(productImage.getPackagingPhoto());
-                restored.setBrand(productImage.getBrand());
-                restored.setGpsrLabel(productImage.isGpsrLabel());
-                restored.setGpsrWarning(productImage.isGpsrWarning());
+            if (productImage == null)
+                continue;
 
-                imagesDetailRepository.save(restored);
-                productImageRepository.delete(productImage);
+            ImagesDetailEntity restored = new ImagesDetailEntity();
+            copyProductImageToImageEntity(productImage, restored);
 
-                restoredImages.add(ImagesMapper.toResponse(restored));
-            }
+            imagesDetailRepository.save(restored);
+            productImageRepository.delete(productImage);
+
+            restoredImages.add(ImagesMapper.toResponse(restored));
         }
 
         String message = restoredImages.isEmpty()
@@ -212,35 +209,108 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
     }
 
     @Override
-    public ImagesDetailEntity uploadFromUrl(String imageUrl, String name) {
+    public ImagesDetailEntity uploadFromUrl(String imageUrl, String customName) {
         try {
             URL url = new URL(imageUrl);
-            String fileName = name + ".jpg";
-            byte[] imageBytes = url.openStream().readAllBytes();
-            System.out.println("📥 Scaricata immagine da: " + imageUrl + " - dimensione: " + imageBytes.length);
+            var connection = url.openConnection();
+            connection.connect();
 
-            MultipartFile multipartFile = new BytesMultipartFile(fileName, imageBytes);
+            String contentType = connection.getContentType();
+            // Usa enum per ricavare estensione corretta dal contentType
+            String extension = ImageExtension.getExtensionForMimeType(contentType);
 
-            return uploadAndReturnEntity(multipartFile);
+            // Se l'estensione non è affidabile, prova a estrarla dall'URL
+            if (extension == null || extension.isBlank() || extension.equals(".jpg")) {
+                extension = ImageExtensionUtil.extractExtensionFromUrl(imageUrl);
+            }
+
+            // Costruisci baseName coerente, senza doppie estensioni
+            String baseName;
+            if (customName != null && !customName.isBlank()) {
+                int dotIndex = customName.lastIndexOf('.');
+                baseName = dotIndex > 0 ? customName.substring(0, dotIndex) : customName;
+            } else {
+                baseName = ImageExtensionUtil.extractBaseNameFromUrl(imageUrl);
+            }
+            if (baseName.isBlank()) {
+                baseName = "downloaded-image";
+            }
+
+            String fileName = baseName + extension;
+
+            // Scarica i byte dell'immagine
+            byte[] bytes;
+            try (var inputStream = connection.getInputStream()) {
+                bytes = inputStream.readAllBytes();
+            }
+
+            System.out.println("📥 Scaricata immagine da: " + imageUrl + " - dimensione: " + bytes.length);
+
+            // Crea MultipartFile usando BytesMultipartFile (assumendo contentType corretto)
+            MultipartFile multipartFile = new BytesMultipartFile(fileName, bytes, contentType);
+
+            // Usa la funzione uploadAndReturnEntity modificata per passare il nome custom
+            // corretto e contentType coerente
+            return uploadAndReturnEntity(multipartFile, baseName);
+
         } catch (IOException e) {
             throw new RuntimeException("Errore durante il download dell'immagine da URL", e);
         }
     }
 
     @Override
-    public ImagesDetailEntity uploadAndReturnEntity(MultipartFile file) {
-        ImagesDetailDto dto = uploadImage(file);
+    public ImagesDetailEntity uploadAndReturnEntity(MultipartFile file, String customFileName) {
+        ImagesDetailDto dto = uploadImage(file, customFileName);
         return imagesDetailRepository.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("Errore dopo upload"));
     }
 
     @Override
-    public void deleteFileFromB2(String fileName) {
-        throw new UnsupportedOperationException("Unimplemented method 'deleteFileFromB2'");
+    public ImagesDetailEntity uploadAndReturnEntity(MultipartFile file) {
+        return uploadAndReturnEntity(file, null);
+    }
+
+    @Override
+    public void deleteFileFromB2(String fileId, String fileName) {
+        try {
+            b2StorageClient.deleteFileVersion(
+                    B2DeleteFileVersionRequest.builder(fileName, fileId).build());
+        } catch (B2Exception e) {
+            throw new RuntimeException("Impossibile cancellare file da Backblaze B2", e);
+        }
     }
 
     @Override
     public byte[] downloadImage(String filename) {
         throw new UnsupportedOperationException("Unimplemented method 'downloadImage'");
+    }
+
+    // --- Metodi privati per ridurre duplicazioni e aumentare chiarezza ---
+
+    private void checkFileSize(MultipartFile file) {
+        if (file.getSize() > maxFileSize) {
+            throw new IllegalArgumentException(FILE_TOO_LARGE_MSG);
+        }
+    }
+
+    private void logUpload(String filename, long size, String url, Long id) {
+        System.out.println("🚀 Upload su Backblaze: " + filename + " - dimensione: " + size);
+        System.out.println("✅ Immagine salvata: " + url + " - ID DB: " + id);
+    }
+
+    private void copyProductImageToImageEntity(ProductImageEntity productImage, ImagesDetailEntity imageEntity) {
+        imageEntity.setName(productImage.getName());
+        imageEntity.setUrl(productImage.getUrl());
+        imageEntity.setIsCover(productImage.isCover());
+        imageEntity.setLogo(productImage.isLogo());
+        imageEntity.setWhiteBackground(productImage.isWhiteBackground());
+        imageEntity.setPosition(productImage.getPosition());
+        imageEntity.setEnergyEfficiency(productImage.getEnergyEfficiency());
+        imageEntity.setIcon(productImage.getIcon());
+        imageEntity.setMarketingPhoto(productImage.getMarketingPhoto());
+        imageEntity.setPackagingPhoto(productImage.getPackagingPhoto());
+        imageEntity.setBrand(productImage.getBrand());
+        imageEntity.setGpsrLabel(productImage.isGpsrLabel());
+        imageEntity.setGpsrWarning(productImage.isGpsrWarning());
     }
 }

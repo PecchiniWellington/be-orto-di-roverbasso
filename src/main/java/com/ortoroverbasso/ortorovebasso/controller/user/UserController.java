@@ -17,12 +17,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ortoroverbasso.ortorovebasso.config.EnvironmentConfig;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.cart.ICartService;
+import com.ortoroverbasso.ortorovebasso.service.email.IEmailVerificationService;
 import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
 import com.ortoroverbasso.ortorovebasso.utils.JwtCookieUtil;
 
@@ -102,6 +104,19 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error checking authentication: " + e.getMessage());
+        }
+    }
+
+    @Autowired
+    private IEmailVerificationService emailVerificationService;
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        boolean success = emailVerificationService.verifyEmail(token);
+        if (success) {
+            return ResponseEntity.ok("Email verificata con successo");
+        } else {
+            return ResponseEntity.badRequest().body("Token non valido o scaduto");
         }
     }
 }

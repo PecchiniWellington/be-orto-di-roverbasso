@@ -105,6 +105,7 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(WHITE_LIST_URLS).permitAll()
+            .requestMatchers("/api/users/verify-email").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
             .requestMatchers("/api/users/*/preferences/**").authenticated()
             .requestMatchers("/api/users/*/profile/**").authenticated()

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Verifica il tuo indirizzo email</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f0f4f8;
+        font-family: Arial, sans-serif;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+      }
+
+      .header img {
+        width: 100px;
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        font-size: 24px;
+        color: #2b6cb0;
+        margin-bottom: 10px;
+      }
+
+      .content {
+        font-size: 16px;
+        color: #333;
+        margin-bottom: 20px;
+        line-height: 1.6;
+      }
+
+      .btn {
+        display: inline-block;
+        background-color: #2b6cb0;
+        color: #fff;
+        padding: 12px 28px;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: bold;
+        margin-top: 20px;
+      }
+
+      .footer {
+        font-size: 12px;
+        color: #888;
+        margin-top: 40px;
+      }
+
+      .social-icons {
+        margin-top: 20px;
+      }
+
+      .social-icons img {
+        width: 24px;
+        margin: 0 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img src="https://cdn-icons-png.flaticon.com/512/561/561127.png" alt="Verify Icon" />
+      </div>
+
+      <h1>Ciao <span th:text="${name}">Utente</span>, verifica la tua email</h1>
+
+      <p class="content">
+        Grazie per esserti registrato! Per completare la tua iscrizione, verifica il tuo indirizzo
+        email cliccando il pulsante qui sotto:
+      </p>
+
+      <a class="btn" th:href="${verificationUrl}">Verifica Email</a>
+
+      <p class="content" style="margin-top: 30px">
+        Se non hai richiesto questa registrazione, ignora semplicemente questa email.
+      </p>
+
+      <div class="footer">
+        <div class="social-icons">
+          <a href="#"
+            ><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"
+          /></a>
+          <a href="#"
+            ><img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" alt="Twitter"
+          /></a>
+          <a href="#"
+            ><img src="https://cdn-icons-png.flaticon.com/512/733/733561.png" alt="LinkedIn"
+          /></a>
+          <a href="#"
+            ><img src="https://cdn-icons-png.flaticon.com/512/733/733614.png" alt="Instagram"
+          /></a>
+        </div>
+        <p style="margin-top: 20px">
+          <a href="#">UNSUBSCRIBE</a> | <a href="#">PRIVACY POLICY</a> | <a href="#">WEB</a><br />
+          © 2025 Orto Rover Basso. Tutti i diritti riservati.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

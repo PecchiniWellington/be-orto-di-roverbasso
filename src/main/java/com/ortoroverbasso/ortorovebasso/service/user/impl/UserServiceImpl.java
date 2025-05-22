@@ -22,6 +22,7 @@ import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.user_profile.UserProfileEntity;
 import com.ortoroverbasso.ortorovebasso.exception.UserNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.user.UserMapper;
+import com.ortoroverbasso.ortorovebasso.repository.email_verification.EmailVerificationTokenRepository;
 import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
 import com.ortoroverbasso.ortorovebasso.security.JwtTokenProvider;
 import com.ortoroverbasso.ortorovebasso.service.images.IImagesDetailService;
@@ -38,6 +39,8 @@ public class UserServiceImpl implements IUserService {
     private JwtTokenProvider tokenProvider;
     @Autowired
     private IImagesDetailService imageDetailService;
+    @Autowired
+    private EmailVerificationTokenRepository emailVerificationTokenRepository;
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -89,24 +92,26 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public UserResponseDto deleteUser(Long id) {
+        // 1️⃣ Recupera l'utente o lancia eccezione se non esiste
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        // 1️⃣ Elimina immagine avatar se presente
+        // 2️⃣ Elimina token di verifica email associati
+        emailVerificationTokenRepository.deleteAllByUser_Id(id);
+
+        // 3️⃣ Elimina immagine avatar se presente
         UserProfileEntity profile = userEntity.getProfile();
         if (profile != null) {
             ImagesDetailEntity avatar = profile.getAvatar();
-            System.err.println("Avatar: " + avatar);
-            System.err.println("Avatar fileId: " + (avatar != null ? avatar.getFileId() : "null"));
             if (avatar != null && avatar.getFileId() != null && !avatar.getFileId().isBlank()) {
-                imageDetailService.deleteImage(avatar.getId());
+                imageDetailService.deleteImage(avatar.getId()); // elimina da B2 + DB
             }
         }
 
-        // 2️⃣ Cancella utente
+        // 4️⃣ Elimina l'utente
         userRepository.delete(userEntity);
 
-        // 3️⃣ Ritorna risposta
+        // 5️⃣ Mappa e restituisci la risposta
         UserResponseDto responseDto = UserMapper.toResponseDto(userEntity);
         responseDto.setMessage(
                 "User with ID " + userEntity.getId() + " and name " + userEntity.getName() + " has been deleted.");

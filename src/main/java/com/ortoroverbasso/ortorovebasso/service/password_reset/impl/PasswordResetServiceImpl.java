@@ -22,7 +22,9 @@ public class PasswordResetServiceImpl implements IPasswordResetService {
     @Value("${app.frontend.reset-url}") // es: http://localhost:3000/reset-password
     private String frontendResetUrl;
 
-    public PasswordResetServiceImpl(PasswordResetTokenRepository tokenRepository, IEmailService emailService) {
+    public PasswordResetServiceImpl(
+            PasswordResetTokenRepository tokenRepository,
+            IEmailService emailService) {
         this.tokenRepository = tokenRepository;
         this.emailService = emailService;
     }
@@ -37,11 +39,13 @@ public class PasswordResetServiceImpl implements IPasswordResetService {
         entity.setExpirationDate(LocalDateTime.now().plusHours(1));
         tokenRepository.save(entity);
 
-        String link = frontendResetUrl + "?token=" + token;
-        String subject = "Recupero password";
-        String body = "Clicca sul link per reimpostare la password: " + link;
+        String resetUrl = frontendResetUrl + "?token=" + token;
 
-        emailService.send(email, subject, body);
+        // TODO: Recupera il nome dell’utente se vuoi personalizzare l'email (es. "Ciao
+        // Mario")
+        String name = "utente"; // oppure recuperalo da UserRepository
+
+        emailService.sendHtmlResetPasswordEmail(email, name, resetUrl);
     }
 
     @Transactional

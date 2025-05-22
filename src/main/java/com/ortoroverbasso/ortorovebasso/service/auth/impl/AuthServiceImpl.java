@@ -28,6 +28,7 @@ import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
 import com.ortoroverbasso.ortorovebasso.security.JwtTokenProvider;
 import com.ortoroverbasso.ortorovebasso.service.auth.IAuthService;
 import com.ortoroverbasso.ortorovebasso.service.cart.ICartService;
+import com.ortoroverbasso.ortorovebasso.service.email.IEmailVerificationService;
 import com.ortoroverbasso.ortorovebasso.utils.JwtCookieUtil;
 
 import jakarta.servlet.http.Cookie;
@@ -57,6 +58,9 @@ public class AuthServiceImpl implements IAuthService {
 
     @Autowired
     private JwtCookieUtil jwtCookieUtil;
+
+    @Autowired
+    private IEmailVerificationService emailVerificationService;
 
     @Override
     public ResponseEntity<JwtAuthResponseDto> login(LoginRequestDto loginDto, HttpServletRequest request,
@@ -136,6 +140,7 @@ public class AuthServiceImpl implements IAuthService {
         user.setSecurity(security);
 
         userRepository.save(user);
+        emailVerificationService.sendVerificationToken(user);
 
         return ResponseEntity.ok("Utente registrato con successo");
     }

@@ -85,24 +85,29 @@ public class UserProfileServiceImpl implements IUserProfileService {
     @Override
     @Transactional
     public UserProfileResponseDto uploadAndSetAvatar(Long userId, MultipartFile file) {
-        // 1. Trova utente e profilo
+        // 1. Trova profilo
         UserProfileEntity profile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Profilo non trovato"));
 
-        // 2. Upload immagine su B2 e salvataggio entità
-        ImagesDetailEntity uploadedImage = imagesService.uploadAndReturnEntity(file);
-
-        // 3. Elimina vecchio avatar se presente
+        // 2. Se c’è già un avatar, cancellalo da B2 e DB
         ImagesDetailEntity oldAvatar = profile.getAvatar();
         if (oldAvatar != null) {
+            // cancella da Backblaze B2
+            imagesService.deleteFileFromB2(oldAvatar.getFileId(), oldAvatar.getName());
+            // cancella da DB
             imagesDetailRepository.delete(oldAvatar);
         }
 
-        // 4. Collega l’immagine al profilo
+        String customFileName = "avatars/user-avatar-" + userId + ".png";
+
+        ImagesDetailEntity uploadedImage = imagesService.uploadAndReturnEntity(file, customFileName);
+
+        // 4. Aggiorna profilo con nuovo avatar e salva
         profile.setAvatar(uploadedImage);
         userProfileRepository.save(profile);
 
-        // 5. Ritorna il profilo aggiornato
+        // 5. Ritorna DTO aggiornato
         return UserProfileMapper.toResponseDto(profile);
     }
+
 }

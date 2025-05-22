@@ -33,6 +33,9 @@ public class UserEntity {
     @Column(unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private boolean emailVerified = false;
+
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -78,7 +81,8 @@ public class UserEntity {
             UserSecurityEntity security,
             List<UserAddressEntity> addresses,
             String provider,
-            CartEntity cart) {
+            CartEntity cart,
+            boolean emailVerified) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -91,6 +95,7 @@ public class UserEntity {
         this.addresses = addresses;
         this.provider = provider;
         this.cart = cart;
+        this.emailVerified = emailVerified;
 
     }
 
@@ -189,6 +194,14 @@ public class UserEntity {
 
     public void setCart(CartEntity cart) {
         this.cart = cart;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
     }
 
 }

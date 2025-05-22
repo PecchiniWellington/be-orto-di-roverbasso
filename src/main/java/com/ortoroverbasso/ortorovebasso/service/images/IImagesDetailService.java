@@ -13,6 +13,8 @@ import com.ortoroverbasso.ortorovebasso.entity.images.ImagesDetailEntity;
 public interface IImagesDetailService {
     // Define the methods that will be implemented in the service class
 
+    ImagesDetailDto uploadImage(MultipartFile file, String customFileName);
+
     ImagesDetailDto uploadImage(MultipartFile file);
 
     List<ImagesDetailDto> uploadImages(List<MultipartFile> files);
@@ -21,7 +23,7 @@ public interface IImagesDetailService {
 
     ImageConnectResponse disconnectImagesFromProduct(ImageConnectRequestDto imagesRequestDto);
 
-    void deleteFileFromB2(String fileName);
+    void deleteFileFromB2(String fileName, String bucketName);
 
     byte[] downloadImage(String filename);
 
@@ -32,4 +34,6 @@ public interface IImagesDetailService {
     ImagesDetailEntity uploadFromUrl(String imageUrl, String name);
 
     ImagesDetailEntity uploadAndReturnEntity(MultipartFile file);
+
+    ImagesDetailEntity uploadAndReturnEntity(MultipartFile file, String customFileName);
 }
