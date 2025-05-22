@@ -53,6 +53,9 @@ public class SecurityConfig {
       "/oauth2/authorization/**",
       "/login**",
       "/api/email/send",
+      "/api/auth/forgot-password",
+      "/api/auth/reset-password",
+      "/api/auth/validate-reset-token",
   };
 
   public SecurityConfig(
