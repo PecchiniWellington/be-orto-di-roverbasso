@@ -19,7 +19,7 @@ public interface IProductService {
 
     ProductResponseDto updateProduct(Long productId, ProductRequestDto product);
 
-    List<ProductResponseDto> getAllProducts();
+    PaginatedResponseDto<ProductResponseDto> getAllProducts(Pageable pageable);
 
     GenericResponseDto deleteProduct(Long productId);
 

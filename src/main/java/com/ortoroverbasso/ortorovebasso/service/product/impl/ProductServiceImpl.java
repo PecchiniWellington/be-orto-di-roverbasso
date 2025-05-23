@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -104,25 +106,32 @@ public class ProductServiceImpl implements IProductService {
         }
 
         @Override
-        public List<ProductResponseDto> getAllProducts() {
-                List<ProductEntity> products = productRepository.findAll();
+        public PaginatedResponseDto<ProductResponseDto> getAllProducts(Pageable pageable) {
+                Page<ProductEntity> productsPage = productRepository.findAll(pageable);
 
-                return products.stream().map(product -> {
-                        ProductResponseDto productDto = ProductMapper.toResponseDto(product);
+                List<ProductResponseDto> productDtos = productsPage.stream()
+                                .map(product -> {
+                                        ProductResponseDto productDto = ProductMapper.toResponseDto(product);
+                                        productDto.setTags(productTagsRepository.existsByProductId(product.getId()));
+                                        productDto.setAttributes(
+                                                        productAttributesRepository.existsByProductId(product.getId()));
 
-                        productDto.setTags(productTagsRepository.existsByProductId(product.getId()));
-                        productDto.setAttributes(productAttributesRepository.existsByProductId(product.getId()));
+                                        List<ProductImagesShortDto> productImagesDtos = product.getProductImages()
+                                                        .stream()
+                                                        .map(image -> new ProductImagesShortDto(
+                                                                        image.getId(),
+                                                                        image.getUrl(),
+                                                                        image.isCover()))
+                                                        .collect(Collectors.toList());
+                                        productDto.setProductImages(productImagesDtos);
 
-                        List<ProductImagesShortDto> productImagesDtos = product.getProductImages().stream()
-                                        .map(image -> new ProductImagesShortDto(
-                                                        image.getId(),
-                                                        image.getUrl(),
-                                                        image.isCover()))
-                                        .collect(Collectors.toList());
-                        productDto.setProductImages(productImagesDtos);
+                                        return productDto;
+                                })
+                                .collect(Collectors.toList());
 
-                        return productDto;
-                }).collect(Collectors.toList());
+                // Usa il metodo statico dal DTO per costruire la risposta paginata
+                return PaginatedResponseDto
+                                .fromPage(new PageImpl<>(productDtos, pageable, productsPage.getTotalElements()));
         }
 
         @Override
