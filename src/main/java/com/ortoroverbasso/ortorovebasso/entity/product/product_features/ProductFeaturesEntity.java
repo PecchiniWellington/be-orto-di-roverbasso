@@ -1,16 +1,14 @@
 package com.ortoroverbasso.ortorovebasso.entity.product.product_features;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 
 @Entity
@@ -22,9 +20,8 @@ public class ProductFeaturesEntity {
     private String feature;
     private String value;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private List<ProductEntity> products;
+    @ManyToMany(mappedBy = "productFeatures")
+    private Set<ProductEntity> products;
 
     // Default constructor
     public ProductFeaturesEntity() {
@@ -60,11 +57,11 @@ public class ProductFeaturesEntity {
     }
 
     // Getter and Setter for products
-    public List<ProductEntity> getProducts() {
+    public Set<ProductEntity> getProducts() {
         return products;
     }
 
-    public void setProducts(List<ProductEntity> products) {
+    public void setProducts(Set<ProductEntity> products) {
         this.products = products;
     }
 

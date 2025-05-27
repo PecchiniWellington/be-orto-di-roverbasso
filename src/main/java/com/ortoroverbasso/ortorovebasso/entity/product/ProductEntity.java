@@ -70,9 +70,9 @@ public class ProductEntity {
     @JoinColumn(name = "product_information_id", referencedColumnName = "id", nullable = true)
     private ProductInformationEntity productInformation;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_features_id", referencedColumnName = "id")
-    private List<ProductFeaturesEntity> productFeatures = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(name = "product_feature", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "feature_id"))
+    private Set<ProductFeaturesEntity> productFeatures = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "product_whychoose", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "whychoose_id"))
@@ -269,11 +269,11 @@ public class ProductEntity {
         this.discount = discount;
     }
 
-    public List<ProductFeaturesEntity> getProductFeatures() {
+    public Set<ProductFeaturesEntity> getProductFeatures() {
         return productFeatures;
     }
 
-    public void setProductFeatures(List<ProductFeaturesEntity> productFeatures) {
+    public void setProductFeatures(Set<ProductFeaturesEntity> productFeatures) {
         this.productFeatures = productFeatures;
     }
 

@@ -32,6 +32,7 @@ public class CategoryServiceImpl implements ICategoryService {
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
         Set<CategoryResponseDto> subCategoriesDtos = category.getSubCategories().stream()
+                .filter(sub -> sub.getSubCategories().isEmpty())
                 .map(subCategory -> new CategoryResponseDto(
                         subCategory.getId(),
                         subCategory.getName(),
@@ -47,7 +48,7 @@ public class CategoryServiceImpl implements ICategoryService {
     @Transactional
     @Override
     public List<CategoryResponseDto> getAllCategories() {
-        List<CategoryEntity> categories = categoryRepository.findAll();
+        List<CategoryEntity> categories = categoryRepository.findAllWithSubCategoriesAndProducts();
 
         return categories.stream()
                 .filter(category -> category.getParentCategory() == null)
@@ -80,6 +81,7 @@ public class CategoryServiceImpl implements ICategoryService {
 
     private Set<CategoryResponseDto> getSubCategoriesRecursive(CategoryEntity category) {
         Set<CategoryResponseDto> subCategoriesDtos = category.getSubCategories().stream()
+                .filter(sub -> sub.getSubCategories().isEmpty())
                 .map(subCategory -> {
                     Set<ProductCategoryResponseDto> subCategoryProducts = subCategory.getProducts().stream()
                             .map(product -> new ProductCategoryResponseDto(product.getId(),
