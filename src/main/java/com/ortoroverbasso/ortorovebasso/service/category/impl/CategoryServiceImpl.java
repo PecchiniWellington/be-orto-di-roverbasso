@@ -16,6 +16,8 @@ import com.ortoroverbasso.ortorovebasso.repository.category.CategoryRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.service.category.ICategoryService;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class CategoryServiceImpl implements ICategoryService {
 
@@ -42,6 +44,7 @@ public class CategoryServiceImpl implements ICategoryService {
         return categoryResponseDto;
     }
 
+    @Transactional
     @Override
     public List<CategoryResponseDto> getAllCategories() {
         List<CategoryEntity> categories = categoryRepository.findAll();

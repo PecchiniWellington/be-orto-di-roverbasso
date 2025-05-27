@@ -47,12 +47,14 @@ public class UserServiceImpl implements IUserService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     @Override
     public List<UserResponseDto> getAllUsers() {
         List<UserEntity> usersEntity = userRepository.findAll();
         return usersEntity.stream().map(UserMapper::toResponseDto).toList();
     }
 
+    @Transactional
     @Override
     public UserResponseDto getUserById(Long id) {
         UserEntity userEntity = userRepository.findById(id)
@@ -119,6 +121,7 @@ public class UserServiceImpl implements IUserService {
         return responseDto;
     }
 
+    @Transactional
     @Override
     public UserResponseDto getUserByEmail(String email) {
         UserEntity userEntity = userRepository.findByEmail(email)
@@ -126,6 +129,7 @@ public class UserServiceImpl implements IUserService {
         return UserMapper.toResponseDto(userEntity);
     }
 
+    @Transactional
     @Override
     public ResponseEntity<?> getCurrentAuthenticatedUser() {
         try {
@@ -169,6 +173,7 @@ public class UserServiceImpl implements IUserService {
         }
     }
 
+    @Transactional
     @Override
     public Long getUserIdFromEmail(String email) {
         UserEntity user = userRepository.findByEmail(email)
@@ -204,6 +209,7 @@ public class UserServiceImpl implements IUserService {
                 });
     }
 
+    @Transactional
     @Override
     public ResponseEntity<?> getCurrentAuthenticatedUserByEmail(String email) {
         try {
@@ -263,6 +269,8 @@ public class UserServiceImpl implements IUserService {
         }
     }
 
+    @Override
+    @Transactional
     public UserEntity findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Utente non trovato con email: " + email));

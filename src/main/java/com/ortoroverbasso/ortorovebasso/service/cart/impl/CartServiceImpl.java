@@ -71,6 +71,7 @@ public class CartServiceImpl implements ICartService {
         });
     }
 
+    @Transactional
     private CartResponseDto getCartInternal(CartEntity cart) {
         List<CartItemDto> cartItems = cart.getItems().stream()
                 .sorted(Comparator.comparing(CartItemEntity::getAddedAt,
@@ -331,6 +332,7 @@ public class CartServiceImpl implements ICartService {
         }
     }
 
+    @Transactional
     @Override
     public CartResponseDto getCart(String cartToken) {
         CartEntity cart = cartRepository.findByCartToken(cartToken)
@@ -343,6 +345,7 @@ public class CartServiceImpl implements ICartService {
         return getCartInternal(cart);
     }
 
+    @Transactional
     @Override
     public CartResponseDto getCart(Long userId) {
         CartEntity cart = cartRepository.findByUserId(userId).orElseGet(() -> {
@@ -361,6 +364,7 @@ public class CartServiceImpl implements ICartService {
                 .orElseThrow(() -> new RuntimeException("Cart not found with token: " + cartToken));
     }
 
+    @Transactional
     @Override
     public CartResponseDto getCartById(Long cartId) {
         CartEntity cart = cartRepository.findById(cartId)
