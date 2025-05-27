@@ -3,6 +3,8 @@ package com.ortoroverbasso.ortorovebasso.controller.product;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import com.ortoroverbasso.ortorovebasso.dto.GenericResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.filters.paginate.PaginatedResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFacetResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFilterRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.ProductFlatDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
@@ -94,4 +97,26 @@ public class ProductController {
         return productService.getAvailableFilters(filterDto);
     }
 
+    // 📦 Versione NON paginata
+    @GetMapping("/flat-list")
+    public List<ProductFlatDto> getFlatProducts() {
+        return productService.getFlatProducts();
+    }
+
+    // 📄 Versione paginata
+    @GetMapping("/flat/paginated")
+    public Page<ProductFlatDto> getFlatProductsPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        List<ProductFlatDto> allProducts = productService.getFlatProducts();
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), allProducts.size());
+
+        List<ProductFlatDto> pagedList = allProducts.subList(start, end);
+
+        return new PageImpl<>(pagedList, pageable, allProducts.size());
+    }
 }

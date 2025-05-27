@@ -10,11 +10,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ortoroverbasso.ortorovebasso.dto.GenericResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.filters.paginate.PaginatedResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFacetResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFilterRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.ProductFlatDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesShortDto;
@@ -22,7 +24,6 @@ import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductI
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
 import com.ortoroverbasso.ortorovebasso.entity.category.CategoryEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
-import com.ortoroverbasso.ortorovebasso.entity.product.product_informations.ProductInformationEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
 import com.ortoroverbasso.ortorovebasso.exception.ProductNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.product.ProductMapper;
@@ -105,31 +106,42 @@ public class ProductServiceImpl implements IProductService {
                 return ProductMapper.toResponseDto(product);
         }
 
+        @Transactional(readOnly = true)
         @Override
         public PaginatedResponseDto<ProductResponseDto> getAllProducts(Pageable pageable) {
-                Page<ProductEntity> productsPage = productRepository.findAll(pageable);
+                Page<ProductEntity> productsPage = productRepository.findAllWithDetails(pageable); // senza join su
+                                                                                                   // priceLargeQuantities
 
                 List<ProductResponseDto> productDtos = productsPage.stream()
                                 .map(product -> {
-                                        ProductResponseDto productDto = ProductMapper.toResponseDto(product);
-                                        productDto.setTags(productTagsRepository.existsByProductId(product.getId()));
-                                        productDto.setAttributes(
+                                        // ⚠️ Forza il caricamento della lista LAZY
+                                        product.getPriceLargeQuantities().size();
+
+                                        ProductResponseDto dto = ProductMapper.toResponseDto(product);
+                                        dto.setTags(productTagsRepository.existsByProductId(product.getId()));
+                                        dto.setAttributes(
                                                         productAttributesRepository.existsByProductId(product.getId()));
 
-                                        List<ProductImagesShortDto> productImagesDtos = product.getProductImages()
-                                                        .stream()
-                                                        .map(image -> new ProductImagesShortDto(
-                                                                        image.getId(),
-                                                                        image.getUrl(),
-                                                                        image.isCover()))
+                                        List<ProductImagesShortDto> imageDtos = product.getProductImages().stream()
+                                                        .map(img -> new ProductImagesShortDto(img.getId(), img.getUrl(),
+                                                                        img.isCover()))
                                                         .collect(Collectors.toList());
-                                        productDto.setProductImages(productImagesDtos);
+                                        dto.setProductImages(imageDtos);
 
-                                        return productDto;
+                                        if (product.getProductInformation() != null) {
+                                                dto.setProductInformation(
+                                                                ProductInformationMapper.toResponseDto(
+                                                                                product.getProductInformation()));
+                                        }
+
+                                        if (product.getCategory() != null) {
+                                                dto.setCategoryId(product.getCategory().getId());
+                                        }
+
+                                        return dto;
                                 })
                                 .collect(Collectors.toList());
 
-                // Usa il metodo statico dal DTO per costruire la risposta paginata
                 return PaginatedResponseDto
                                 .fromPage(new PageImpl<>(productDtos, pageable, productsPage.getTotalElements()));
         }
@@ -168,16 +180,17 @@ public class ProductServiceImpl implements IProductService {
                 return ProductMapper.toResponseDto(existingProduct);
         }
 
+        @Transactional(readOnly = true)
         @Override
         public ProductResponseDto getProductById(Long productId) {
-                ProductEntity product = productRepository.findById(productId)
+                ProductEntity product = productRepository.findFullProductById(productId)
                                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
 
                 boolean hasTags = productTagsRepository.existsByProductId(productId);
                 boolean hasAttributes = productAttributesRepository.existsByProductId(productId);
 
                 ProductResponseDto productDto = ProductMapper.toResponseDto(product);
-                // Se la categoria è presente, aggiungi l'ID della categoria nella risposta
+
                 if (product.getCategory() != null) {
                         productDto.setCategoryId(product.getCategory().getId());
                 }
@@ -193,14 +206,11 @@ public class ProductServiceImpl implements IProductService {
                                 .collect(Collectors.toList());
                 productDto.setProductImages(productImagesDtos);
 
-                ProductInformationEntity productInformation = productInformationRepository.findByProductId(productId);
-
-                if (productInformation != null) {
+                // ProductInformation è già fetchato nella query
+                if (product.getProductInformation() != null) {
                         ProductInformationResponseDto productInformationResponseDto = ProductInformationMapper
-                                        .toResponseDto(productInformation);
+                                        .toResponseDto(product.getProductInformation());
                         productDto.setProductInformation(productInformationResponseDto);
-                } else {
-                        productDto.setProductInformation(null);
                 }
 
                 return productDto;
@@ -261,5 +271,11 @@ public class ProductServiceImpl implements IProductService {
                         ProductFilterRequestDto filterDto,
                         Pageable pageable) {
                 return productFacetService.getFilteredProducts(filterDto, pageable);
+        }
+
+        @Transactional(readOnly = true)
+        @Override
+        public List<ProductFlatDto> getFlatProducts() {
+                return productRepository.findAllFlat();
         }
 }

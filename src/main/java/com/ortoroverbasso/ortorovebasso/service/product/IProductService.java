@@ -8,6 +8,7 @@ import com.ortoroverbasso.ortorovebasso.dto.GenericResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.filters.paginate.PaginatedResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFacetResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFilterRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.ProductFlatDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 
@@ -30,5 +31,7 @@ public interface IProductService {
     PaginatedResponseDto<ProductResponseDto> getFilteredProducts(ProductFilterRequestDto filterDto, Pageable pageable);
 
     ProductFacetResponseDto getAvailableFilters(ProductFilterRequestDto filterDto);
+
+    List<ProductFlatDto> getFlatProducts();
 
 }

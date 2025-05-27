@@ -198,6 +198,23 @@
       <scope>test</scope>
     </dependency>
 
+
+    <!-- METRICS -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+    </dependency>
+
+    <!-- Opzionale ma utile: per metriche su JVM -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
