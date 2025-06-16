@@ -22,6 +22,7 @@ import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesShortDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.category.CategoryEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
@@ -72,17 +73,12 @@ public class ProductServiceImpl implements IProductService {
         @Override
         public ProductResponseDto createProduct(ProductRequestDto dto) {
 
-                // Recuperiamo la categoria tramite l'ID
                 CategoryEntity category = categoryRepository.findById(dto.getCategory())
                                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-                // Creiamo il prodotto
                 ProductEntity product = ProductMapper.toEntity(dto);
-
-                // Associa la categoria al prodotto
                 product.setCategory(category);
 
-                // Gestione dei prezzi per quantità
                 if (dto.getPriceLargeQuantities() == null) {
                         product.setPriceLargeQuantities(new ArrayList<>());
                 } else {
@@ -100,7 +96,6 @@ public class ProductServiceImpl implements IProductService {
                         product.setPriceLargeQuantities(prices);
                 }
 
-                // Salviamo il prodotto nel database
                 product = productRepository.save(product);
 
                 return ProductMapper.toResponseDto(product);
@@ -109,12 +104,10 @@ public class ProductServiceImpl implements IProductService {
         @Transactional(readOnly = true)
         @Override
         public PaginatedResponseDto<ProductResponseDto> getAllProducts(Pageable pageable) {
-                Page<ProductEntity> productsPage = productRepository.findAllWithDetails(pageable); // senza join su
-                                                                                                   // priceLargeQuantities
+                Page<ProductEntity> productsPage = productRepository.findAllWithDetails(pageable);
 
                 List<ProductResponseDto> productDtos = productsPage.stream()
                                 .map(product -> {
-                                        // ⚠️ Forza il caricamento della lista LAZY
                                         product.getPriceLargeQuantities().size();
 
                                         ProductResponseDto dto = ProductMapper.toResponseDto(product);
@@ -129,9 +122,8 @@ public class ProductServiceImpl implements IProductService {
                                         dto.setProductImages(imageDtos);
 
                                         if (product.getProductInformation() != null) {
-                                                dto.setProductInformation(
-                                                                ProductInformationMapper.toResponseDto(
-                                                                                product.getProductInformation()));
+                                                dto.setProductInformation(ProductInformationMapper.toResponseDto(
+                                                                product.getProductInformation()));
                                         }
 
                                         if (product.getCategory() != null) {
@@ -148,26 +140,19 @@ public class ProductServiceImpl implements IProductService {
 
         @Override
         public ProductResponseDto updateProduct(Long productId, ProductRequestDto productRequest) {
-
                 ProductEntity existingProduct = productRepository.findById(productId)
                                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
 
-                // Recuperiamo la categoria tramite l'ID
                 CategoryEntity category = categoryRepository.findById(productRequest.getCategory())
                                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-                // Aggiorniamo le informazioni del prodotto
                 ProductEntity updatedProduct = ProductMapper.toEntity(productRequest);
                 updatedProduct.setId(productId);
-
-                // Associa la categoria aggiornata
                 updatedProduct.setCategory(category);
 
-                // Copia le proprietà dal prodotto esistente a quello aggiornato
                 BeanUtils.copyProperties(updatedProduct, existingProduct,
                                 BeanUtilsHelper.getNullPropertyNames(updatedProduct));
 
-                // Gestiamo i prezzi per quantità se esistono
                 if (updatedProduct.getPriceLargeQuantities() != null) {
                         existingProduct.setPriceLargeQuantities(updatedProduct.getPriceLargeQuantities());
                 }
@@ -206,7 +191,6 @@ public class ProductServiceImpl implements IProductService {
                                 .collect(Collectors.toList());
                 productDto.setProductImages(productImagesDtos);
 
-                // ProductInformation è già fetchato nella query
                 if (product.getProductInformation() != null) {
                         ProductInformationResponseDto productInformationResponseDto = ProductInformationMapper
                                         .toResponseDto(product.getProductInformation());
@@ -222,7 +206,6 @@ public class ProductServiceImpl implements IProductService {
                                 .orElseThrow(() -> new ProductNotFoundException(productId));
 
                 productInformationRepository.deleteById(product.getId());
-
                 productRepository.delete(product);
 
                 return new GenericResponseDto(200, "Prodotto eliminato con successo. ID: " + productId);
@@ -230,21 +213,31 @@ public class ProductServiceImpl implements IProductService {
 
         @Override
         public List<ProductResponseDto> getProductsByCategory(Long categoryId) {
-                // Trova la categoria dal suo ID
                 CategoryEntity category = categoryRepository.findById(categoryId)
                                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-                // Trova i prodotti per la categoria
                 List<ProductEntity> products = productRepository.findByCategory(category);
 
-                // Mappa i prodotti in DTO
                 return products.stream()
-                                .map(ProductMapper::toResponseDto)
+                                .map(product -> {
+                                        product.getPriceLargeQuantities().size();
+                                        return ProductMapper.toResponseDto(product);
+                                })
                                 .collect(Collectors.toList());
         }
 
+        private void forceInit(CategoryEntity category) {
+                if (category.getSubCategories() != null) {
+                        category.getSubCategories().forEach(this::forceInit);
+                }
+        }
+
+        @Transactional
+        @Override
         public List<ProductResponseDto> getProductsByCategorySlug(String slug) {
-                CategoryEntity category = categoryRepository.findBySlug(slug);
+                CategoryEntity category = categoryRepository.findBySlugWithSubCategories(slug);
+
+                forceInit(category);
 
                 List<ProductResponseDto> products = new ArrayList<>();
                 collectProducts(category, products);
@@ -252,8 +245,13 @@ public class ProductServiceImpl implements IProductService {
         }
 
         private void collectProducts(CategoryEntity category, List<ProductResponseDto> products) {
-                products.addAll(productRepository.findByCategory(category).stream()
-                                .map(ProductMapper::toResponseDto)
+                List<ProductEntity> productEntities = productRepository.findByCategoryId(category.getId());
+
+                products.addAll(productEntities.stream()
+                                .map(product -> {
+                                        product.getPriceLargeQuantities().size();
+                                        return ProductMapper.toResponseDto(product);
+                                })
                                 .collect(Collectors.toList()));
 
                 for (CategoryEntity subCategory : category.getSubCategories()) {
@@ -266,11 +264,31 @@ public class ProductServiceImpl implements IProductService {
                 return productFacetService.getFacets(filterDto);
         }
 
+        @Transactional(readOnly = true)
         @Override
-        public PaginatedResponseDto<ProductResponseDto> getFilteredProducts(
-                        ProductFilterRequestDto filterDto,
+        public PaginatedResponseDto<ProductResponseDto> getFilteredProducts(ProductFilterRequestDto filterDto,
                         Pageable pageable) {
-                return productFacetService.getFilteredProducts(filterDto, pageable);
+
+                PaginatedResponseDto<ProductResponseDto> paginated = productFacetService.getFilteredProducts(filterDto,
+                                pageable);
+
+                paginated.getItems().forEach(dto -> {
+                        ProductEntity entity = productRepository.findById(dto.getId())
+                                        .orElseThrow(() -> new RuntimeException(
+                                                        "Product not found during enrichment: " + dto.getId()));
+
+                        // Forza l'inizializzazione
+                        List<ProductLargeQuantityPriceEntity> prices = entity.getPriceLargeQuantities();
+                        prices.size();
+
+                        List<ProductLargeQuantityPriceResponseDto> priceDtos = prices.stream()
+                                        .map(ProductMapper::toLargeQuantityDto)
+                                        .collect(Collectors.toList());
+
+                        dto.setPriceLargeQuantities(priceDtos);
+                });
+
+                return paginated;
         }
 
         @Transactional(readOnly = true)

@@ -1,7 +1,7 @@
 package com.ortoroverbasso.ortorovebasso.entity.category;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
@@ -30,11 +30,11 @@ public class CategoryEntity {
     @JoinColumn(name = "parent_category_id", nullable = true)
     private CategoryEntity parentCategory;
 
-    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL) // Cambia da PERSIST a ALL
-    private Set<CategoryEntity> subCategories = new HashSet<>();
+    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL)
+    private List<CategoryEntity> subCategories = new ArrayList<>();
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private Set<ProductEntity> products = new HashSet<>();
+    private List<ProductEntity> products = new ArrayList<>();
 
     // Getter e setter...
 
@@ -62,19 +62,19 @@ public class CategoryEntity {
         this.parentCategory = parentCategory;
     }
 
-    public Set<CategoryEntity> getSubCategories() {
+    public List<CategoryEntity> getSubCategories() {
         return subCategories;
     }
 
-    public void setSubCategories(Set<CategoryEntity> subCategories) {
+    public void setSubCategories(List<CategoryEntity> subCategories) {
         this.subCategories = subCategories;
     }
 
-    public Set<ProductEntity> getProducts() {
+    public List<ProductEntity> getProducts() {
         return products;
     }
 
-    public void setProducts(Set<ProductEntity> products) {
+    public void setProducts(List<ProductEntity> products) {
         this.products = products;
     }
 

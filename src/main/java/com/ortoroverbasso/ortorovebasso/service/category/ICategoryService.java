@@ -1,6 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.service.category;
 
-import java.util.List;
+import java.util.Set;
 
 import com.ortoroverbasso.ortorovebasso.dto.category.CategoryRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.category.CategoryResponseDto;
@@ -8,7 +8,7 @@ import com.ortoroverbasso.ortorovebasso.dto.category.CategoryResponseDto;
 public interface ICategoryService {
     CategoryResponseDto getCategory(Long id);
 
-    List<CategoryResponseDto> getAllCategories();
+    Set<CategoryResponseDto> getAllCategories();
 
     CategoryResponseDto createCategory(CategoryRequestDto categoryRequestDto);
 

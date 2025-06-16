@@ -65,7 +65,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         jwtCookie.setMaxAge(7 * 24 * 60 * 60);
         response.addCookie(jwtCookie);
 
-        response.sendRedirect("http://localhost:3000");
+        response.sendRedirect("http://localhost:1");
     }
 
 }

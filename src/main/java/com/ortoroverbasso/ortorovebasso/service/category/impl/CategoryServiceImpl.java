@@ -1,6 +1,5 @@
 package com.ortoroverbasso.ortorovebasso.service.category.impl;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +22,7 @@ public class CategoryServiceImpl implements ICategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
     @Autowired
     private ProductRepository productRepository;
 
@@ -31,13 +31,7 @@ public class CategoryServiceImpl implements ICategoryService {
         CategoryEntity category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        Set<CategoryResponseDto> subCategoriesDtos = category.getSubCategories().stream()
-                .filter(sub -> sub.getSubCategories().isEmpty())
-                .map(subCategory -> new CategoryResponseDto(
-                        subCategory.getId(),
-                        subCategory.getName(),
-                        subCategory.getSlug()))
-                .collect(Collectors.toSet());
+        Set<CategoryResponseDto> subCategoriesDtos = getSubCategoriesRecursive(category);
 
         CategoryResponseDto categoryResponseDto = CategoryMapper.toResponse(category);
         categoryResponseDto.setSubCategories(subCategoriesDtos);
@@ -47,45 +41,45 @@ public class CategoryServiceImpl implements ICategoryService {
 
     @Transactional
     @Override
-    public List<CategoryResponseDto> getAllCategories() {
-        List<CategoryEntity> categories = categoryRepository.findAllWithSubCategoriesAndProducts();
+    public Set<CategoryResponseDto> getAllCategories() {
+        Set<CategoryEntity> categoriesWithSubs = Set.copyOf(categoryRepository.findAllWithSubCategories());
+        Set<CategoryEntity> categoriesWithProducts = Set
+                .copyOf(categoryRepository.findAllWithProducts(categoriesWithSubs.stream().toList()));
 
-        return categories.stream()
-                .filter(category -> category.getParentCategory() == null)
+        return categoriesWithProducts.stream()
                 .map(category -> {
-
-                    Set<ProductCategoryResponseDto> productIdAndNameDtos = category.getProducts().stream()
-                            .map(product -> {
-                                String productName = (product.getProductInformation() != null)
-                                        ? product.getProductInformation().getName()
-                                        : "";
-                                return new ProductCategoryResponseDto(product.getId(), productName);
-                            })
+                    Set<ProductCategoryResponseDto> productDtos = category.getProducts().stream()
+                            .map(product -> new ProductCategoryResponseDto(
+                                    product.getId(),
+                                    product.getProductInformation() != null
+                                            ? product.getProductInformation().getName()
+                                            : ""))
                             .collect(Collectors.toSet());
 
-                    Set<CategoryResponseDto> subCategoriesDtos = getSubCategoriesRecursive(category);
+                    Set<CategoryResponseDto> subCategoryDtos = getSubCategoriesRecursive(category);
 
-                    CategoryResponseDto categoryResponseDto = new CategoryResponseDto();
-                    categoryResponseDto.setId(category.getId());
-                    categoryResponseDto.setName(category.getName());
-                    categoryResponseDto.setSlug(category.getSlug());
-                    categoryResponseDto.setProducts(productIdAndNameDtos);
-                    categoryResponseDto.setSubCategories(subCategoriesDtos);
-                    categoryResponseDto.setParentCategoryId(
+                    CategoryResponseDto dto = new CategoryResponseDto();
+                    dto.setId(category.getId());
+                    dto.setName(category.getName());
+                    dto.setSlug(category.getSlug());
+                    dto.setProducts(productDtos);
+                    dto.setSubCategories(subCategoryDtos);
+                    dto.setParentCategoryId(
                             category.getParentCategory() != null ? category.getParentCategory().getId() : null);
 
-                    return categoryResponseDto;
+                    return dto;
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     private Set<CategoryResponseDto> getSubCategoriesRecursive(CategoryEntity category) {
-        Set<CategoryResponseDto> subCategoriesDtos = category.getSubCategories().stream()
-                .filter(sub -> sub.getSubCategories().isEmpty())
+        return category.getSubCategories().stream()
                 .map(subCategory -> {
                     Set<ProductCategoryResponseDto> subCategoryProducts = subCategory.getProducts().stream()
-                            .map(product -> new ProductCategoryResponseDto(product.getId(),
-                                    product.getProductInformation() != null ? product.getProductInformation().getName()
+                            .map(product -> new ProductCategoryResponseDto(
+                                    product.getId(),
+                                    product.getProductInformation() != null
+                                            ? product.getProductInformation().getName()
                                             : ""))
                             .collect(Collectors.toSet());
 
@@ -104,8 +98,6 @@ public class CategoryServiceImpl implements ICategoryService {
                     return subCategoryDto;
                 })
                 .collect(Collectors.toSet());
-
-        return subCategoriesDtos;
     }
 
     @Override
@@ -120,7 +112,6 @@ public class CategoryServiceImpl implements ICategoryService {
 
             if (!parentCategory.getSubCategories().contains(category)) {
                 parentCategory.getSubCategories().add(category);
-
             }
 
             categoryRepository.save(category);
@@ -128,7 +119,6 @@ public class CategoryServiceImpl implements ICategoryService {
             categoryRepository.save(category);
         }
 
-        // Restituisci la categoria come risposta
         return CategoryMapper.toResponse(category);
     }
 
@@ -155,7 +145,6 @@ public class CategoryServiceImpl implements ICategoryService {
         CategoryEntity category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        // Rimuovi la categoria dai prodotti collegati
         category.getProducts().forEach(product -> {
             if (product.getCategory() != null && product.getCategory().getId().equals(id)) {
                 product.setCategory(null);
@@ -168,10 +157,7 @@ public class CategoryServiceImpl implements ICategoryService {
             }
         });
 
-        // Elimina eventuali sottocategorie collegate
-        deleteSubCategories(category, null); // se deleteSubCategories richiede una categoria sostitutiva, dovrai
-                                             // adattarlo
-
+        deleteSubCategories(category, null);
         categoryRepository.delete(category);
     }
 
@@ -185,7 +171,7 @@ public class CategoryServiceImpl implements ICategoryService {
                         product.getProductInformation().setProduct(null);
                     }
 
-                    productRepository.save(product); // Aggiorna il prodotto nel database
+                    productRepository.save(product);
                 }
             });
 
@@ -208,5 +194,4 @@ public class CategoryServiceImpl implements ICategoryService {
 
         return CategoryMapper.toResponse(subCategory);
     }
-
 }

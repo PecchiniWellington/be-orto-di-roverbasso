@@ -141,4 +141,12 @@ public class ProductMapper {
                 return productRequestDto;
         }
 
+        public static ProductLargeQuantityPriceResponseDto toLargeQuantityDto(ProductLargeQuantityPriceEntity entity) {
+                ProductLargeQuantityPriceResponseDto dto = new ProductLargeQuantityPriceResponseDto();
+                dto.setId(entity.getId());
+                dto.setQuantity(entity.getQuantity());
+                dto.setPrice(entity.getPrice());
+                return dto;
+        }
+
 }
