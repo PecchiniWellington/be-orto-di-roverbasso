@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +43,8 @@ public class UserServiceImpl implements IUserService {
     private IImagesDetailService imageDetailService;
     @Autowired
     private EmailVerificationTokenRepository emailVerificationTokenRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -66,30 +69,83 @@ public class UserServiceImpl implements IUserService {
     @Transactional
     public ResponseEntity<UserResponseDto> createUser(UserRequestDto userRequest) {
         UserEntity userEntity = UserMapper.toEntity(userRequest);
+
+        if (userRequest.getPassword() != null && !userRequest.getPassword().isBlank()) {
+            userEntity.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        }
+
         userEntity = userRepository.save(userEntity);
         UserResponseDto responseDto = UserMapper.toResponseDto(userEntity);
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     @Override
-    public UserResponseDto updateUser(Long id, UserRequestDto user) {
+    @Transactional
+    public UserResponseDto updateUser(Long id, UserRequestDto userDto) {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        if (user.getName() != null && !user.getName().isBlank()) {
-            userEntity.setName(user.getName());
+        // Nome
+        if (userDto.getName() != null && !userDto.getName().isBlank()) {
+            userEntity.setName(userDto.getName());
         }
 
-        if (user.getEmail() != null && !user.getEmail().isBlank()) {
-            userEntity.setEmail(user.getEmail());
+        // Email
+        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
+            userEntity.setEmail(userDto.getEmail());
         }
 
-        if (user.getPassword() != null && !user.getPassword().isBlank()) {
-            userEntity.setPassword(user.getPassword());
+        // Password
+        if (userDto.getPassword() != null && !userDto.getPassword().isBlank()) {
+            userEntity.setPassword(passwordEncoder.encode(userDto.getPassword()));
         }
 
-        UserEntity updatedUser = userRepository.save(userEntity);
-        return UserMapper.toResponseDto(updatedUser);
+        // Role
+        if (userDto.getRole() != null) {
+            userEntity.setRole(userDto.getRole());
+        }
+
+        // Account Status
+        if (userDto.getAccountStatus() != null) {
+            userEntity.setAccountStatus(userDto.getAccountStatus());
+        }
+
+        // Provider
+        if (userDto.getProvider() != null) {
+            userEntity.setProvider(userDto.getProvider());
+        }
+
+        /*
+         * if (userDto.getProfile() != null) {
+         * userEntity.setProfile(userProfileMapper.toEntity(userDto.getProfile(),
+         * userEntity.getProfile()));
+         * }
+         * 
+         * 
+         * if (userDto.getPreferences() != null) {
+         * userEntity.setPreferences(
+         * userPreferencesMapper.toEntity(userDto.getPreferences(),
+         * userEntity.getPreferences()));
+         * }
+         * 
+         * 
+         * if (userDto.getSecurity() != null) {
+         * userEntity.setSecurity(userSecurityMapper.toEntity(userDto.getSecurity(),
+         * userEntity.getSecurity()));
+         * }
+         * 
+         * 
+         * if (userDto.getAddresses() != null) {
+         * List<UserAddressEntity> updatedAddresses = userDto.getAddresses().stream()
+         * .map(addr -> userAddressMapper.toEntity(addr))
+         * .collect(Collectors.toList());
+         * 
+         * userEntity.setAddresses(updatedAddresses);
+         * }
+         */
+
+        UserEntity updated = userRepository.save(userEntity);
+        return UserMapper.toResponseDto(updated);
     }
 
     @Override
