@@ -10,6 +10,7 @@ public class UserResponseDto {
 
     private Long id;
     private String name;
+    private String lastName;
     private String email;
     private Role role;
     private AccountStatus accountStatus;
@@ -42,6 +43,14 @@ public class UserResponseDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getEmail() {

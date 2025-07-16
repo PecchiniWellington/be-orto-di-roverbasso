@@ -22,6 +22,10 @@ public class UserMapper {
             entity.setName(dto.getName());
         }
 
+        if (StringUtils.hasText(dto.getLastName())) {
+            entity.setLastName(dto.getLastName());
+        }
+
         if (StringUtils.hasText(dto.getEmail())) {
             entity.setEmail(dto.getEmail());
         }
@@ -52,6 +56,7 @@ public class UserMapper {
         UserResponseDto response = new UserResponseDto();
         response.setId(entity.getId());
         response.setName(entity.getName());
+        response.setLastName(entity.getLastName());
         response.setEmail(entity.getEmail());
         response.setRole(entity.getRole());
         response.setAccountStatus(entity.getAccountStatus());

@@ -29,6 +29,7 @@ public class UserEntity {
     private Long id;
 
     private String name;
+    private String lastName;
 
     @Column(unique = true)
     private String email;
@@ -72,6 +73,7 @@ public class UserEntity {
     public UserEntity(
             Long id,
             String name,
+            String lastName,
             String email,
             String password,
             Role role,
@@ -85,6 +87,7 @@ public class UserEntity {
             boolean emailVerified) {
         this.id = id;
         this.name = name;
+        this.lastName = lastName;
         this.email = email;
         this.password = password;
         this.role = role;
@@ -114,6 +117,14 @@ public class UserEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getEmail() {

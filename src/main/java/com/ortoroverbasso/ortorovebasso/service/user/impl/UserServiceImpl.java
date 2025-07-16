@@ -89,6 +89,10 @@ public class UserServiceImpl implements IUserService {
         if (userDto.getName() != null && !userDto.getName().isBlank()) {
             userEntity.setName(userDto.getName());
         }
+        // Cognome
+        if (userDto.getLastName() != null && !userDto.getLastName().isBlank()) {
+            userEntity.setLastName(userDto.getLastName());
+        }
 
         // Email
         if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
@@ -120,26 +124,26 @@ public class UserServiceImpl implements IUserService {
          * userEntity.setProfile(userProfileMapper.toEntity(userDto.getProfile(),
          * userEntity.getProfile()));
          * }
-         * 
-         * 
+         *
+         *
          * if (userDto.getPreferences() != null) {
          * userEntity.setPreferences(
          * userPreferencesMapper.toEntity(userDto.getPreferences(),
          * userEntity.getPreferences()));
          * }
-         * 
-         * 
+         *
+         *
          * if (userDto.getSecurity() != null) {
          * userEntity.setSecurity(userSecurityMapper.toEntity(userDto.getSecurity(),
          * userEntity.getSecurity()));
          * }
-         * 
-         * 
+         *
+         *
          * if (userDto.getAddresses() != null) {
          * List<UserAddressEntity> updatedAddresses = userDto.getAddresses().stream()
          * .map(addr -> userAddressMapper.toEntity(addr))
          * .collect(Collectors.toList());
-         * 
+         *
          * userEntity.setAddresses(updatedAddresses);
          * }
          */
