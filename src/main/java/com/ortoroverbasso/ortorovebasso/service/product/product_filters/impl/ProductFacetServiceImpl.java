@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,6 +29,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
@@ -155,10 +156,36 @@ public class ProductFacetServiceImpl implements IProductFacetService {
     @Override
     public PaginatedResponseDto<ProductResponseDto> getFilteredProducts(ProductFilterRequestDto filterDto,
             Pageable pageable) {
-        Specification<ProductEntity> spec = ProductSpecification.build(filterDto);
-        Pageable sortedPageable = applySorting(pageable, filterDto.getSort());
-        Page<ProductEntity> productPage = productRepository.findAll(spec, sortedPageable);
-        Page<ProductResponseDto> dtoPage = productPage.map(ProductMapper::toResponseDto);
-        return PaginatedResponseDto.fromPage(dtoPage);
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        CriteriaQuery<ProductEntity> query = cb.createQuery(ProductEntity.class);
+        Root<ProductEntity> root = query.from(ProductEntity.class);
+
+        root.fetch("productImages", JoinType.LEFT);
+        root.fetch("productInformation", JoinType.LEFT);
+        root.fetch("category", JoinType.LEFT);
+        query.distinct(true);
+
+        List<Predicate> predicates = ProductSpecification.buildPredicateList(filterDto, cb, root);
+        query.where(predicates.toArray(new Predicate[0]));
+        query.orderBy(cb.asc(root.get("id")));
+
+        List<ProductEntity> resultList = entityManager.createQuery(query)
+                .setFirstResult((int) pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
+
+        // Count query
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<ProductEntity> countRoot = countQuery.from(ProductEntity.class);
+        List<Predicate> countPredicates = ProductSpecification.buildPredicateList(filterDto, cb, countRoot);
+        countQuery.select(cb.countDistinct(countRoot)).where(countPredicates.toArray(new Predicate[0]));
+        Long total = entityManager.createQuery(countQuery).getSingleResult();
+
+        List<ProductResponseDto> dtoList = ProductMapper.toResponseDtoList(resultList);
+
+        return PaginatedResponseDto.fromPage(new PageImpl<>(dtoList, pageable, total));
     }
+
 }

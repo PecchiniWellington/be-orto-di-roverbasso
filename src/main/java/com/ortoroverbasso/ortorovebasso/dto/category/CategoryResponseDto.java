@@ -1,42 +1,38 @@
 package com.ortoroverbasso.ortorovebasso.dto.category;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CategoryResponseDto {
     private Long id;
     private String name;
     private String slug;
-    private Set<CategoryResponseDto> subCategories; // Sottocategorie
-    private Set<ProductCategoryResponseDto> products; // Prodotti associati alla categoria
-    private Long parentCategoryId; // ID della categoria padre (per evitare il ciclo infinito)
+    private Set<CategoryResponseDto> subCategories = new HashSet<>();
+    private Set<ProductCategoryResponseDto> products = new HashSet<>();
+    private Long parentCategoryId;
 
     public CategoryResponseDto() {
-
     }
 
-    // Costruttore con parametri
     public CategoryResponseDto(Long id, String name, String slug) {
         this.id = id;
         this.name = name;
         this.slug = slug;
     }
 
-    public CategoryResponseDto(
-            Long id,
-            String name,
-            Set<CategoryResponseDto> subCategories,
-            Set<ProductCategoryResponseDto> products,
-            Long parentCategoryId,
-            String slug) {
+    public CategoryResponseDto(Long id, String name, String slug, Set<CategoryResponseDto> subCategories,
+            Set<ProductCategoryResponseDto> products, Long parentCategoryId) {
         this.id = id;
         this.name = name;
+        this.slug = slug;
         this.subCategories = subCategories;
         this.products = products;
         this.parentCategoryId = parentCategoryId;
-        this.slug = slug;
     }
 
-    // Getter e Setter
     public Long getId() {
         return id;
     }
@@ -58,7 +54,7 @@ public class CategoryResponseDto {
     }
 
     public void setSubCategories(Set<CategoryResponseDto> subCategories) {
-        this.subCategories = subCategories;
+        this.subCategories = subCategories != null ? subCategories : new HashSet<>();
     }
 
     public Set<ProductCategoryResponseDto> getProducts() {
@@ -66,7 +62,7 @@ public class CategoryResponseDto {
     }
 
     public void setProducts(Set<ProductCategoryResponseDto> products) {
-        this.products = products;
+        this.products = products != null ? products : new HashSet<>();
     }
 
     public Long getParentCategoryId() {
@@ -85,4 +81,16 @@ public class CategoryResponseDto {
         this.slug = slug;
     }
 
+    // Metodi di utilità
+    public boolean hasSubCategories() {
+        return subCategories != null && !subCategories.isEmpty();
+    }
+
+    public boolean hasProducts() {
+        return products != null && !products.isEmpty();
+    }
+
+    public boolean isRootCategory() {
+        return parentCategoryId == null;
+    }
 }

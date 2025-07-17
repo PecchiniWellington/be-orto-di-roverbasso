@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.service.product.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -193,12 +194,18 @@ public class ProductServiceImpl implements IProductService {
         public List<ProductResponseDto> getProductsByCategorySlug(String slug) {
                 logger.debug("Retrieving products for category slug: {}", slug);
 
-                CategoryEntity category = categoryRepository.findBySlugWithSubCategories(slug);
-                if (category == null) {
-                        throw new CategoryNotFoundException("Category not found with slug: " + slug);
-                }
+                CategoryEntity category = categoryRepository.findBySlugWithSubCategories(slug)
+                                .orElseThrow(() -> new CategoryNotFoundException(
+                                                "Category not found with slug: " + slug));
 
-                return collectProductsFromCategoryTree(category);
+                // Raccogli tutti gli ID delle categorie e sottocategorie
+                List<Long> categoryIds = new ArrayList<>();
+                collectCategoryIdsRecursively(category, categoryIds);
+
+                // Un'unica query per ottenere tutti i prodotti delle categorie
+                List<ProductEntity> products = productRepository.findAllActiveByCategoryIdsWithDetails(categoryIds);
+
+                return ProductMapper.toResponseDtoList(products);
         }
 
         @Override
@@ -207,11 +214,9 @@ public class ProductServiceImpl implements IProductService {
                 logger.debug("Retrieving products for subcategory slug: {}", slug);
 
                 // Per sottocategorie, recuperiamo solo i prodotti di quella specifica categoria
-                CategoryEntity subCategory = categoryRepository.findBySlug(slug);
-                if (subCategory == null) {
-                        throw new CategoryNotFoundException(
-                                        "Subcategory not found with slug: " + slug);
-                }
+                CategoryEntity subCategory = categoryRepository.findBySlug(slug)
+                                .orElseThrow(() -> new CategoryNotFoundException(
+                                                "Subcategory not found with slug: " + slug));
 
                 List<ProductEntity> products = productRepository.findByCategoryId(subCategory.getId());
                 return ProductMapper.toResponseDtoList(products);
@@ -221,9 +226,13 @@ public class ProductServiceImpl implements IProductService {
         @Transactional(readOnly = true)
         public PaginatedResponseDto<ProductResponseDto> getFilteredProducts(
                         ProductFilterRequestDto filterDto, Pageable pageable) {
-                logger.debug("Retrieving filtered products with criteria: {}", filterDto);
 
-                return productFacetService.getFilteredProducts(filterDto, pageable);
+                Page<ProductEntity> productsPage = productRepository.findFilteredProducts(filterDto, pageable);
+
+                List<ProductResponseDto> productDtos = ProductMapper.toResponseDtoList(productsPage.getContent());
+
+                return PaginatedResponseDto.fromPage(
+                                new PageImpl<>(productDtos, pageable, productsPage.getTotalElements()));
         }
 
         @Override
@@ -324,6 +333,16 @@ public class ProductServiceImpl implements IProductService {
                 List<ProductEntity> allProducts = new java.util.ArrayList<>();
                 collectProductsRecursively(category, allProducts);
                 return ProductMapper.toResponseDtoList(allProducts);
+        }
+
+        private void collectCategoryIdsRecursively(CategoryEntity category, List<Long> ids) {
+                ids.add(category.getId());
+
+                if (category.getSubCategories() != null && !category.getSubCategories().isEmpty()) {
+                        for (CategoryEntity sub : category.getSubCategories()) {
+                                collectCategoryIdsRecursively(sub, ids);
+                        }
+                }
         }
 
         private void collectProductsRecursively(CategoryEntity category, List<ProductEntity> products) {
