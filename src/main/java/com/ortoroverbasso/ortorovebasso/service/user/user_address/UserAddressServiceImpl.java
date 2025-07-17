@@ -35,6 +35,11 @@ public class UserAddressServiceImpl implements IUserAddressService {
         UserAddressEntity entity = UserAddressMapper.toEntity(dto);
         entity.setUser(user);
 
+        // Se è il primo indirizzo per l’utente, impostalo come predefinito
+        if (user.getAddresses().isEmpty()) {
+            entity.setPrimary(true);
+        }
+
         return UserAddressMapper.toResponseDto(userAddressRepository.save(entity));
     }
 

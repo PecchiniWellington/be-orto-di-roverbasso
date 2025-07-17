@@ -14,6 +14,7 @@ import com.ortoroverbasso.ortorovebasso.service.auth.IAuthService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,14 +25,14 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponseDto> login(
-            @RequestBody LoginRequestDto loginDto,
+            @Valid @RequestBody LoginRequestDto loginDto,
             HttpServletRequest request,
             HttpServletResponse response) {
         return authService.login(loginDto, request, response);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserRequestDto dto) {
+    public ResponseEntity<?> register(@Valid @RequestBody UserRequestDto dto) {
         return authService.register(dto);
     }
 

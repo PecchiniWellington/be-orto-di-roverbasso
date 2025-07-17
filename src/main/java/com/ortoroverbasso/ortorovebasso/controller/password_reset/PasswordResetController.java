@@ -19,6 +19,8 @@ import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 import com.ortoroverbasso.ortorovebasso.repository.user.UserRepository;
 import com.ortoroverbasso.ortorovebasso.service.password_reset.IPasswordResetService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/auth")
 public class PasswordResetController {
@@ -36,14 +38,14 @@ public class PasswordResetController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody Map<String, String> request) {
         String email = request.get("email");
         passwordResetService.sendResetToken(email);
         return ResponseEntity.ok("Token inviato via email");
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody PasswordResetRequestDto request) {
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody PasswordResetRequestDto request) {
         if (!passwordResetService.isValidToken(request.getToken())) {
             return ResponseEntity.badRequest().body("Token non valido o scaduto");
         }
@@ -70,7 +72,7 @@ public class PasswordResetController {
 
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(
-            @RequestBody PasswordChangeRequestDto request,
+            @Valid @RequestBody PasswordChangeRequestDto request,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String email = userDetails.getUsername(); // ottenuto dal token

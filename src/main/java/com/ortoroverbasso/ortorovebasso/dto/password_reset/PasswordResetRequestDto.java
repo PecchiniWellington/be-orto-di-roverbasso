@@ -1,7 +1,13 @@
 package com.ortoroverbasso.ortorovebasso.dto.password_reset;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class PasswordResetRequestDto {
     private String token;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email should be valid")
     private String email;
     private String newPassword;
 

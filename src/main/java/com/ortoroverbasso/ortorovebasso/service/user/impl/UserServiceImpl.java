@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.ortoroverbasso.ortorovebasso.dto.user.UserRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.UserResponseDto;
@@ -21,7 +22,10 @@ import com.ortoroverbasso.ortorovebasso.entity.images.ImagesDetailEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.AccountStatus;
 import com.ortoroverbasso.ortorovebasso.entity.user.Role;
 import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
+import com.ortoroverbasso.ortorovebasso.entity.user.user_preferences.UserPreferencesEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.user_profile.UserProfileEntity;
+import com.ortoroverbasso.ortorovebasso.entity.user.user_security.UserSecurityEntity;
+import com.ortoroverbasso.ortorovebasso.exception.UserAlreadyExistsException;
 import com.ortoroverbasso.ortorovebasso.exception.UserNotFoundException;
 import com.ortoroverbasso.ortorovebasso.mapper.user.UserMapper;
 import com.ortoroverbasso.ortorovebasso.repository.email_verification.EmailVerificationTokenRepository;
@@ -31,6 +35,7 @@ import com.ortoroverbasso.ortorovebasso.service.images.IImagesDetailService;
 import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 @Service
 public class UserServiceImpl implements IUserService {
@@ -74,14 +79,37 @@ public class UserServiceImpl implements IUserService {
             userEntity.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         }
 
+        // Set default role and status if not provided
+        if (userEntity.getRole() == null) {
+            userEntity.setRole(Role.USER);
+        }
+        userEntity.setAccountStatus(AccountStatus.ACTIVE);
+
+        // Crea entità collegate
+        UserProfileEntity profile = new UserProfileEntity();
+        profile.setUser(userEntity);
+
+        UserPreferencesEntity preferences = new UserPreferencesEntity();
+        preferences.setUser(userEntity);
+
+        UserSecurityEntity security = new UserSecurityEntity();
+        security.setUser(userEntity);
+
+        // Associa tutto all’utente
+        userEntity.setProfile(profile);
+        userEntity.setPreferences(preferences);
+        userEntity.setSecurity(security);
+
+        // Salva utente (cascading salverà anche le altre entità se configurato)
         userEntity = userRepository.save(userEntity);
+
         UserResponseDto responseDto = UserMapper.toResponseDto(userEntity);
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     @Override
     @Transactional
-    public UserResponseDto updateUser(Long id, UserRequestDto userDto) {
+    public UserResponseDto updateUser(Long id, @Valid @RequestBody UserRequestDto userDto) {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
@@ -94,6 +122,16 @@ public class UserServiceImpl implements IUserService {
             userEntity.setLastName(userDto.getLastName());
         }
 
+        /* CONTROLLO EMAIL */
+        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
+            if (!userDto.getEmail().equals(userEntity.getEmail())) {
+                boolean emailExists = userRepository.existsByEmail(userDto.getEmail());
+                if (emailExists) {
+                    throw new UserAlreadyExistsException("Email già registrata.");
+                }
+                userEntity.setEmail(userDto.getEmail());
+            }
+        }
         // Email
         if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
             userEntity.setEmail(userDto.getEmail());

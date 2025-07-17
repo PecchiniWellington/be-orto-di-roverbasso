@@ -15,6 +15,8 @@ import com.ortoroverbasso.ortorovebasso.dto.user.shipping_address.ShippingAddres
 import com.ortoroverbasso.ortorovebasso.dto.user.shipping_address.ShippingAddressResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.user.shipping_address.IShippingAddressService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/shipping-addresses")
 public class ShippingAddressController {
@@ -23,14 +25,14 @@ public class ShippingAddressController {
     private IShippingAddressService shippingAddressService;
 
     @PostMapping
-    public ShippingAddressResponseDto createShippingAddress(@RequestBody ShippingAddressRequestDto dto) {
+    public ShippingAddressResponseDto createShippingAddress(@Valid @RequestBody ShippingAddressRequestDto dto) {
         return shippingAddressService.createShippingAddress(dto);
     }
 
     @PutMapping("/{id}")
     public ShippingAddressResponseDto updateShippingAddress(
             @PathVariable Long id,
-            @RequestBody ShippingAddressRequestDto dto) {
+            @Valid @RequestBody ShippingAddressRequestDto dto) {
         return shippingAddressService.updateShippingAddress(id, dto);
     }
 

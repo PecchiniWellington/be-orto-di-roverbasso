@@ -4,13 +4,24 @@ import java.util.List;
 
 import com.ortoroverbasso.ortorovebasso.entity.user.AccountStatus;
 import com.ortoroverbasso.ortorovebasso.entity.user.Role;
+import com.ortoroverbasso.ortorovebasso.service.validation.ValidationGroups;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 public class UserRequestDto {
 
     private Long id;
     private String name;
     private String lastName;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email should be valid")
     private String email;
+
+    @NotBlank(message = "La password è obbligatoria", groups = ValidationGroups.OnCreate.class)
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_\\-+=\\[\\]{};':\"\\\\|,.<>/?]).{8,}$", message = "La password deve contenere almeno 8 caratteri, una maiuscola, una minuscola, un numero e un simbolo speciale")
     private String password;
     private Role role;
     private AccountStatus accountStatus;

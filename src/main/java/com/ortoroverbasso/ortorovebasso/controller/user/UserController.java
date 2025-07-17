@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ import com.ortoroverbasso.ortorovebasso.entity.user.UserEntity;
 import com.ortoroverbasso.ortorovebasso.service.cart.ICartService;
 import com.ortoroverbasso.ortorovebasso.service.email.IEmailVerificationService;
 import com.ortoroverbasso.ortorovebasso.service.user.IUserService;
+import com.ortoroverbasso.ortorovebasso.service.validation.ValidationGroups;
 import com.ortoroverbasso.ortorovebasso.utils.JwtCookieUtil;
 
 import jakarta.servlet.http.Cookie;
@@ -56,7 +58,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto userRequest) {
+    public ResponseEntity<UserResponseDto> createUser(
+            @Validated(ValidationGroups.OnCreate.class) @RequestBody UserRequestDto userRequest) {
         return userService.createUser(userRequest);
     }
 
@@ -66,7 +69,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public UserResponseDto updateUser(@PathVariable Long id, @RequestBody UserRequestDto entity) {
+    public UserResponseDto updateUser(@PathVariable Long id, @Validated @RequestBody UserRequestDto entity) {
         return userService.updateUser(id, entity);
     }
 

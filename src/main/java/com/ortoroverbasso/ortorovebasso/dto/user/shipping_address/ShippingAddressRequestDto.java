@@ -1,5 +1,8 @@
 package com.ortoroverbasso.ortorovebasso.dto.user.shipping_address;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class ShippingAddressRequestDto {
 
     private String firstName;
@@ -9,6 +12,9 @@ public class ShippingAddressRequestDto {
     private String town;
     private String address;
     private String phone;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email should be valid")
     private String email;
     private String vatNumber;
     private String companyName;
