@@ -1,75 +1,116 @@
 package com.ortoroverbasso.ortorovebasso.dto.images;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+
+@Schema(description = "DTO per i dettagli delle immagini")
 public class ImagesDetailDto {
-    private long id;
-    private boolean isCover;
+
+    @Schema(description = "ID dell'immagine", example = "1")
+    private Long id;
+
+    @Schema(description = "Nome dell'immagine", example = "product-main-image")
     private String name;
+
+    @NotBlank(message = "URL dell'immagine è obbligatorio")
+    @Schema(description = "URL dell'immagine", example = "https://example.com/images/product.jpg")
     private String url;
-    private boolean logo;
-    private boolean whiteBackground;
-    private int position;
-    private int energyEfficiency;
-    private int icon;
-    private int marketingPhoto;
-    private int packagingPhoto;
-    private int brand;
-    private boolean gpsrLabel;
-    private boolean gpsrWarning;
+
+    @Schema(description = "Indica se questa è l'immagine di copertina", example = "true")
+    private Boolean isCover = false;
+
+    @Schema(description = "Posizione/ordine di visualizzazione", example = "1")
+    private Integer position = 0;
+
+    @Schema(description = "Testo alternativo per accessibilità", example = "Immagine principale del prodotto")
+    private String altText;
+
+    @Schema(description = "ID del file", example = "file-123")
     private String fileId;
 
-    // Default constructor
+    // Campi legacy mantenuti per compatibilità
+    @Schema(description = "Indica se è un logo", example = "false")
+    private Boolean isLogo = false;
+
+    @Schema(description = "Indica se ha sfondo bianco", example = "true")
+    private Boolean whiteBackground = false;
+
+    @Schema(description = "Efficienza energetica", example = "A+")
+    private String energyEfficiency;
+
+    @Schema(description = "Icona associata", example = "energy-star")
+    private String icon;
+
+    @Schema(description = "Foto marketing", example = "main-campaign")
+    private String marketingPhoto;
+
+    @Schema(description = "Foto packaging", example = "box-image")
+    private String packagePhoto;
+
+    @Schema(description = "Brand associato", example = "Samsung")
+    private String brand;
+
+    @Schema(description = "Etichetta GPSR", example = "false")
+    private Boolean gpsrLabel = false;
+
+    @Schema(description = "Avviso GPSR", example = "false")
+    private Boolean gpsrWarning = false;
+
+    // Constructors
     public ImagesDetailDto() {
     }
 
-    // All-args constructor
-    public ImagesDetailDto(
-            long id,
-            boolean isCover,
-            String name,
-            String url,
-            boolean logo,
-            boolean whiteBackground,
-            int position,
-            int energyEfficiency,
-            int icon,
-            int marketingPhoto,
-            int packagingPhoto,
-            int brand,
-            boolean gpsrLabel,
-            boolean gpsrWarning,
-            String fileId) {
-        this.id = id;
-        this.isCover = isCover;
+    public ImagesDetailDto(String name, String url, Boolean isCover) {
         this.name = name;
         this.url = url;
-        this.logo = logo;
-        this.whiteBackground = whiteBackground;
+        this.isCover = isCover;
+    }
+
+    public ImagesDetailDto(String name, String url, Boolean isCover, Integer position, String altText) {
+        this.name = name;
+        this.url = url;
+        this.isCover = isCover;
         this.position = position;
-        this.energyEfficiency = energyEfficiency;
-        this.icon = icon;
-        this.marketingPhoto = marketingPhoto;
-        this.packagingPhoto = packagingPhoto;
-        this.brand = brand;
-        this.gpsrLabel = gpsrLabel;
-        this.gpsrWarning = gpsrWarning;
-        this.fileId = fileId;
+        this.altText = altText;
+    }
+
+    // Utility methods
+    public boolean isCover() {
+        return Boolean.TRUE.equals(isCover);
+    }
+
+    public boolean isLogo() {
+        return Boolean.TRUE.equals(isLogo);
+    }
+
+    public boolean isWhiteBackground() {
+        return Boolean.TRUE.equals(whiteBackground);
+    }
+
+    public boolean isGpsrLabel() {
+        return Boolean.TRUE.equals(gpsrLabel);
+    }
+
+    public boolean isGpsrWarning() {
+        return Boolean.TRUE.equals(gpsrWarning);
+    }
+
+    // Metodi legacy per compatibilità
+    public String getPackagingPhoto() {
+        return packagePhoto;
+    }
+
+    public void setPackagingPhoto(String packagePhoto) {
+        this.packagePhoto = packagePhoto;
     }
 
     // Getters and Setters
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
-    }
-
-    public boolean isCover() {
-        return isCover;
-    }
-
-    public void setIsCover(boolean isCover) {
-        this.isCover = isCover;
     }
 
     public String getName() {
@@ -88,84 +129,28 @@ public class ImagesDetailDto {
         this.url = url;
     }
 
-    public boolean isLogo() {
-        return logo;
+    public Boolean getIsCover() {
+        return isCover;
     }
 
-    public void setLogo(boolean logo) {
-        this.logo = logo;
+    public void setIsCover(Boolean isCover) {
+        this.isCover = isCover;
     }
 
-    public boolean isWhiteBackground() {
-        return whiteBackground;
-    }
-
-    public void setWhiteBackground(boolean whiteBackground) {
-        this.whiteBackground = whiteBackground;
-    }
-
-    public int getPosition() {
+    public Integer getPosition() {
         return position;
     }
 
-    public void setPosition(int position) {
+    public void setPosition(Integer position) {
         this.position = position;
     }
 
-    public int getEnergyEfficiency() {
-        return energyEfficiency;
+    public String getAltText() {
+        return altText;
     }
 
-    public void setEnergyEfficiency(int energyEfficiency) {
-        this.energyEfficiency = energyEfficiency;
-    }
-
-    public int getIcon() {
-        return icon;
-    }
-
-    public void setIcon(int icon) {
-        this.icon = icon;
-    }
-
-    public int getMarketingPhoto() {
-        return marketingPhoto;
-    }
-
-    public void setMarketingPhoto(int marketingPhoto) {
-        this.marketingPhoto = marketingPhoto;
-    }
-
-    public int getPackagingPhoto() {
-        return packagingPhoto;
-    }
-
-    public void setPackagingPhoto(int packagingPhoto) {
-        this.packagingPhoto = packagingPhoto;
-    }
-
-    public int getBrand() {
-        return brand;
-    }
-
-    public void setBrand(int brand) {
-        this.brand = brand;
-    }
-
-    public boolean isGpsrLabel() {
-        return gpsrLabel;
-    }
-
-    public void setGpsrLabel(boolean gpsrLabel) {
-        this.gpsrLabel = gpsrLabel;
-    }
-
-    public boolean isGpsrWarning() {
-        return gpsrWarning;
-    }
-
-    public void setGpsrWarning(boolean gpsrWarning) {
-        this.gpsrWarning = gpsrWarning;
+    public void setAltText(String altText) {
+        this.altText = altText;
     }
 
     public String getFileId() {
@@ -176,4 +161,109 @@ public class ImagesDetailDto {
         this.fileId = fileId;
     }
 
+    public Boolean getIsLogo() {
+        return isLogo;
+    }
+
+    public void setIsLogo(Boolean isLogo) {
+        this.isLogo = isLogo;
+    }
+
+    public Boolean getWhiteBackground() {
+        return whiteBackground;
+    }
+
+    public void setWhiteBackground(Boolean whiteBackground) {
+        this.whiteBackground = whiteBackground;
+    }
+
+    public String getEnergyEfficiency() {
+        return energyEfficiency;
+    }
+
+    public void setEnergyEfficiency(String energyEfficiency) {
+        this.energyEfficiency = energyEfficiency;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    public String getMarketingPhoto() {
+        return marketingPhoto;
+    }
+
+    public void setMarketingPhoto(String marketingPhoto) {
+        this.marketingPhoto = marketingPhoto;
+    }
+
+    public String getPackagePhoto() {
+        return packagePhoto;
+    }
+
+    public void setPackagePhoto(String packagePhoto) {
+        this.packagePhoto = packagePhoto;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public Boolean getGpsrLabel() {
+        return gpsrLabel;
+    }
+
+    public void setGpsrLabel(Boolean gpsrLabel) {
+        this.gpsrLabel = gpsrLabel;
+    }
+
+    public Boolean getGpsrWarning() {
+        return gpsrWarning;
+    }
+
+    public void setGpsrWarning(Boolean gpsrWarning) {
+        this.gpsrWarning = gpsrWarning;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        ImagesDetailDto that = (ImagesDetailDto) o;
+
+        if (id != null ? !id.equals(that.id) : that.id != null)
+            return false;
+        return url != null ? url.equals(that.url) : that.url == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (url != null ? url.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ImagesDetailDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", url='" + url + '\'' +
+                ", isCover=" + isCover +
+                ", position=" + position +
+                ", altText='" + altText + '\'' +
+                ", fileId='" + fileId + '\'' +
+                '}';
+    }
 }

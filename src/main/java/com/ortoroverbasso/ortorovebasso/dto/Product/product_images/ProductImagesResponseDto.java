@@ -1,68 +1,53 @@
 package com.ortoroverbasso.ortorovebasso.dto.product.product_images;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "DTO per la risposta delle immagini del prodotto")
 public class ProductImagesResponseDto {
+
+    @Schema(description = "ID dell'immagine", example = "1")
     private Long id;
-    private String name;
-    private String url;
-    private boolean isCover;
-    private boolean logo;
-    private boolean whiteBackground;
-    private int position;
-    private int energyEfficiency;
-    private int icon;
-    private int marketingPhoto;
-    private int packagingPhoto;
-    private int brand;
-    private boolean gpsrLabel;
-    private boolean gpsrWarning;
+
+    @Schema(description = "ID del prodotto associato", example = "123")
     private Long productId;
 
-    // Default constructor
+    @Schema(description = "URL dell'immagine", example = "https://example.com/images/product.jpg")
+    private String url;
+
+    @Schema(description = "Testo alternativo per l'immagine", example = "Immagine del prodotto XYZ")
+    private String altText;
+
+    @Schema(description = "Indica se questa è l'immagine di copertina", example = "true")
+    private Boolean isCover = false;
+
+    @Schema(description = "Ordine di visualizzazione dell'immagine", example = "1")
+    private Integer displayOrder = 0;
+
+    // Constructors
     public ProductImagesResponseDto() {
     }
 
-    public ProductImagesResponseDto(Long id, String url, boolean isCover) {
-
+    public ProductImagesResponseDto(Long id, String url, Boolean isCover) {
         this.id = id;
-
         this.url = url;
-
         this.isCover = isCover;
-
     }
 
-    // All-args constructor
-    public ProductImagesResponseDto(
-            Long id,
-            String name,
-            String url,
-            boolean isCover,
-            boolean logo,
-            boolean whiteBackground,
-            int position,
-            int energyEfficiency,
-            int icon,
-            int marketingPhoto,
-            int packagingPhoto,
-            int brand,
-            boolean gpsrLabel,
-            boolean gpsrWarning,
-            Long productId) {
+    public ProductImagesResponseDto(Long id, String url, String altText, Boolean isCover, Integer displayOrder) {
         this.id = id;
-        this.name = name;
         this.url = url;
+        this.altText = altText;
         this.isCover = isCover;
-        this.logo = logo;
-        this.whiteBackground = whiteBackground;
-        this.position = position;
-        this.energyEfficiency = energyEfficiency;
-        this.icon = icon;
-        this.marketingPhoto = marketingPhoto;
-        this.packagingPhoto = packagingPhoto;
-        this.brand = brand;
-        this.gpsrLabel = gpsrLabel;
-        this.gpsrWarning = gpsrWarning;
-        this.productId = productId;
+        this.displayOrder = displayOrder;
+    }
+
+    // Utility methods
+    public boolean isCover() {
+        return Boolean.TRUE.equals(isCover);
+    }
+
+    public String getDisplayText() {
+        return altText != null && !altText.trim().isEmpty() ? altText : "Immagine prodotto";
     }
 
     // Getters and Setters
@@ -74,12 +59,12 @@ public class ProductImagesResponseDto {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public Long getProductId() {
+        return productId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 
     public String getUrl() {
@@ -90,100 +75,47 @@ public class ProductImagesResponseDto {
         this.url = url;
     }
 
-    public boolean isCover() {
+    public String getAltText() {
+        return altText;
+    }
+
+    public void setAltText(String altText) {
+        this.altText = altText;
+    }
+
+    public Boolean getCover() {
         return isCover;
     }
 
-    public void setCover(boolean isCover) {
+    public void setCover(Boolean cover) {
+        this.isCover = cover;
+    }
+
+    public Boolean getIsCover() {
+        return isCover;
+    }
+
+    public void setIsCover(Boolean isCover) {
         this.isCover = isCover;
     }
 
-    public boolean isLogo() {
-        return logo;
+    public Integer getDisplayOrder() {
+        return displayOrder;
     }
 
-    public void setLogo(boolean logo) {
-        this.logo = logo;
+    public void setDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
     }
 
-    public boolean isWhiteBackground() {
-        return whiteBackground;
+    @Override
+    public String toString() {
+        return "ProductImagesResponseDto{" +
+                "id=" + id +
+                ", productId=" + productId +
+                ", url='" + url + '\'' +
+                ", altText='" + altText + '\'' +
+                ", isCover=" + isCover +
+                ", displayOrder=" + displayOrder +
+                '}';
     }
-
-    public void setWhiteBackground(boolean whiteBackground) {
-        this.whiteBackground = whiteBackground;
-    }
-
-    public int getPosition() {
-        return position;
-    }
-
-    public void setPosition(int position) {
-        this.position = position;
-    }
-
-    public int getEnergyEfficiency() {
-        return energyEfficiency;
-    }
-
-    public void setEnergyEfficiency(int energyEfficiency) {
-        this.energyEfficiency = energyEfficiency;
-    }
-
-    public int getIcon() {
-        return icon;
-    }
-
-    public void setIcon(int icon) {
-        this.icon = icon;
-    }
-
-    public int getMarketingPhoto() {
-        return marketingPhoto;
-    }
-
-    public void setMarketingPhoto(int marketingPhoto) {
-        this.marketingPhoto = marketingPhoto;
-    }
-
-    public int getPackagingPhoto() {
-        return packagingPhoto;
-    }
-
-    public void setPackagingPhoto(int packagingPhoto) {
-        this.packagingPhoto = packagingPhoto;
-    }
-
-    public int getBrand() {
-        return brand;
-    }
-
-    public void setBrand(int brand) {
-        this.brand = brand;
-    }
-
-    public boolean isGpsrLabel() {
-        return gpsrLabel;
-    }
-
-    public void setGpsrLabel(boolean gpsrLabel) {
-        this.gpsrLabel = gpsrLabel;
-    }
-
-    public boolean isGpsrWarning() {
-        return gpsrWarning;
-    }
-
-    public void setGpsrWarning(boolean gpsrWarning) {
-        this.gpsrWarning = gpsrWarning;
-    }
-
-    public Long getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-    // Constructor + Getters
 }

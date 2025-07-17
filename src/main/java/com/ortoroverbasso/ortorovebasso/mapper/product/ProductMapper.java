@@ -1,6 +1,8 @@
 package com.ortoroverbasso.ortorovebasso.mapper.product;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -9,144 +11,241 @@ import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_features.ProductFeaturesResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesShortDto;
-import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
-import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_why_choose.ProductWhyChooseResponseNoProductIdDto;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
-import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_information.ProductInformationMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_why_choose.ProductWhyChooseMapper;
 
 @Component
 public class ProductMapper {
 
+        /**
+         * Converte un ProductRequestDto in ProductEntity
+         */
         public static ProductEntity toEntity(ProductRequestDto dto) {
-                ProductEntity product = new ProductEntity();
-                product.setSku(dto.getSku());
-                product.setRetailPrice(dto.getRetailPrice());
-                product.setActive(dto.getActive());
-                product.setDiscount(dto.getDiscount());
-
-                // Mappare priceLargeQuantities se esistono nel DTO
-                if (dto.getPriceLargeQuantities() != null) {
-                        List<ProductLargeQuantityPriceEntity> priceEntities = dto.getPriceLargeQuantities().stream()
-                                        .map(priceDto -> new ProductLargeQuantityPriceEntity(priceDto.getQuantity(),
-                                                        priceDto.getPrice()))
-                                        .collect(Collectors.toList());
-                        product.setPriceLargeQuantities(priceEntities);
+                if (dto == null) {
+                        return null;
                 }
+
+                ProductEntity product = new ProductEntity();
+
+                // Campi base
+                mapBasicFields(dto, product);
 
                 return product;
         }
 
-        public static List<ProductResponseDto> toResponseListDto(List<ProductEntity> products) {
+        /**
+         * Converte una lista di ProductEntity in lista di ProductResponseDto
+         */
+        public static List<ProductResponseDto> toResponseDtoList(List<ProductEntity> products) {
+                if (products == null || products.isEmpty()) {
+                        return Collections.emptyList();
+                }
+
                 return products.stream()
                                 .map(ProductMapper::toResponseDto)
                                 .collect(Collectors.toList());
         }
 
+        /**
+         * Converte un ProductEntity in ProductResponseDto con tutti i dettagli
+         */
         public static ProductResponseDto toResponseDto(ProductEntity product) {
+                if (product == null) {
+                        return null;
+                }
 
-                List<ProductLargeQuantityPriceResponseDto> priceDtos = product.getPriceLargeQuantities().stream()
+                return ProductResponseDto.builder()
+                                .id(product.getId())
+                                .sku(product.getSku())
+                                .retailPrice(product.getRetailPrice())
+                                .weight(product.getWeight())
+                                .active(product.getActive())
+                                .wholesalePrice(product.getWholesalePrice())
+                                .inShopsPrice(product.getInShopsPrice())
+                                .hasTags(product.getHasTags())
+                                .manufacturerId(extractManufacturerId(product))
+                                .discount(product.getDiscount())
+                                .productName(extractProductName(product))
+                                .categoryId(extractCategoryId(product))
+                                .reference(product.getReference())
+                                .quantity(product.getQuantity())
+                                .dateAdd(product.getDateAdd())
+                                .hasAttributes(product.getHasAttributes())
+                                .hasImages(product.getHasImages())
+                                .priceLargeQuantities(mapPriceLargeQuantities(product))
+                                .productImages(mapProductImages(product))
+                                .productInformation(mapProductInformation(product))
+                                .productFeatures(mapProductFeatures(product))
+                                .whyChoose(mapWhyChoose(product))
+                                .build();
+        }
+
+        /**
+         * Converte un ProductResponseDto in ProductEntity (per aggiornamenti)
+         */
+        public static ProductEntity fromResponseToEntity(ProductResponseDto dto) {
+                if (dto == null) {
+                        return null;
+                }
+
+                ProductEntity product = new ProductEntity();
+                product.setId(dto.getId());
+                product.setSku(dto.getSku());
+                product.setRetailPrice(dto.getRetailPrice());
+                product.setWeight(dto.getWeight());
+                product.setActive(dto.getActive());
+                product.setWholesalePrice(dto.getWholesalePrice());
+                product.setInShopsPrice(dto.getInShopsPrice());
+                product.setDiscount(dto.getDiscount());
+                product.setReference(dto.getReference());
+                product.setQuantity(dto.getQuantity());
+
+                return product;
+        }
+
+        /**
+         * Aggiorna un ProductEntity esistente con i dati da ProductRequestDto
+         */
+        public static void updateEntityFromDto(ProductRequestDto dto, ProductEntity entity) {
+                if (dto == null || entity == null) {
+                        return;
+                }
+
+                // Aggiorna solo i campi non null del DTO
+                Optional.ofNullable(dto.getSku()).ifPresent(entity::setSku);
+                Optional.ofNullable(dto.getRetailPrice()).ifPresent(entity::setRetailPrice);
+                Optional.ofNullable(dto.getWeight()).ifPresent(entity::setWeight);
+                Optional.ofNullable(dto.getActive()).ifPresent(entity::setActive);
+                Optional.ofNullable(dto.getWholesalePrice()).ifPresent(entity::setWholesalePrice);
+                Optional.ofNullable(dto.getInShopsPrice()).ifPresent(entity::setInShopsPrice);
+                Optional.ofNullable(dto.getDiscount()).ifPresent(entity::setDiscount);
+                Optional.ofNullable(dto.getReference()).ifPresent(entity::setReference);
+                Optional.ofNullable(dto.getQuantity()).ifPresent(entity::setQuantity);
+        }
+
+        // Metodi helper privati
+
+        private static void mapBasicFields(ProductRequestDto dto, ProductEntity product) {
+                product.setSku(dto.getSku());
+                product.setRetailPrice(dto.getRetailPrice());
+                product.setWeight(dto.getWeight());
+                product.setActive(dto.getActive());
+                product.setWholesalePrice(dto.getWholesalePrice());
+                product.setInShopsPrice(dto.getInShopsPrice());
+                product.setDiscount(dto.getDiscount());
+                product.setReference(dto.getReference());
+                product.setQuantity(dto.getQuantity());
+        }
+
+        private static Long extractManufacturerId(ProductEntity product) {
+                return Optional.ofNullable(product.getManufacturer())
+                                .map(manufacturer -> manufacturer.getId())
+                                .orElse(null);
+        }
+
+        private static String extractProductName(ProductEntity product) {
+                return Optional.ofNullable(product.getProductInformation())
+                                .map(info -> info.getName())
+                                .orElse(null);
+        }
+
+        private static Long extractCategoryId(ProductEntity product) {
+                return Optional.ofNullable(product.getCategory())
+                                .map(category -> category.getId())
+                                .orElse(null);
+        }
+
+        private static List<ProductLargeQuantityPriceResponseDto> mapPriceLargeQuantities(ProductEntity product) {
+                if (product.getPriceLargeQuantities() == null || product.getPriceLargeQuantities().isEmpty()) {
+                        return Collections.emptyList();
+                }
+
+                return product.getPriceLargeQuantities().stream()
                                 .map(priceEntity -> new ProductLargeQuantityPriceResponseDto(
                                                 priceEntity.getId(),
                                                 priceEntity.getQuantity(),
                                                 priceEntity.getPrice()))
                                 .collect(Collectors.toList());
+        }
 
-                Long manufacturerId = product.getManufacturer() != null ? product.getManufacturer().getId() : null;
+        private static List<ProductImagesShortDto> mapProductImages(ProductEntity product) {
+                if (product.getProductImages() == null || product.getProductImages().isEmpty()) {
+                        return Collections.emptyList();
+                }
 
-                List<ProductImagesShortDto> productImagesDtos = product.getProductImages().stream()
+                return product.getProductImages().stream()
                                 .map(image -> new ProductImagesShortDto(
                                                 image.getId(),
                                                 image.getUrl(),
                                                 image.isCover()))
                                 .collect(Collectors.toList());
+        }
 
-                List<ProductFeaturesResponseDto> productFeaturesDto = product.getProductFeatures().stream()
+        private static com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto mapProductInformation(
+                        ProductEntity product) {
+                return Optional.ofNullable(product.getProductInformation())
+                                .map(ProductInformationMapper::toResponseDto)
+                                .orElse(null);
+        }
+
+        private static List<ProductFeaturesResponseDto> mapProductFeatures(ProductEntity product) {
+                if (product.getProductFeatures() == null || product.getProductFeatures().isEmpty()) {
+                        return Collections.emptyList();
+                }
+
+                return product.getProductFeatures().stream()
                                 .map(feature -> new ProductFeaturesResponseDto(
                                                 feature.getId(),
                                                 feature.getFeature(),
                                                 feature.getValue()))
                                 .collect(Collectors.toList());
-
-                ProductInformationResponseDto productInformationResponseDto = product.getProductInformation() != null
-                                ? ProductInformationMapper.toResponseDto(product.getProductInformation())
-                                : null;
-
-                List<ProductWhyChooseResponseNoProductIdDto> whyChooseResponses = product.getWhyChoose().stream()
-                                .map(ProductWhyChooseMapper::toResponseWithoutProductId)
-                                .collect(Collectors.toList());
-
-                ProductResponseDto productResponseDto = new ProductResponseDto();
-                productResponseDto.setId(product.getId());
-                productResponseDto.setSku(product.getSku());
-                productResponseDto.setRetailPrice(product.getRetailPrice());
-                productResponseDto.setActive(product.getActive());
-                productResponseDto.setWholesalePrice(product.getWholesalePrice());
-                productResponseDto.setInShopsPrice(product.getInShopsPrice());
-                productResponseDto.setTags(product.getTags());
-                productResponseDto.setManufacturer(manufacturerId);
-                productResponseDto.setPriceLargeQuantities(priceDtos);
-                productResponseDto.setAttributes(product.getAttributes());
-                productResponseDto.setProductImages(productImagesDtos);
-                productResponseDto.setProductInformation(productInformationResponseDto);
-                productResponseDto.setDiscount(product.getDiscount());
-                productResponseDto.setProductFeatures(productFeaturesDto);
-                productResponseDto.setWhyChoose(whyChooseResponses);
-                productResponseDto.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
-
-                return productResponseDto;
         }
 
-        public static ProductEntity fromResponseToEntity(ProductResponseDto dto) {
-                ProductEntity product = new ProductEntity();
-                product.setId(dto.getId());
-                product.setSku(dto.getSku());
-                product.setRetailPrice(dto.getRetailPrice());
-                product.setActive(dto.getActive());
-
-                // Mappare priceLargeQuantities se esistono nel DTO
-                if (dto.getPriceLargeQuantities() != null) {
-                        List<ProductLargeQuantityPriceEntity> priceEntities = dto.getPriceLargeQuantities().stream()
-                                        .map(priceDto -> new ProductLargeQuantityPriceEntity(priceDto.getQuantity(),
-                                                        priceDto.getPrice()))
-                                        .collect(Collectors.toList());
-                        product.setPriceLargeQuantities(priceEntities);
+        private static List<ProductWhyChooseResponseNoProductIdDto> mapWhyChoose(ProductEntity product) {
+                if (product.getWhyChoose() == null || product.getWhyChoose().isEmpty()) {
+                        return Collections.emptyList();
                 }
 
-                return product;
-        }
-
-        public static ProductRequestDto fromProductEntityToRequestDto(ProductEntity product) {
-                List<ProductLargeQuantityPriceRequestDto> priceLargeQuantities = product.getPriceLargeQuantities()
-                                .stream()
-                                .map(priceEntity -> new ProductLargeQuantityPriceRequestDto(
-                                                priceEntity.getId(),
-                                                priceEntity.getQuantity(),
-                                                priceEntity.getPrice()))
+                return product.getWhyChoose().stream()
+                                .map(ProductWhyChooseMapper::toResponseWithoutProductId)
                                 .collect(Collectors.toList());
-
-                ProductRequestDto productRequestDto = new ProductRequestDto();
-                productRequestDto.setId(product.getId());
-                productRequestDto.setSku(product.getSku());
-                productRequestDto.setRetailPrice(product.getRetailPrice());
-                productRequestDto.setActive(product.getActive());
-                productRequestDto.setWholesalePrice(product.getWholesalePrice());
-                productRequestDto.setInShopsPrice(product.getInShopsPrice());
-                productRequestDto.setPriceLargeQuantities(priceLargeQuantities);
-                productRequestDto.setDiscount(product.getDiscount());
-
-                return productRequestDto;
         }
 
-        public static ProductLargeQuantityPriceResponseDto toLargeQuantityDto(ProductLargeQuantityPriceEntity entity) {
-                ProductLargeQuantityPriceResponseDto dto = new ProductLargeQuantityPriceResponseDto();
-                dto.setId(entity.getId());
-                dto.setQuantity(entity.getQuantity());
-                dto.setPrice(entity.getPrice());
-                return dto;
+        /**
+         * Metodo utility per convertire singolo ProductLargeQuantityPriceEntity
+         */
+        public static ProductLargeQuantityPriceResponseDto toLargeQuantityDto(
+                        com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity entity) {
+                if (entity == null) {
+                        return null;
+                }
+
+                return new ProductLargeQuantityPriceResponseDto(
+                                entity.getId(),
+                                entity.getQuantity(),
+                                entity.getPrice());
         }
 
+        /**
+         * Metodo utility per creare un ProductResponseDto semplificato (per liste)
+         */
+        public static ProductResponseDto toSimpleResponseDto(ProductEntity product) {
+                if (product == null) {
+                        return null;
+                }
+
+                return ProductResponseDto.builder()
+                                .id(product.getId())
+                                .sku(product.getSku())
+                                .retailPrice(product.getRetailPrice())
+                                .active(product.getActive())
+                                .productName(extractProductName(product))
+                                .categoryId(extractCategoryId(product))
+                                .hasImages(product.getHasImages())
+                                .hasAttributes(product.getHasAttributes())
+                                .build();
+        }
 }

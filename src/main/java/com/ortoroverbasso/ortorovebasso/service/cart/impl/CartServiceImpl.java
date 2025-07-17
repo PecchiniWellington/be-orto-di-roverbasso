@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.service.cart.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -91,9 +92,9 @@ public class CartServiceImpl implements ICartService {
         }
 
         int totalQuantity = cartItems.stream().mapToInt(CartItemDto::getQuantity).sum();
-        double totalPrice = cartItems.stream()
-                .mapToDouble(item -> item.getPrice() * item.getQuantity())
-                .sum();
+        BigDecimal totalPrice = cartItems.stream()
+                .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         cartResponseDto.setTotalQuantity(totalQuantity);
         cartResponseDto.setTotalPrice(String.format("%.2f", totalPrice));

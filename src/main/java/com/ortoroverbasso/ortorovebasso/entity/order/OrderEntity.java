@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.entity.order;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
@@ -8,13 +9,11 @@ import com.ortoroverbasso.ortorovebasso.entity.user.shipping_address.ShippingAdd
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -26,32 +25,29 @@ public class OrderEntity {
     private Long id;
 
     private String internalReference;
-    private String dateAdd;
+
+    private LocalDateTime dateAdd;
+
     private Double totalPaidTaxIncl;
     private Double totalPaidTaxExcl;
     private Double totalShippingTaxExcl;
     private Double totalShippingTaxIncl;
+
     private String status;
 
-    @ManyToOne
-    @JoinColumn(name = "shipping_address_id")
+    @ManyToOne(cascade = CascadeType.ALL)
     private ShippingAddressEntity shippingAddress;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id_test")
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<ProductEntity> products;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id_test")
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<CarriersEntity> carriers;
 
     // Getters and Setters
+
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getInternalReference() {
@@ -62,11 +58,11 @@ public class OrderEntity {
         this.internalReference = internalReference;
     }
 
-    public String getDateAdd() {
+    public LocalDateTime getDateAdd() {
         return dateAdd;
     }
 
-    public void setDateAdd(String dateAdd) {
+    public void setDateAdd(LocalDateTime dateAdd) {
         this.dateAdd = dateAdd;
     }
 

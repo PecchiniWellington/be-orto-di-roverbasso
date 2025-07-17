@@ -1,13 +1,18 @@
 package com.ortoroverbasso.ortorovebasso.dto.cart;
 
+import java.math.BigDecimal;
+
+import jakarta.persistence.Column;
+
 public class CartItemDto {
     private Long productId;
     private String productName;
     private int quantity;
-    private Double price;
+    @Column(name = "price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
     // Modifica del costruttore per prendere il nome dal ProductInformation
-    public CartItemDto(Long productId, String productName, int quantity, Double price) {
+    public CartItemDto(Long productId, String productName, int quantity, BigDecimal price) {
         this.productId = productId;
         this.productName = productName != null ? productName : "Default Name";
         this.quantity = quantity;
@@ -38,11 +43,11 @@ public class CartItemDto {
         this.quantity = quantity;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 }

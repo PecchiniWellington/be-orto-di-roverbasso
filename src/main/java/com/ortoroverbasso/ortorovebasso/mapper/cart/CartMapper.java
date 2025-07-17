@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.mapper.cart;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,7 +15,7 @@ public class CartMapper {
     // Mappa da CartItemEntity a CartItemDto
     public static CartItemDto mapToCartItemDto(CartItemEntity cartItemEntity) {
         String productName = cartItemEntity.getProduct().getProductInformation().getName();
-        Double productPrice = cartItemEntity.getProduct().getRetailPrice();
+        BigDecimal productPrice = cartItemEntity.getProduct().getRetailPrice();
 
         return new CartItemDto(
                 cartItemEntity.getProduct().getId(),

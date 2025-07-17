@@ -5,9 +5,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backblaze.b2.client.B2StorageClientImpl;
@@ -35,38 +38,48 @@ import com.ortoroverbasso.ortorovebasso.service.images.IImagesDetailService;
 import com.ortoroverbasso.ortorovebasso.utils.BytesMultipartFile;
 import com.ortoroverbasso.ortorovebasso.utils.ImageExtensionUtil;
 
-import jakarta.transaction.Transactional;
-
 @Service
+@Transactional
 public class ImageDetailServiceImpl implements IImagesDetailService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ImageDetailServiceImpl.class);
     private static final String BACKBLAZE_BASE_URL = "https://f003.backblazeb2.com/file/";
     private static final String FILE_TOO_LARGE_MSG = "File troppo grande.";
 
-    @Autowired
-    private ProductRepository productRepository;
-    @Autowired
-    private B2StorageClientImpl b2StorageClient;
-    @Autowired
-    private ProductImagesRepository productImageRepository;
-    @Autowired
-    private ImagesDetailRepository imagesDetailRepository;
+    private final ProductRepository productRepository;
+    private final B2StorageClientImpl b2StorageClient;
+    private final ProductImagesRepository productImageRepository;
+    private final ImagesDetailRepository imagesDetailRepository;
 
     @Value("${backblaze.bucket-name}")
     private String bucketName;
+
     @Value("${backblaze.bucket-id}")
     private String bucketId;
+
     @Value("${app.upload.max-file-size-bytes}")
     private long maxFileSize;
 
+    @Autowired
+    public ImageDetailServiceImpl(
+            ProductRepository productRepository,
+            B2StorageClientImpl b2StorageClient,
+            ProductImagesRepository productImageRepository,
+            ImagesDetailRepository imagesDetailRepository) {
+        this.productRepository = productRepository;
+        this.b2StorageClient = b2StorageClient;
+        this.productImageRepository = productImageRepository;
+        this.imagesDetailRepository = imagesDetailRepository;
+    }
+
     private ImagesDetailEntity findImageOrThrow(Long id) {
         return imagesDetailRepository.findById(id)
-                .orElseThrow(() -> new ImageNotFoundException(id));
+                .orElseThrow(() -> new ImageNotFoundException("Image not found with ID: " + id));
     }
 
     private ProductEntity findProductOrThrow(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(id));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + id));
     }
 
     @Override
@@ -77,27 +90,14 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
     @Override
     public ImagesDetailDto uploadImage(MultipartFile file, String customFileName) {
         try {
-            if (file.getSize() > maxFileSize) {
-                throw new IllegalArgumentException("File troppo grande.");
-            }
+            checkFileSize(file);
 
-            // Prendi il content type reale del file
             String contentType = file.getContentType();
             String extension = ImageExtension.getExtensionForMimeType(contentType);
-
-            // originalName dal MultipartFile
             String originalName = file.getOriginalFilename();
 
             // Costruisci nome file con estensione coerente
-            String baseName = (customFileName != null && !customFileName.isBlank())
-                    ? customFileName
-                    : (originalName != null ? originalName : "file");
-
-            int dotIndex = baseName.lastIndexOf('.');
-            if (dotIndex > 0) {
-                baseName = baseName.substring(0, dotIndex);
-            }
-
+            String baseName = buildBaseName(customFileName, originalName);
             String filename = baseName + extension;
 
             byte[] fileBytes = file.getBytes();
@@ -108,26 +108,24 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
                     .build();
 
             var response = b2StorageClient.uploadSmallFile(request);
-
             String fileUrl = BACKBLAZE_BASE_URL + bucketName + "/" + filename;
 
-            ImagesDetailEntity imageEntity = new ImagesDetailEntity();
-            imageEntity.setName(filename);
-            imageEntity.setUrl(fileUrl);
-            imageEntity.setFileId(response.getFileId());
+            // Crea e salva l'entità usando i metodi corretti
+            ImagesDetailEntity imageEntity = createImageEntity(filename, fileUrl, response.getFileId());
             ImagesDetailEntity savedImage = imagesDetailRepository.save(imageEntity);
 
-            System.out.println("🚀 Upload su Backblaze: " + filename + " - dimensione: " + file.getSize());
-            System.out.println("✅ Immagine salvata: " + fileUrl + " - ID DB: " + savedImage.getId());
+            logUpload(filename, file.getSize(), fileUrl, savedImage.getId());
 
             return ImagesMapper.toResponse(savedImage);
 
         } catch (IOException | B2Exception e) {
+            logger.error("Errore durante l'upload su B2: {}", e.getMessage(), e);
             throw new RuntimeException("Errore durante l'upload su B2", e);
         }
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ImagesDetailDto> uploadImages(List<MultipartFile> files) {
         return files.stream()
                 .map(this::uploadImage)
@@ -138,29 +136,28 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
     public void deleteImage(Long imageId) {
         try {
             ImagesDetailEntity image = findImageOrThrow(imageId);
-            if (image.getFileId() == null || image.getFileId().isBlank())
+
+            if (image.getFileId() == null || image.getFileId().isBlank()) {
                 throw new RuntimeException("fileId mancante per l'immagine con ID: " + imageId);
+            }
 
             var deleteRequest = B2DeleteFileVersionRequest.builder(image.getName(), image.getFileId()).build();
-
             b2StorageClient.deleteFileVersion(deleteRequest);
             imagesDetailRepository.delete(image);
 
-            System.out.println("✅ File eliminato da B2 (via fileId): " + image.getName());
+            logger.info("File eliminato da B2: {}", image.getName());
+
         } catch (B2Exception e) {
-            System.err.println("Errore durante la cancellazione su B2: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Errore durante la cancellazione su B2: {}", e.getMessage(), e);
             throw new RuntimeException("Errore durante la cancellazione su B2", e);
         }
     }
 
-    @Transactional
     @Override
     public void deleteImages(List<Long> imageIds) {
         imageIds.forEach(this::deleteImage);
     }
 
-    @Transactional
     @Override
     public List<ProductImagesResponseDto> connectImageToProduct(ImageConnectRequestDto dto) {
         ProductEntity product = findProductOrThrow(dto.getIdConnect());
@@ -168,19 +165,23 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
 
         for (Long imageId : dto.getImageIds()) {
             ImagesDetailEntity imageEntity = findImageOrThrow(imageId);
-            ImagesDetailDto imageDto = ImagesMapper.toResponse(imageEntity);
 
-            ProductImageEntity productImage = ProductImagesMapper.toEntity(imageDto, imageDto.getName(),
-                    imageDto.getUrl(), product.getId());
-            productImageRepository.save(productImage);
+            // Crea ProductImageEntity usando il mapper corretto
+            ProductImageEntity productImage = createProductImageFromDetail(imageEntity, product);
+            ProductImageEntity savedProductImage = productImageRepository.save(productImage);
+
+            // Elimina l'immagine dalla tabella dettagli
             imagesDetailRepository.delete(imageEntity);
 
-            connected.add(ProductImagesMapper.toResponse(productImage));
+            // Usa il mapper corretto per la risposta
+            ProductImagesResponseDto responseDto = ProductImagesMapper.toResponseDto(savedProductImage);
+            connected.add(responseDto);
         }
+
+        logger.info("Connesse {} immagini al prodotto {}", connected.size(), dto.getIdConnect());
         return connected;
     }
 
-    @Transactional
     @Override
     public ImageConnectResponse disconnectImagesFromProduct(ImageConnectRequestDto dto) {
         Long productId = dto.getIdConnect();
@@ -188,14 +189,18 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
         List<ImagesDetailDto> restoredImages = new ArrayList<>();
 
         for (Long imageId : imageIds) {
+            // Trova l'immagine del prodotto
             ProductImageEntity productImage = productImageRepository.findByProductIdAndId(productId, imageId);
-            if (productImage == null)
+            if (productImage == null) {
+                logger.warn("ProductImage non trovata per productId {} e imageId {}", productId, imageId);
                 continue;
+            }
 
-            ImagesDetailEntity restored = new ImagesDetailEntity();
-            copyProductImageToImageEntity(productImage, restored);
-
+            // Crea una nuova ImagesDetailEntity
+            ImagesDetailEntity restored = createImageDetailFromProduct(productImage);
             imagesDetailRepository.save(restored);
+
+            // Elimina dalla tabella prodotto
             productImageRepository.delete(productImage);
 
             restoredImages.add(ImagesMapper.toResponse(restored));
@@ -205,6 +210,7 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
                 ? "Nessuna immagine disconnessa"
                 : restoredImages.size() + " immagini disconnesse correttamente";
 
+        logger.info("Disconnesse {} immagini dal prodotto {}", restoredImages.size(), productId);
         return new ImageConnectResponse(message, restoredImages);
     }
 
@@ -216,7 +222,6 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
             connection.connect();
 
             String contentType = connection.getContentType();
-            // Usa enum per ricavare estensione corretta dal contentType
             String extension = ImageExtension.getExtensionForMimeType(contentType);
 
             // Se l'estensione non è affidabile, prova a estrarla dall'URL
@@ -224,18 +229,7 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
                 extension = ImageExtensionUtil.extractExtensionFromUrl(imageUrl);
             }
 
-            // Costruisci baseName coerente, senza doppie estensioni
-            String baseName;
-            if (customName != null && !customName.isBlank()) {
-                int dotIndex = customName.lastIndexOf('.');
-                baseName = dotIndex > 0 ? customName.substring(0, dotIndex) : customName;
-            } else {
-                baseName = ImageExtensionUtil.extractBaseNameFromUrl(imageUrl);
-            }
-            if (baseName.isBlank()) {
-                baseName = "downloaded-image";
-            }
-
+            String baseName = buildBaseNameFromUrl(customName, imageUrl);
             String fileName = baseName + extension;
 
             // Scarica i byte dell'immagine
@@ -244,16 +238,15 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
                 bytes = inputStream.readAllBytes();
             }
 
-            System.out.println("📥 Scaricata immagine da: " + imageUrl + " - dimensione: " + bytes.length);
+            logger.info("Scaricata immagine da: {} - dimensione: {}", imageUrl, bytes.length);
 
-            // Crea MultipartFile usando BytesMultipartFile (assumendo contentType corretto)
+            // Crea MultipartFile usando BytesMultipartFile
             MultipartFile multipartFile = new BytesMultipartFile(fileName, bytes, contentType);
 
-            // Usa la funzione uploadAndReturnEntity modificata per passare il nome custom
-            // corretto e contentType coerente
             return uploadAndReturnEntity(multipartFile, baseName);
 
         } catch (IOException e) {
+            logger.error("Errore durante il download dell'immagine da URL: {}", e.getMessage(), e);
             throw new RuntimeException("Errore durante il download dell'immagine da URL", e);
         }
     }
@@ -262,7 +255,7 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
     public ImagesDetailEntity uploadAndReturnEntity(MultipartFile file, String customFileName) {
         ImagesDetailDto dto = uploadImage(file, customFileName);
         return imagesDetailRepository.findById(dto.getId())
-                .orElseThrow(() -> new RuntimeException("Errore dopo upload"));
+                .orElseThrow(() -> new RuntimeException("Errore dopo upload: entità non trovata"));
     }
 
     @Override
@@ -275,17 +268,19 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
         try {
             b2StorageClient.deleteFileVersion(
                     B2DeleteFileVersionRequest.builder(fileName, fileId).build());
+            logger.info("File eliminato da B2: {} ({})", fileName, fileId);
         } catch (B2Exception e) {
+            logger.error("Errore durante eliminazione file da B2: {}", e.getMessage(), e);
             throw new RuntimeException("Impossibile cancellare file da Backblaze B2", e);
         }
     }
 
     @Override
     public byte[] downloadImage(String filename) {
-        throw new UnsupportedOperationException("Unimplemented method 'downloadImage'");
+        throw new UnsupportedOperationException("Metodo downloadImage non ancora implementato");
     }
 
-    // --- Metodi privati per ridurre duplicazioni e aumentare chiarezza ---
+    // --- Metodi privati helper ---
 
     private void checkFileSize(MultipartFile file) {
         if (file.getSize() > maxFileSize) {
@@ -293,24 +288,68 @@ public class ImageDetailServiceImpl implements IImagesDetailService {
         }
     }
 
-    private void logUpload(String filename, long size, String url, Long id) {
-        System.out.println("🚀 Upload su Backblaze: " + filename + " - dimensione: " + size);
-        System.out.println("✅ Immagine salvata: " + url + " - ID DB: " + id);
+    private String buildBaseName(String customFileName, String originalName) {
+        String baseName = (customFileName != null && !customFileName.isBlank())
+                ? customFileName
+                : (originalName != null ? originalName : "file");
+
+        int dotIndex = baseName.lastIndexOf('.');
+        return dotIndex > 0 ? baseName.substring(0, dotIndex) : baseName;
     }
 
-    private void copyProductImageToImageEntity(ProductImageEntity productImage, ImagesDetailEntity imageEntity) {
-        imageEntity.setName(productImage.getName());
-        imageEntity.setUrl(productImage.getUrl());
-        imageEntity.setIsCover(productImage.isCover());
-        imageEntity.setLogo(productImage.isLogo());
-        imageEntity.setWhiteBackground(productImage.isWhiteBackground());
-        imageEntity.setPosition(productImage.getPosition());
-        imageEntity.setEnergyEfficiency(productImage.getEnergyEfficiency());
-        imageEntity.setIcon(productImage.getIcon());
-        imageEntity.setMarketingPhoto(productImage.getMarketingPhoto());
-        imageEntity.setPackagingPhoto(productImage.getPackagingPhoto());
-        imageEntity.setBrand(productImage.getBrand());
-        imageEntity.setGpsrLabel(productImage.isGpsrLabel());
-        imageEntity.setGpsrWarning(productImage.isGpsrWarning());
+    private String buildBaseNameFromUrl(String customName, String imageUrl) {
+        if (customName != null && !customName.isBlank()) {
+            int dotIndex = customName.lastIndexOf('.');
+            return dotIndex > 0 ? customName.substring(0, dotIndex) : customName;
+        } else {
+            String baseName = ImageExtensionUtil.extractBaseNameFromUrl(imageUrl);
+            return baseName.isBlank() ? "downloaded-image" : baseName;
+        }
+    }
+
+    private ImagesDetailEntity createImageEntity(String filename, String fileUrl, String fileId) {
+        ImagesDetailEntity imageEntity = new ImagesDetailEntity();
+        imageEntity.setName(filename);
+        imageEntity.setUrl(fileUrl);
+        imageEntity.setFileId(fileId);
+        // Imposta valori di default per i campi Boolean
+        imageEntity.setIsCover(false);
+        imageEntity.setIsLogo(false);
+        imageEntity.setWhiteBackground(false);
+        imageEntity.setGpsrLabel(false);
+        imageEntity.setGpsrWarning(false);
+        imageEntity.setPosition(0);
+        return imageEntity;
+    }
+
+    private ProductImageEntity createProductImageFromDetail(ImagesDetailEntity imageEntity, ProductEntity product) {
+        ProductImageEntity productImage = new ProductImageEntity();
+        productImage.setUrl(imageEntity.getUrl());
+        productImage.setIsCover(imageEntity.getIsCover());
+        productImage.setAltText(imageEntity.getName());
+        productImage.setDisplayOrder(imageEntity.getPosition());
+        productImage.setProduct(product);
+        return productImage;
+    }
+
+    private ImagesDetailEntity createImageDetailFromProduct(ProductImageEntity productImage) {
+        ImagesDetailEntity restored = new ImagesDetailEntity();
+        restored.setName(productImage.getAltText() != null ? productImage.getAltText() : "restored-image");
+        restored.setUrl(productImage.getUrl());
+        restored.setIsCover(productImage.getIsCover());
+        restored.setPosition(productImage.getDisplayOrder());
+
+        // Imposta valori di default per campi non mappati
+        restored.setIsLogo(false);
+        restored.setWhiteBackground(false);
+        restored.setGpsrLabel(false);
+        restored.setGpsrWarning(false);
+
+        return restored;
+    }
+
+    private void logUpload(String filename, long size, String url, Long id) {
+        logger.info("Upload su Backblaze completato: {} - dimensione: {} - URL: {} - ID DB: {}",
+                filename, size, url, id);
     }
 }

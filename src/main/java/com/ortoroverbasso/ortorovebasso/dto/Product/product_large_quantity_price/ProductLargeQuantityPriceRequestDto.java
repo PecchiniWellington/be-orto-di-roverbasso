@@ -1,5 +1,7 @@
 package com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price;
 
+import java.math.BigDecimal;
+
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +14,7 @@ public class ProductLargeQuantityPriceRequestDto {
     private Integer quantity;
 
     @NotNull(message = "Price is required")
-    private Double price;
+    private BigDecimal price;
 
     // Default constructor
     public ProductLargeQuantityPriceRequestDto() {
@@ -22,7 +24,7 @@ public class ProductLargeQuantityPriceRequestDto {
     public ProductLargeQuantityPriceRequestDto(
             Long id,
             Integer quantity,
-            Double price) {
+            BigDecimal price) {
         this.id = id;
         this.quantity = quantity;
         this.price = price;
@@ -46,11 +48,11 @@ public class ProductLargeQuantityPriceRequestDto {
         this.quantity = quantity;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

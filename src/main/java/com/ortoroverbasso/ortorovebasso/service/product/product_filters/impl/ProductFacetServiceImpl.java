@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.service.product.product_filters.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class ProductFacetServiceImpl implements IProductFacetService {
 
     @PersistenceContext
     private EntityManager entityManager;
+
     @Autowired
     private ProductRepository productRepository;
 
@@ -47,21 +49,23 @@ public class ProductFacetServiceImpl implements IProductFacetService {
 
         // MIN/MAX prezzo
         {
-            CriteriaQuery<Double> minQuery = cb.createQuery(Double.class);
+            CriteriaQuery<BigDecimal> minQuery = cb.createQuery(BigDecimal.class);
             Root<ProductEntity> root = minQuery.from(ProductEntity.class);
             minQuery.select(cb.min(root.get("retailPrice")));
             Predicate predicate = spec.toPredicate(root, minQuery, cb);
             if (predicate != null)
                 minQuery.where(predicate);
-            facet.setMinPrice(entityManager.createQuery(minQuery).getSingleResult());
+            BigDecimal minPrice = entityManager.createQuery(minQuery).getSingleResult();
+            facet.setMinPrice(minPrice != null ? minPrice.doubleValue() : null);
 
-            CriteriaQuery<Double> maxQuery = cb.createQuery(Double.class);
+            CriteriaQuery<BigDecimal> maxQuery = cb.createQuery(BigDecimal.class);
             root = maxQuery.from(ProductEntity.class);
             maxQuery.select(cb.max(root.get("retailPrice")));
             predicate = spec.toPredicate(root, maxQuery, cb);
             if (predicate != null)
                 maxQuery.where(predicate);
-            facet.setMaxPrice(entityManager.createQuery(maxQuery).getSingleResult());
+            BigDecimal maxPrice = entityManager.createQuery(maxQuery).getSingleResult();
+            facet.setMaxPrice(maxPrice != null ? maxPrice.doubleValue() : null);
         }
 
         // Fasce di prezzo con conteggio
@@ -75,7 +79,10 @@ public class ProductFacetServiceImpl implements IProductFacetService {
                 CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
                 Root<ProductEntity> root = countQuery.from(ProductEntity.class);
                 Predicate predicate = spec.toPredicate(root, countQuery, cb);
-                Predicate rangePredicate = cb.between(root.get("retailPrice"), i, i + step - 1);
+                Predicate rangePredicate = cb.between(
+                        root.get("retailPrice"),
+                        BigDecimal.valueOf(i),
+                        BigDecimal.valueOf(i + step - 1));
                 countQuery.select(cb.count(root)).where(cb.and(predicate, rangePredicate));
                 Long count = entityManager.createQuery(countQuery).getSingleResult();
                 ranges.add(new PriceRangeResponseDto(i, i + step - 1, count));
@@ -86,21 +93,23 @@ public class ProductFacetServiceImpl implements IProductFacetService {
 
         // MIN/MAX peso
         {
-            CriteriaQuery<Double> minW = cb.createQuery(Double.class);
+            CriteriaQuery<BigDecimal> minW = cb.createQuery(BigDecimal.class);
             Root<ProductEntity> root = minW.from(ProductEntity.class);
             minW.select(cb.min(root.get("weight")));
             Predicate pred = spec.toPredicate(root, minW, cb);
             if (pred != null)
                 minW.where(pred);
-            facet.setMinWeight(entityManager.createQuery(minW).getSingleResult());
+            BigDecimal minWeight = entityManager.createQuery(minW).getSingleResult();
+            facet.setMinWeight(minWeight != null ? minWeight.doubleValue() : null);
 
-            CriteriaQuery<Double> maxW = cb.createQuery(Double.class);
+            CriteriaQuery<BigDecimal> maxW = cb.createQuery(BigDecimal.class);
             root = maxW.from(ProductEntity.class);
             maxW.select(cb.max(root.get("weight")));
             pred = spec.toPredicate(root, maxW, cb);
             if (pred != null)
                 maxW.where(pred);
-            facet.setMaxWeight(entityManager.createQuery(maxW).getSingleResult());
+            BigDecimal maxWeight = entityManager.createQuery(maxW).getSingleResult();
+            facet.setMaxWeight(maxWeight != null ? maxWeight.doubleValue() : null);
         }
 
         // Fasce di peso con conteggio
@@ -114,7 +123,10 @@ public class ProductFacetServiceImpl implements IProductFacetService {
                 CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
                 Root<ProductEntity> root = countQuery.from(ProductEntity.class);
                 Predicate predicate = spec.toPredicate(root, countQuery, cb);
-                Predicate rangePredicate = cb.between(root.get("weight"), i, i + step - 1);
+                Predicate rangePredicate = cb.between(
+                        root.get("weight"),
+                        BigDecimal.valueOf(i),
+                        BigDecimal.valueOf(i + step - 1));
                 countQuery.select(cb.count(root)).where(cb.and(predicate, rangePredicate));
                 Long count = entityManager.createQuery(countQuery).getSingleResult();
                 ranges.add(new WeightRangeResponseDto(i, i + step - 1, count));

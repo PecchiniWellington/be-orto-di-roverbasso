@@ -6,26 +6,53 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 
 @Entity
 @Table(name = "images_detail")
 public class ImagesDetailEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    private boolean isCover;
+    private Long id;
+
+    @Column(name = "is_cover")
+    private Boolean isCover = false;
+
     private String name;
+
+    @NotBlank(message = "URL is required")
     private String url;
-    private boolean logo;
-    private boolean whiteBackground;
-    private int position;
-    private int energyEfficiency;
-    private int icon;
-    private int marketingPhoto;
-    private int packagingPhoto;
-    private int brand;
-    private boolean gpsrLabel;
-    private boolean gpsrWarning;
+
+    @Column(name = "is_logo")
+    private Boolean isLogo = false;
+
+    @Column(name = "white_background")
+    private Boolean whiteBackground = false;
+
+    @PositiveOrZero(message = "Position must be positive or zero")
+    private Integer position = 0;
+
+    @Column(name = "energy_efficiency")
+    private String energyEfficiency;
+
+    private String icon;
+
+    @Column(name = "marketing_photo")
+    private String marketingPhoto;
+
+    @Column(name = "packaging_photo")
+    private String packagingPhoto;
+
+    private String brand;
+
+    @Column(name = "gpsr_label")
+    private Boolean gpsrLabel = false;
+
+    @Column(name = "gpsr_warning")
+    private Boolean gpsrWarning = false;
+
     @Column(name = "file_id")
     private String fileId;
 
@@ -33,28 +60,35 @@ public class ImagesDetailEntity {
     public ImagesDetailEntity() {
     }
 
+    // Constructor with essential fields
+    public ImagesDetailEntity(String name, String url, Boolean isCover) {
+        this.name = name;
+        this.url = url;
+        this.isCover = isCover;
+    }
+
     // All-args constructor
     public ImagesDetailEntity(
-            long id,
-            boolean isCover,
+            Long id,
+            Boolean isCover,
             String name,
             String url,
-            boolean logo,
-            boolean whiteBackground,
-            int position,
-            int energyEfficiency,
-            int icon,
-            int marketingPhoto,
-            int packagingPhoto,
-            int brand,
-            boolean gpsrLabel,
-            boolean gpsrWarning,
+            Boolean isLogo,
+            Boolean whiteBackground,
+            Integer position,
+            String energyEfficiency,
+            String icon,
+            String marketingPhoto,
+            String packagingPhoto,
+            String brand,
+            Boolean gpsrLabel,
+            Boolean gpsrWarning,
             String fileId) {
         this.id = id;
         this.isCover = isCover;
         this.name = name;
         this.url = url;
-        this.logo = logo;
+        this.isLogo = isLogo;
         this.whiteBackground = whiteBackground;
         this.position = position;
         this.energyEfficiency = energyEfficiency;
@@ -67,20 +101,41 @@ public class ImagesDetailEntity {
         this.fileId = fileId;
     }
 
+    // Utility methods
+    public boolean isCover() {
+        return Boolean.TRUE.equals(isCover);
+    }
+
+    public boolean isLogo() {
+        return Boolean.TRUE.equals(isLogo);
+    }
+
+    public boolean isWhiteBackground() {
+        return Boolean.TRUE.equals(whiteBackground);
+    }
+
+    public boolean isGpsrLabel() {
+        return Boolean.TRUE.equals(gpsrLabel);
+    }
+
+    public boolean isGpsrWarning() {
+        return Boolean.TRUE.equals(gpsrWarning);
+    }
+
     // Getters and Setters
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public boolean isCover() {
+    public Boolean getIsCover() {
         return isCover;
     }
 
-    public void setIsCover(boolean isCover) {
+    public void setIsCover(Boolean isCover) {
         this.isCover = isCover;
     }
 
@@ -100,83 +155,88 @@ public class ImagesDetailEntity {
         this.url = url;
     }
 
-    public boolean isLogo() {
-        return logo;
+    public Boolean getIsLogo() {
+        return isLogo;
     }
 
-    public void setLogo(boolean logo) {
-        this.logo = logo;
+    public void setIsLogo(Boolean isLogo) {
+        this.isLogo = isLogo;
     }
 
-    public boolean isWhiteBackground() {
+    // Metodo legacy per compatibilità
+    public void setLogo(Boolean logo) {
+        this.isLogo = logo;
+    }
+
+    public Boolean getWhiteBackground() {
         return whiteBackground;
     }
 
-    public void setWhiteBackground(boolean whiteBackground) {
+    public void setWhiteBackground(Boolean whiteBackground) {
         this.whiteBackground = whiteBackground;
     }
 
-    public int getPosition() {
+    public Integer getPosition() {
         return position;
     }
 
-    public void setPosition(int position) {
+    public void setPosition(Integer position) {
         this.position = position;
     }
 
-    public int getEnergyEfficiency() {
+    public String getEnergyEfficiency() {
         return energyEfficiency;
     }
 
-    public void setEnergyEfficiency(int energyEfficiency) {
+    public void setEnergyEfficiency(String energyEfficiency) {
         this.energyEfficiency = energyEfficiency;
     }
 
-    public int getIcon() {
+    public String getIcon() {
         return icon;
     }
 
-    public void setIcon(int icon) {
+    public void setIcon(String icon) {
         this.icon = icon;
     }
 
-    public int getMarketingPhoto() {
+    public String getMarketingPhoto() {
         return marketingPhoto;
     }
 
-    public void setMarketingPhoto(int marketingPhoto) {
+    public void setMarketingPhoto(String marketingPhoto) {
         this.marketingPhoto = marketingPhoto;
     }
 
-    public int getPackagingPhoto() {
+    public String getPackagingPhoto() {
         return packagingPhoto;
     }
 
-    public void setPackagingPhoto(int packagingPhoto) {
+    public void setPackagingPhoto(String packagingPhoto) {
         this.packagingPhoto = packagingPhoto;
     }
 
-    public int getBrand() {
+    public String getBrand() {
         return brand;
     }
 
-    public void setBrand(int brand) {
+    public void setBrand(String brand) {
         this.brand = brand;
     }
 
-    public boolean isGpsrLabel() {
+    public Boolean getGpsrLabel() {
         return gpsrLabel;
     }
 
-    public void setGpsrLabel(boolean gpsrLabel) {
+    public void setGpsrLabel(Boolean gpsrLabel) {
         this.gpsrLabel = gpsrLabel;
     }
 
-    public boolean isGpsrWarning() {
+    public Boolean getGpsrWarning() {
         return gpsrWarning;
     }
 
-    public void setGpsrWarning(boolean gpsrWarning) {
+    public void setGpsrWarning(Boolean gpsrWarning) {
         this.gpsrWarning = gpsrWarning;
     }
 
@@ -188,4 +248,35 @@ public class ImagesDetailEntity {
         this.fileId = fileId;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        ImagesDetailEntity that = (ImagesDetailEntity) o;
+
+        if (id != null ? !id.equals(that.id) : that.id != null)
+            return false;
+        return url != null ? url.equals(that.url) : that.url == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (url != null ? url.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ImagesDetailEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", url='" + url + '\'' +
+                ", isCover=" + isCover +
+                ", position=" + position +
+                '}';
+    }
 }

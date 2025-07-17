@@ -35,7 +35,7 @@ public class ManufacturerMapper {
         if (entity.getProducts() == null) {
             response.setProducts(List.of());
         } else {
-            response.setProducts(ProductMapper.toResponseListDto(entity.getProducts()));
+            response.setProducts(ProductMapper.toResponseDtoList(entity.getProducts()));
         }
         return response;
 

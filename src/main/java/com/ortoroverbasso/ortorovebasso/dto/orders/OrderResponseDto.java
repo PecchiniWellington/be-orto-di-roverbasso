@@ -1,5 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.dto.orders;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
@@ -10,7 +11,7 @@ public class OrderResponseDto {
 
     private Long id;
     private String internalReference;
-    private String dateAdd;
+    private LocalDateTime dateAdd;
     private Double totalPaidTaxIncl;
     private Double totalPaidTaxExcl;
     private Double totalShippingTaxExcl;
@@ -37,11 +38,11 @@ public class OrderResponseDto {
         this.internalReference = internalReference;
     }
 
-    public String getDateAdd() {
+    public LocalDateTime getDateAdd() {
         return dateAdd;
     }
 
-    public void setDateAdd(String dateAdd) {
+    public void setDateAdd(LocalDateTime dateAdd) {
         this.dateAdd = dateAdd;
     }
 

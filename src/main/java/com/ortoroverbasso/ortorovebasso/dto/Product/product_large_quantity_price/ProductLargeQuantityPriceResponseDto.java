@@ -1,9 +1,11 @@
 package com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price;
 
+import java.math.BigDecimal;
+
 public class ProductLargeQuantityPriceResponseDto {
     private Long id;
     private Integer quantity;
-    private Double price;
+    private BigDecimal price;
 
     // Default constructor
     public ProductLargeQuantityPriceResponseDto() {
@@ -13,7 +15,7 @@ public class ProductLargeQuantityPriceResponseDto {
     public ProductLargeQuantityPriceResponseDto(
             Long id,
             Integer quantity,
-            Double price) {
+            BigDecimal price) {
         this.id = id;
         this.quantity = quantity;
         this.price = price;
@@ -36,11 +38,11 @@ public class ProductLargeQuantityPriceResponseDto {
         this.quantity = quantity;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

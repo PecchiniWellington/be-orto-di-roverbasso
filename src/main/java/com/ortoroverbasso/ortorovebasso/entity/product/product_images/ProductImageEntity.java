@@ -11,6 +11,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "product_images")
@@ -20,77 +22,54 @@ public class ProductImageEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @NotBlank(message = "Image URL is required")
+    @Column(name = "url", nullable = false)
     private String url;
-    private boolean isCover;
-    private boolean logo;
-    private boolean whiteBackground;
-    private int position;
-    private int energyEfficiency;
-    private int icon;
-    private int marketingPhoto;
-    private int packagingPhoto;
-    private int brand;
-    private boolean gpsrLabel;
-    private boolean gpsrWarning;
 
-    @Column(name = "product_id")
-    private Long productId;
+    @NotNull(message = "Cover status is required")
+    @Column(name = "is_cover", nullable = false)
+    private Boolean isCover = false;
+
+    @Column(name = "alt_text")
+    private String altText;
+
+    @Column(name = "display_order")
+    private Integer displayOrder = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "product_id", nullable = false)
     private ProductEntity product;
 
+    // Constructors
     public ProductImageEntity() {
     }
 
-    public ProductImageEntity(
-            Long id,
-            String name,
-            String url,
-            boolean isCover,
-            boolean logo,
-            boolean whiteBackground,
-            int position,
-            int energyEfficiency,
-            int icon,
-            int marketingPhoto,
-            int packagingPhoto,
-            int brand,
-            boolean gpsrLabel,
-            boolean gpsrWarning,
-            Long productId) {
-        this.id = id;
-        this.name = name;
+    public ProductImageEntity(String url, Boolean isCover) {
         this.url = url;
         this.isCover = isCover;
-        this.logo = logo;
-        this.whiteBackground = whiteBackground;
-        this.position = position;
-        this.energyEfficiency = energyEfficiency;
-        this.icon = icon;
-        this.marketingPhoto = marketingPhoto;
-        this.packagingPhoto = packagingPhoto;
-        this.brand = brand;
-        this.gpsrLabel = gpsrLabel;
-        this.gpsrWarning = gpsrWarning;
-        this.productId = productId;
     }
 
+    public ProductImageEntity(String url, Boolean isCover, String altText) {
+        this.url = url;
+        this.isCover = isCover;
+        this.altText = altText;
+    }
+
+    public void markAsCover() {
+        this.isCover = true;
+    }
+
+    public void unmarkAsCover() {
+        this.isCover = false;
+    }
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getUrl() {
@@ -101,101 +80,72 @@ public class ProductImageEntity {
         this.url = url;
     }
 
-    public boolean isCover() {
+    public Boolean getIsCover() {
         return isCover;
     }
 
-    public void setIsCover(boolean isCover) {
+    public void setIsCover(Boolean isCover) {
         this.isCover = isCover;
     }
 
-    public boolean isLogo() {
-        return logo;
+    // Metodo per compatibilità (getter alternativo)
+    public boolean isCover() {
+        return Boolean.TRUE.equals(isCover);
     }
 
-    public void setLogo(boolean logo) {
-        this.logo = logo;
+    public String getAltText() {
+        return altText;
     }
 
-    public boolean isWhiteBackground() {
-        return whiteBackground;
+    public void setAltText(String altText) {
+        this.altText = altText;
     }
 
-    public void setWhiteBackground(boolean whiteBackground) {
-        this.whiteBackground = whiteBackground;
+    public Integer getDisplayOrder() {
+        return displayOrder;
     }
 
-    public int getPosition() {
-        return position;
+    public void setDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
     }
 
-    public void setPosition(int position) {
-        this.position = position;
+    public ProductEntity getProduct() {
+        return product;
     }
 
-    public int getEnergyEfficiency() {
-        return energyEfficiency;
+    public void setProduct(ProductEntity product) {
+        this.product = product;
     }
 
-    public void setEnergyEfficiency(int energyEfficiency) {
-        this.energyEfficiency = energyEfficiency;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        ProductImageEntity that = (ProductImageEntity) o;
+
+        if (id != null ? !id.equals(that.id) : that.id != null)
+            return false;
+        return url != null ? url.equals(that.url) : that.url == null;
     }
 
-    public int getIcon() {
-        return icon;
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (url != null ? url.hashCode() : 0);
+        return result;
     }
 
-    public void setIcon(int icon) {
-        this.icon = icon;
+    @Override
+    public String toString() {
+        return "ProductImageEntity{" +
+                "id=" + id +
+                ", url='" + url + '\'' +
+                ", isCover=" + isCover +
+                ", altText='" + altText + '\'' +
+                ", displayOrder=" + displayOrder +
+                '}';
     }
-
-    public int getMarketingPhoto() {
-        return marketingPhoto;
-    }
-
-    public void setMarketingPhoto(int marketingPhoto) {
-        this.marketingPhoto = marketingPhoto;
-    }
-
-    public int getPackagingPhoto() {
-        return packagingPhoto;
-    }
-
-    public void setPackagingPhoto(int packagingPhoto) {
-        this.packagingPhoto = packagingPhoto;
-    }
-
-    public int getBrand() {
-        return brand;
-    }
-
-    public void setBrand(int brand) {
-        this.brand = brand;
-    }
-
-    public boolean isGpsrLabel() {
-        return gpsrLabel;
-    }
-
-    public void setGpsrLabel(boolean gpsrLabel) {
-        this.gpsrLabel = gpsrLabel;
-    }
-
-    public boolean isGpsrWarning() {
-        return gpsrWarning;
-    }
-
-    public void setGpsrWarning(boolean gpsrWarning) {
-        this.gpsrWarning = gpsrWarning;
-    }
-
-    public Long getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-
-    // Getters and Setters
 }

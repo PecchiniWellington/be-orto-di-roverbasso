@@ -1,46 +1,82 @@
 package com.ortoroverbasso.ortorovebasso.dto.product;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
+@Schema(description = "DTO per la richiesta di creazione/aggiornamento prodotto")
 public class ProductRequestDto {
 
-    @Schema(description = "ID del prodotto", example = "1")
+    @Schema(description = "ID del prodotto (solo per aggiornamento)", example = "1")
     private Long id;
 
-    @Schema(description = "SKU del prodotto", example = "ABC123")
+    @NotBlank(message = "SKU è obbligatorio")
+    @Schema(description = "SKU del prodotto", example = "ABC123", required = true)
     private String sku;
 
-    @Schema(description = "Prezzo al dettaglio del prodotto", example = "299.99")
-    private Double retailPrice;
+    @NotNull(message = "Prezzo al dettaglio è obbligatorio")
+    @DecimalMin(value = "0.0", message = "Il prezzo al dettaglio deve essere positivo")
+    @Schema(description = "Prezzo al dettaglio del prodotto", example = "299.99", required = true)
+    private BigDecimal retailPrice;
 
-    @Schema(description = "ID della categoria del prodotto", example = "1")
-    private Long category;
+    @NotNull(message = "Categoria è obbligatoria")
+    @Schema(description = "ID della categoria del prodotto", example = "1", required = true)
+    private Long categoryId;
 
+    @PositiveOrZero(message = "Il peso deve essere positivo o zero")
     @Schema(description = "Peso del prodotto in grammi", example = "200")
-    private Integer weight;
+    private BigDecimal weight;
 
-    @Schema(description = "Indica se il prodotto è attivo o meno", example = "true")
-    private Integer active;
+    @NotNull(message = "Stato attivo è obbligatorio")
+    @Schema(description = "Indica se il prodotto è attivo o meno", example = "true", required = true)
+    private Boolean active = true;
 
-    private String wholesalePrice;
-    private Double inShopsPrice;
+    @DecimalMin(value = "0.0", message = "Il prezzo all'ingrosso deve essere positivo")
+    @Schema(description = "Prezzo all'ingrosso del prodotto", example = "199.99")
+    private BigDecimal wholesalePrice;
 
+    @DecimalMin(value = "0.0", message = "Il prezzo nei negozi deve essere positivo")
+    @Schema(description = "Prezzo del prodotto nei negozi", example = "249.99")
+    private BigDecimal inShopsPrice;
+
+    @Schema(description = "Codice di riferimento del prodotto", example = "REF-ABC123")
     private String reference;
-    private Integer quantity;
-    private Integer discount;
-    private Long subCategoryId;
 
+    @PositiveOrZero(message = "La quantità deve essere positiva o zero")
+    @Schema(description = "Quantità disponibile", example = "100")
+    private Integer quantity = 0;
+
+    @PositiveOrZero(message = "Lo sconto deve essere positivo o zero")
+    @Schema(description = "Percentuale di sconto", example = "10")
+    private Integer discount = 0;
+
+    @Schema(description = "ID del produttore", example = "5")
+    private Long manufacturerId;
+
+    @Valid
+    @Schema(description = "Lista dei prezzi per grandi quantità")
     private List<ProductLargeQuantityPriceRequestDto> priceLargeQuantities;
 
-    // Costruttore con tutti i parametri
+    // Constructors
     public ProductRequestDto() {
     }
 
-    // Getter e Setter
+    public ProductRequestDto(String sku, BigDecimal retailPrice, Long categoryId, Boolean active) {
+        this.sku = sku;
+        this.retailPrice = retailPrice;
+        this.categoryId = categoryId;
+        this.active = active;
+    }
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -57,51 +93,51 @@ public class ProductRequestDto {
         this.sku = sku;
     }
 
-    public Double getRetailPrice() {
+    public BigDecimal getRetailPrice() {
         return retailPrice;
     }
 
-    public void setRetailPrice(Double retailPrice) {
+    public void setRetailPrice(BigDecimal retailPrice) {
         this.retailPrice = retailPrice;
     }
 
-    public Long getCategory() {
-        return category;
+    public Long getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategory(Long category) {
-        this.category = category;
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
-    public Integer getWeight() {
+    public BigDecimal getWeight() {
         return weight;
     }
 
-    public void setWeight(Integer weight) {
+    public void setWeight(BigDecimal weight) {
         this.weight = weight;
     }
 
-    public Integer getActive() {
+    public Boolean getActive() {
         return active;
     }
 
-    public void setActive(Integer active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 
-    public String getWholesalePrice() {
+    public BigDecimal getWholesalePrice() {
         return wholesalePrice;
     }
 
-    public void setWholesalePrice(String wholesalePrice) {
+    public void setWholesalePrice(BigDecimal wholesalePrice) {
         this.wholesalePrice = wholesalePrice;
     }
 
-    public Double getInShopsPrice() {
+    public BigDecimal getInShopsPrice() {
         return inShopsPrice;
     }
 
-    public void setInShopsPrice(Double inShopsPrice) {
+    public void setInShopsPrice(BigDecimal inShopsPrice) {
         this.inShopsPrice = inShopsPrice;
     }
 
@@ -121,14 +157,6 @@ public class ProductRequestDto {
         this.quantity = quantity;
     }
 
-    public List<ProductLargeQuantityPriceRequestDto> getPriceLargeQuantities() {
-        return priceLargeQuantities;
-    }
-
-    public void setPriceLargeQuantities(List<ProductLargeQuantityPriceRequestDto> priceLargeQuantities) {
-        this.priceLargeQuantities = priceLargeQuantities;
-    }
-
     public Integer getDiscount() {
         return discount;
     }
@@ -137,11 +165,19 @@ public class ProductRequestDto {
         this.discount = discount;
     }
 
-    public Long getSubCategoryId() {
-        return subCategoryId;
+    public Long getManufacturerId() {
+        return manufacturerId;
     }
 
-    public void setSubCategoryId(Long subCategoryId) {
-        this.subCategoryId = subCategoryId;
+    public void setManufacturerId(Long manufacturerId) {
+        this.manufacturerId = manufacturerId;
+    }
+
+    public List<ProductLargeQuantityPriceRequestDto> getPriceLargeQuantities() {
+        return priceLargeQuantities;
+    }
+
+    public void setPriceLargeQuantities(List<ProductLargeQuantityPriceRequestDto> priceLargeQuantities) {
+        this.priceLargeQuantities = priceLargeQuantities;
     }
 }
