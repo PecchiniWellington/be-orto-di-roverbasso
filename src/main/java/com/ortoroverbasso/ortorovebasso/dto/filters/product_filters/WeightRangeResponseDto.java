@@ -5,6 +5,10 @@ public class WeightRangeResponseDto {
     private double to;
     private long count;
 
+    WeightRangeResponseDto() {
+        // Default constructor for Jackson
+    }
+
     public WeightRangeResponseDto(double from, double to, long count) {
         this.from = from;
         this.to = to;

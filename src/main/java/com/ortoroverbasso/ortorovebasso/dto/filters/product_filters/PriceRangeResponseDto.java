@@ -5,6 +5,10 @@ public class PriceRangeResponseDto {
     private double to;
     private long count;
 
+    public PriceRangeResponseDto() {
+        // Costruttore vuoto per Jackson
+    }
+
     public PriceRangeResponseDto(double from, double to, long count) {
         this.from = from;
         this.to = to;

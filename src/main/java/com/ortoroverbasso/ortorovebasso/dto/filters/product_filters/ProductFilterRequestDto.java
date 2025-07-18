@@ -10,7 +10,7 @@ public class ProductFilterRequestDto {
     private Double minPrice;
     private Double maxPrice;
     private Boolean available;
-    private ProductSortEnum sortBy;
+    private ProductSortEnum sort;
 
     // Getters e Setters
     public List<String> getCategorySlugs() {
@@ -54,10 +54,22 @@ public class ProductFilterRequestDto {
     }
 
     public ProductSortEnum getSort() {
-        return sortBy;
+        return sort;
     }
 
-    public void setSort(ProductSortEnum sortBy) {
-        this.sortBy = sortBy;
+    public void setSort(ProductSortEnum sort) {
+        this.sort = sort;
+    }
+
+    @Override
+    public String toString() {
+        return "ProductFilterRequestDto{" +
+                "categorySlugs=" + categorySlugs +
+                ", search='" + search + '\'' +
+                ", minPrice=" + minPrice +
+                ", maxPrice=" + maxPrice +
+                ", available=" + available +
+                ", sort=" + sort +
+                '}';
     }
 }
