@@ -1,4 +1,4 @@
-package com.ortoroverbasso.ortorovebasso.service.product.impl;
+package com.ortoroverbasso.ortorovebasso.service.product.implementation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ortoroverbasso.ortorovebasso.constants.product.ProductConstants;
 import com.ortoroverbasso.ortorovebasso.dto.GenericResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.filters.paginate.PaginatedResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFacetResponseDto;
@@ -33,6 +34,7 @@ import com.ortoroverbasso.ortorovebasso.repository.category.CategoryRepository;
 import com.ortoroverbasso.ortorovebasso.repository.manufacturer.ManufacturerRepository;
 import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
+import com.ortoroverbasso.ortorovebasso.service.product.business.ProductBusinessLogic;
 import com.ortoroverbasso.ortorovebasso.service.product.product_filters.IProductFacetService;
 
 @Service
@@ -45,41 +47,46 @@ public class ProductServiceImpl implements IProductService {
         private final CategoryRepository categoryRepository;
         private final ManufacturerRepository manufacturerRepository;
         private final IProductFacetService productFacetService;
+        private final ProductBusinessLogic productBusinessLogic;
 
         @Autowired
         public ProductServiceImpl(
                         ProductRepository productRepository,
                         CategoryRepository categoryRepository,
                         ManufacturerRepository manufacturerRepository,
-                        IProductFacetService productFacetService) {
+                        IProductFacetService productFacetService,
+                        ProductBusinessLogic productBusinessLogic) {
                 this.productRepository = productRepository;
                 this.categoryRepository = categoryRepository;
                 this.manufacturerRepository = manufacturerRepository;
                 this.productFacetService = productFacetService;
+                this.productBusinessLogic = productBusinessLogic;
         }
 
         @Override
-        @CacheEvict(value = { "products", "flatProducts" }, allEntries = true)
+        @CacheEvict(value = { ProductConstants.CACHE_PRODUCTS,
+                        ProductConstants.CACHE_FLAT_PRODUCTS }, allEntries = true)
         public ProductResponseDto createProduct(ProductRequestDto dto) {
                 logger.info("Creating new product with SKU: {}", dto.getSku());
 
                 // Verifica SKU univoco
                 if (productRepository.existsBySku(dto.getSku())) {
                         throw new ProductAlreadyExistsException(
-                                        "Product with SKU '" + dto.getSku() + "' already exists");
+                                        String.format(ProductConstants.PRODUCT_ALREADY_EXISTS, dto.getSku()));
                 }
 
                 // Verifica categoria
                 CategoryEntity category = categoryRepository.findById(dto.getCategoryId())
                                 .orElseThrow(() -> new CategoryNotFoundException(
-                                                "Category not found with ID: " + dto.getCategoryId()));
+                                                ProductConstants.CATEGORY_NOT_FOUND + dto.getCategoryId()));
 
                 // Verifica produttore (se specificato)
                 ManufacturerEntity manufacturer = null;
                 if (dto.getManufacturerId() != null) {
                         manufacturer = manufacturerRepository.findById(dto.getManufacturerId())
                                         .orElseThrow(() -> new ManufacturerNotFoundException(
-                                                        "Manufacturer not found with ID: " + dto.getManufacturerId()));
+                                                        ProductConstants.MANUFACTURER_NOT_FOUND
+                                                                        + dto.getManufacturerId()));
                 }
 
                 // Crea entità
@@ -87,22 +94,24 @@ public class ProductServiceImpl implements IProductService {
                 product.setCategory(category);
                 product.setManufacturer(manufacturer);
 
+                // Validazione business logic
+                productBusinessLogic.validateForCreate(product);
+
                 // Salva prodotto
                 ProductEntity savedProduct = productRepository.save(product);
 
-                logger.info("Product created successfully with ID: {}", savedProduct.getId());
+                logger.info(ProductConstants.PRODUCT_CREATED + savedProduct.getId());
                 return ProductMapper.toResponseDto(savedProduct);
         }
 
         @Override
         @Transactional(readOnly = true)
-        @Cacheable(value = "products", key = "#pageable.pageNumber + '_' + #pageable.pageSize")
+        @Cacheable(value = ProductConstants.CACHE_PRODUCTS, key = "#pageable.pageNumber + '_' + #pageable.pageSize")
         public PaginatedResponseDto<ProductResponseDto> getAllProducts(Pageable pageable) {
                 logger.debug("Retrieving all products with pagination: page={}, size={}",
                                 pageable.getPageNumber(), pageable.getPageSize());
 
                 Page<ProductEntity> productsPage = productRepository.findAllWithDetails(pageable);
-
                 List<ProductResponseDto> productDtos = ProductMapper.toResponseDtoList(productsPage.getContent());
 
                 return PaginatedResponseDto.fromPage(
@@ -116,31 +125,32 @@ public class ProductServiceImpl implements IProductService {
 
                 ProductEntity product = productRepository.findFullProductById(productId)
                                 .orElseThrow(() -> new ProductNotFoundException(
-                                                "Product not found with ID: " + productId));
+                                                ProductConstants.PRODUCT_NOT_FOUND + productId));
 
                 return ProductMapper.toResponseDto(product);
         }
 
         @Override
-        @CacheEvict(value = { "products", "flatProducts" }, allEntries = true)
+        @CacheEvict(value = { ProductConstants.CACHE_PRODUCTS,
+                        ProductConstants.CACHE_FLAT_PRODUCTS }, allEntries = true)
         public ProductResponseDto updateProduct(Long productId, ProductRequestDto dto) {
                 logger.info("Updating product with ID: {}", productId);
 
                 ProductEntity existingProduct = productRepository.findById(productId)
                                 .orElseThrow(() -> new ProductNotFoundException(
-                                                "Product not found with ID: " + productId));
+                                                ProductConstants.PRODUCT_NOT_FOUND + productId));
 
                 // Verifica SKU univoco (se cambiato)
                 if (!existingProduct.getSku().equals(dto.getSku()) && productRepository.existsBySku(dto.getSku())) {
                         throw new ProductAlreadyExistsException(
-                                        "Product with SKU '" + dto.getSku() + "' already exists");
+                                        String.format(ProductConstants.PRODUCT_ALREADY_EXISTS, dto.getSku()));
                 }
 
                 // Verifica categoria (se specificata)
                 if (dto.getCategoryId() != null) {
                         CategoryEntity category = categoryRepository.findById(dto.getCategoryId())
                                         .orElseThrow(() -> new CategoryNotFoundException(
-                                                        "Category not found with ID: " + dto.getCategoryId()));
+                                                        ProductConstants.CATEGORY_NOT_FOUND + dto.getCategoryId()));
                         existingProduct.setCategory(category);
                 }
 
@@ -148,32 +158,37 @@ public class ProductServiceImpl implements IProductService {
                 if (dto.getManufacturerId() != null) {
                         ManufacturerEntity manufacturer = manufacturerRepository.findById(dto.getManufacturerId())
                                         .orElseThrow(() -> new ManufacturerNotFoundException(
-                                                        "Manufacturer not found with ID: " + dto.getManufacturerId()));
+                                                        ProductConstants.MANUFACTURER_NOT_FOUND
+                                                                        + dto.getManufacturerId()));
                         existingProduct.setManufacturer(manufacturer);
                 }
 
                 // Aggiorna campi
                 ProductMapper.updateEntityFromDto(dto, existingProduct);
 
+                // Validazione business logic
+                productBusinessLogic.validateForUpdate(existingProduct);
+
                 ProductEntity savedProduct = productRepository.save(existingProduct);
 
-                logger.info("Product updated successfully with ID: {}", savedProduct.getId());
+                logger.info(ProductConstants.PRODUCT_UPDATED + savedProduct.getId());
                 return ProductMapper.toResponseDto(savedProduct);
         }
 
         @Override
-        @CacheEvict(value = { "products", "flatProducts" }, allEntries = true)
+        @CacheEvict(value = { ProductConstants.CACHE_PRODUCTS,
+                        ProductConstants.CACHE_FLAT_PRODUCTS }, allEntries = true)
         public GenericResponseDto deleteProduct(Long productId) {
                 logger.info("Deleting product with ID: {}", productId);
 
                 ProductEntity product = productRepository.findById(productId)
                                 .orElseThrow(() -> new ProductNotFoundException(
-                                                "Product not found with ID: " + productId));
+                                                ProductConstants.PRODUCT_NOT_FOUND + productId));
 
                 productRepository.delete(product);
 
-                logger.info("Product deleted successfully with ID: {}", productId);
-                return new GenericResponseDto(200, "Product deleted successfully. ID: " + productId);
+                logger.info(ProductConstants.PRODUCT_DELETED + productId);
+                return new GenericResponseDto(200, ProductConstants.PRODUCT_DELETED + productId);
         }
 
         @Override
@@ -183,7 +198,7 @@ public class ProductServiceImpl implements IProductService {
 
                 CategoryEntity category = categoryRepository.findById(categoryId)
                                 .orElseThrow(() -> new CategoryNotFoundException(
-                                                "Category not found with ID: " + categoryId));
+                                                ProductConstants.CATEGORY_NOT_FOUND + categoryId));
 
                 List<ProductEntity> products = productRepository.findByCategory(category);
                 return ProductMapper.toResponseDtoList(products);
@@ -228,7 +243,6 @@ public class ProductServiceImpl implements IProductService {
                         ProductFilterRequestDto filterDto, Pageable pageable) {
 
                 Page<ProductEntity> productsPage = productRepository.findFilteredProducts(filterDto, pageable);
-
                 List<ProductResponseDto> productDtos = ProductMapper.toResponseDtoList(productsPage.getContent());
 
                 return PaginatedResponseDto.fromPage(
@@ -245,12 +259,9 @@ public class ProductServiceImpl implements IProductService {
 
         @Override
         @Transactional(readOnly = true)
-        @Cacheable(value = "flatProducts")
+        @Cacheable(value = ProductConstants.CACHE_FLAT_PRODUCTS)
         public List<ProductFlatDto> getFlatProducts() {
-
-                List<ProductFlatDto> result = productRepository.findAllFlat();
-
-                return result;
+                return productRepository.findAllFlat();
         }
 
         @Override
@@ -296,44 +307,40 @@ public class ProductServiceImpl implements IProductService {
         }
 
         @Override
-        @CacheEvict(value = { "products", "flatProducts" }, allEntries = true)
+        @CacheEvict(value = { ProductConstants.CACHE_PRODUCTS,
+                        ProductConstants.CACHE_FLAT_PRODUCTS }, allEntries = true)
         public ProductResponseDto updateProductStatus(Long productId, Boolean active) {
                 logger.info("Updating product status for ID: {} to active: {}", productId, active);
 
                 ProductEntity product = productRepository.findById(productId)
                                 .orElseThrow(() -> new ProductNotFoundException(
-                                                "Product not found with ID: " + productId));
+                                                ProductConstants.PRODUCT_NOT_FOUND + productId));
 
                 product.setActive(active);
                 ProductEntity savedProduct = productRepository.save(product);
 
-                logger.info("Product status updated successfully for ID: {}", productId);
+                logger.info(ProductConstants.PRODUCT_STATUS_UPDATED + productId);
                 return ProductMapper.toResponseDto(savedProduct);
         }
 
         @Override
-        @CacheEvict(value = { "products", "flatProducts" }, allEntries = true)
+        @CacheEvict(value = { ProductConstants.CACHE_PRODUCTS,
+                        ProductConstants.CACHE_FLAT_PRODUCTS }, allEntries = true)
         public ProductResponseDto updateProductQuantity(Long productId, Integer quantity) {
                 logger.info("Updating product quantity for ID: {} to quantity: {}", productId, quantity);
 
                 ProductEntity product = productRepository.findById(productId)
                                 .orElseThrow(() -> new ProductNotFoundException(
-                                                "Product not found with ID: " + productId));
+                                                ProductConstants.PRODUCT_NOT_FOUND + productId));
 
                 product.setQuantity(quantity);
                 ProductEntity savedProduct = productRepository.save(product);
 
-                logger.info("Product quantity updated successfully for ID: {}", productId);
+                logger.info(ProductConstants.PRODUCT_QUANTITY_UPDATED + productId);
                 return ProductMapper.toResponseDto(savedProduct);
         }
 
         // Metodi helper privati
-
-        private List<ProductResponseDto> collectProductsFromCategoryTree(CategoryEntity category) {
-                List<ProductEntity> allProducts = new java.util.ArrayList<>();
-                collectProductsRecursively(category, allProducts);
-                return ProductMapper.toResponseDtoList(allProducts);
-        }
 
         private void collectCategoryIdsRecursively(CategoryEntity category, List<Long> ids) {
                 ids.add(category.getId());
@@ -341,19 +348,6 @@ public class ProductServiceImpl implements IProductService {
                 if (category.getSubCategories() != null && !category.getSubCategories().isEmpty()) {
                         for (CategoryEntity sub : category.getSubCategories()) {
                                 collectCategoryIdsRecursively(sub, ids);
-                        }
-                }
-        }
-
-        private void collectProductsRecursively(CategoryEntity category, List<ProductEntity> products) {
-                // Aggiungi prodotti della categoria corrente
-                List<ProductEntity> categoryProducts = productRepository.findByCategoryId(category.getId());
-                products.addAll(categoryProducts);
-
-                // Aggiungi prodotti delle sottocategorie
-                if (category.getSubCategories() != null) {
-                        for (CategoryEntity subCategory : category.getSubCategories()) {
-                                collectProductsRecursively(subCategory, products);
                         }
                 }
         }

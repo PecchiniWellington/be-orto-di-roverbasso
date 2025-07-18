@@ -1,7 +1,6 @@
 package com.ortoroverbasso.ortorovebasso.entity.product;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -166,117 +165,6 @@ public class ProductEntity {
         this.sku = sku;
         this.retailPrice = retailPrice;
         this.active = active;
-    }
-
-    // Utility methods
-    public boolean isActive() {
-        return Boolean.TRUE.equals(active);
-    }
-
-    public boolean hasImages() {
-        return productImages != null && !productImages.isEmpty();
-    }
-
-    public boolean hasAttributes() {
-        return productAttributes != null && !productAttributes.isEmpty();
-    }
-
-    public boolean hasTags() {
-        return Boolean.TRUE.equals(hasTags);
-    }
-
-    public boolean isOnSale() {
-        return discount != null && discount > 0;
-    }
-
-    public boolean isLowStock() {
-        return quantity != null && quantity <= 10; // Soglia configurabile
-    }
-
-    /**
-     * Aggiunge un'immagine e aggiorna la relazione bidirezionale
-     */
-    public void addImage(ProductImageEntity image) {
-        if (image != null) {
-            productImages.add(image);
-            image.setProduct(this);
-            updateDerivedFields();
-        }
-    }
-
-    /**
-     * Rimuove un'immagine e aggiorna la relazione bidirezionale
-     */
-    public void removeImage(ProductImageEntity image) {
-        if (image != null) {
-            productImages.remove(image);
-            image.setProduct(null);
-            updateDerivedFields();
-        }
-    }
-
-    /**
-     * Aggiunge un prezzo per grandi quantità
-     */
-    public void addLargeQuantityPrice(ProductLargeQuantityPriceEntity price) {
-        if (price != null) {
-            priceLargeQuantities.add(price);
-            price.setProduct(this);
-        }
-    }
-
-    /**
-     * Rimuove un prezzo per grandi quantità
-     */
-    public void removeLargeQuantityPrice(ProductLargeQuantityPriceEntity price) {
-        if (price != null) {
-            priceLargeQuantities.remove(price);
-            price.setProduct(null);
-        }
-    }
-
-    /**
-     * Ottiene l'immagine di copertina
-     */
-    public ProductImageEntity getCoverImage() {
-        return productImages.stream()
-                .filter(img -> Boolean.TRUE.equals(img.getIsCover()))
-                .findFirst()
-                .orElse(productImages.isEmpty() ? null : productImages.get(0));
-    }
-
-    /**
-     * Imposta un'immagine come copertina
-     */
-    public void setCoverImage(ProductImageEntity newCoverImage) {
-        // Rimuovi il flag di copertina da tutte le immagini
-        productImages.forEach(img -> img.setIsCover(false));
-
-        // Imposta la nuova immagine di copertina
-        if (newCoverImage != null && productImages.contains(newCoverImage)) {
-            newCoverImage.setIsCover(true);
-        }
-    }
-
-    /**
-     * Calcola il prezzo finale considerando lo sconto
-     */
-    public BigDecimal getFinalPrice() {
-        if (retailPrice == null)
-            return BigDecimal.ZERO;
-        if (discount == null || discount <= 0)
-            return retailPrice;
-
-        BigDecimal discountAmount = retailPrice.multiply(BigDecimal.valueOf(discount)).divide(BigDecimal.valueOf(100),
-                2, RoundingMode.HALF_UP);
-        return retailPrice.subtract(discountAmount);
-    }
-
-    /**
-     * Verifica se il prodotto può essere ordinato
-     */
-    public boolean canBeOrdered() {
-        return isActive() && quantity != null && quantity > 0;
     }
 
     // Getters and Setters

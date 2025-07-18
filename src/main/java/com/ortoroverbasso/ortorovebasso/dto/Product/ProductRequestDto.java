@@ -3,6 +3,7 @@ package com.ortoroverbasso.ortorovebasso.dto.product;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.ortoroverbasso.ortorovebasso.constants.product.ProductConstants;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceRequestDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 @Schema(description = "DTO per la richiesta di creazione/aggiornamento prodotto")
 public class ProductRequestDto {
@@ -18,16 +20,18 @@ public class ProductRequestDto {
     @Schema(description = "ID del prodotto (solo per aggiornamento)", example = "1")
     private Long id;
 
-    @NotBlank(message = "SKU è obbligatorio")
+    @NotBlank(message = ProductConstants.SKU_REQUIRED)
+    @Size(max = ProductConstants.SKU_MAX_LENGTH, message = "SKU must not exceed " + ProductConstants.SKU_MAX_LENGTH
+            + " characters")
     @Schema(description = "SKU del prodotto", example = "ABC123", required = true)
     private String sku;
 
-    @NotNull(message = "Prezzo al dettaglio è obbligatorio")
+    @NotNull(message = ProductConstants.RETAIL_PRICE_REQUIRED)
     @DecimalMin(value = "0.0", message = "Il prezzo al dettaglio deve essere positivo")
     @Schema(description = "Prezzo al dettaglio del prodotto", example = "299.99", required = true)
     private BigDecimal retailPrice;
 
-    @NotNull(message = "Categoria è obbligatoria")
+    @NotNull(message = ProductConstants.CATEGORY_REQUIRED)
     @Schema(description = "ID della categoria del prodotto", example = "1", required = true)
     private Long categoryId;
 
@@ -35,9 +39,9 @@ public class ProductRequestDto {
     @Schema(description = "Peso del prodotto in grammi", example = "200")
     private BigDecimal weight;
 
-    @NotNull(message = "Stato attivo è obbligatorio")
+    @NotNull(message = ProductConstants.ACTIVE_STATUS_REQUIRED)
     @Schema(description = "Indica se il prodotto è attivo o meno", example = "true", required = true)
-    private Boolean active = true;
+    private Boolean active = ProductConstants.DEFAULT_ACTIVE;
 
     @DecimalMin(value = "0.0", message = "Il prezzo all'ingrosso deve essere positivo")
     @Schema(description = "Prezzo all'ingrosso del prodotto", example = "199.99")
@@ -47,16 +51,18 @@ public class ProductRequestDto {
     @Schema(description = "Prezzo del prodotto nei negozi", example = "249.99")
     private BigDecimal inShopsPrice;
 
+    @Size(max = ProductConstants.REFERENCE_MAX_LENGTH, message = "Reference must not exceed "
+            + ProductConstants.REFERENCE_MAX_LENGTH + " characters")
     @Schema(description = "Codice di riferimento del prodotto", example = "REF-ABC123")
     private String reference;
 
     @PositiveOrZero(message = "La quantità deve essere positiva o zero")
     @Schema(description = "Quantità disponibile", example = "100")
-    private Integer quantity = 0;
+    private Integer quantity = ProductConstants.DEFAULT_QUANTITY;
 
     @PositiveOrZero(message = "Lo sconto deve essere positivo o zero")
     @Schema(description = "Percentuale di sconto", example = "10")
-    private Integer discount = 0;
+    private Integer discount = ProductConstants.DEFAULT_DISCOUNT;
 
     @Schema(description = "ID del produttore", example = "5")
     private Long manufacturerId;

@@ -17,6 +17,9 @@ import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_information.ProductInformationMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_why_choose.ProductWhyChooseMapper;
 
+/**
+ * Mapper per la conversione tra ProductEntity e DTO
+ */
 @Component
 public class ProductMapper {
 
@@ -29,10 +32,7 @@ public class ProductMapper {
                 }
 
                 ProductEntity product = new ProductEntity();
-
-                // Campi base
                 mapBasicFields(dto, product);
-
                 return product;
         }
 
@@ -126,6 +126,41 @@ public class ProductMapper {
                 Optional.ofNullable(dto.getQuantity()).ifPresent(entity::setQuantity);
         }
 
+        /**
+         * Metodo utility per creare un ProductResponseDto semplificato (per liste)
+         */
+        public static ProductResponseDto toSimpleResponseDto(ProductEntity product) {
+                if (product == null) {
+                        return null;
+                }
+
+                return ProductResponseDto.builder()
+                                .id(product.getId())
+                                .sku(product.getSku())
+                                .retailPrice(product.getRetailPrice())
+                                .active(product.getActive())
+                                .productName(extractProductName(product))
+                                .categoryId(extractCategoryId(product))
+                                .hasImages(product.getHasImages())
+                                .hasAttributes(product.getHasAttributes())
+                                .build();
+        }
+
+        /**
+         * Metodo utility per convertire singolo ProductLargeQuantityPriceEntity
+         */
+        public static ProductLargeQuantityPriceResponseDto toLargeQuantityDto(
+                        com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity entity) {
+                if (entity == null) {
+                        return null;
+                }
+
+                return new ProductLargeQuantityPriceResponseDto(
+                                entity.getId(),
+                                entity.getQuantity(),
+                                entity.getPrice());
+        }
+
         // Metodi helper privati
 
         private static void mapBasicFields(ProductRequestDto dto, ProductEntity product) {
@@ -212,40 +247,5 @@ public class ProductMapper {
                 return product.getWhyChoose().stream()
                                 .map(ProductWhyChooseMapper::toResponseWithoutProductId)
                                 .collect(Collectors.toList());
-        }
-
-        /**
-         * Metodo utility per convertire singolo ProductLargeQuantityPriceEntity
-         */
-        public static ProductLargeQuantityPriceResponseDto toLargeQuantityDto(
-                        com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity entity) {
-                if (entity == null) {
-                        return null;
-                }
-
-                return new ProductLargeQuantityPriceResponseDto(
-                                entity.getId(),
-                                entity.getQuantity(),
-                                entity.getPrice());
-        }
-
-        /**
-         * Metodo utility per creare un ProductResponseDto semplificato (per liste)
-         */
-        public static ProductResponseDto toSimpleResponseDto(ProductEntity product) {
-                if (product == null) {
-                        return null;
-                }
-
-                return ProductResponseDto.builder()
-                                .id(product.getId())
-                                .sku(product.getSku())
-                                .retailPrice(product.getRetailPrice())
-                                .active(product.getActive())
-                                .productName(extractProductName(product))
-                                .categoryId(extractCategoryId(product))
-                                .hasImages(product.getHasImages())
-                                .hasAttributes(product.getHasAttributes())
-                                .build();
         }
 }

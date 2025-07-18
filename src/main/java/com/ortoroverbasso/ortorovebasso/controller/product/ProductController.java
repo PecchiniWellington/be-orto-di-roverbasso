@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ortoroverbasso.ortorovebasso.constants.product.ProductConstants;
 import com.ortoroverbasso.ortorovebasso.dto.GenericResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.filters.paginate.PaginatedResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFacetResponseDto;
@@ -37,6 +39,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 @RestController
@@ -72,7 +75,7 @@ public class ProductController {
         @GetMapping("/all")
         public ResponseEntity<PaginatedResponseDto<ProductResponseDto>> getAllProducts(
                         @Parameter(description = "Numero di pagina (0-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
-                        @Parameter(description = "Dimensione della pagina") @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
+                        @Parameter(description = "Dimensione della pagina") @RequestParam(defaultValue = "10") @Min(1) @Max(ProductConstants.MAX_PAGE_SIZE) int size) {
 
                 Pageable pageable = PageRequest.of(page, size);
                 PaginatedResponseDto<ProductResponseDto> products = productService.getAllProducts(pageable);
@@ -162,8 +165,7 @@ public class ProductController {
                         @Valid @RequestBody ProductFilterRequestDto filterDto,
                         @Parameter(description = "Parametri di paginazione") Pageable pageable) {
                 PaginatedResponseDto<ProductResponseDto> filteredProducts = productService.getFilteredProducts(
-                                filterDto,
-                                pageable);
+                                filterDto, pageable);
                 return ResponseEntity.ok(filteredProducts);
         }
 
@@ -195,10 +197,85 @@ public class ProductController {
         @GetMapping("/flat/paginated")
         public ResponseEntity<Page<ProductFlatDto>> getFlatProductsPaginated(
                         @Parameter(description = "Numero di pagina (0-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
-                        @Parameter(description = "Dimensione della pagina") @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
+                        @Parameter(description = "Dimensione della pagina") @RequestParam(defaultValue = "10") @Min(1) @Max(ProductConstants.MAX_PAGE_SIZE) int size) {
 
                 Pageable pageable = PageRequest.of(page, size);
                 Page<ProductFlatDto> products = productService.getFlatProductsPaginated(pageable);
                 return ResponseEntity.ok(products);
+        }
+
+        @Operation(summary = "Ottieni prodotti per range di prezzo")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Prodotti nel range di prezzo recuperati")
+        })
+        @GetMapping("/price-range")
+        public ResponseEntity<PaginatedResponseDto<ProductResponseDto>> getProductsByPriceRange(
+                        @Parameter(description = "Prezzo minimo") @RequestParam(required = false) Double minPrice,
+                        @Parameter(description = "Prezzo massimo") @RequestParam(required = false) Double maxPrice,
+                        @Parameter(description = "Numero di pagina (0-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
+                        @Parameter(description = "Dimensione della pagina") @RequestParam(defaultValue = "10") @Min(1) @Max(ProductConstants.MAX_PAGE_SIZE) int size) {
+
+                Pageable pageable = PageRequest.of(page, size);
+                PaginatedResponseDto<ProductResponseDto> products = productService.getProductsByPriceRange(
+                                minPrice, maxPrice, pageable);
+                return ResponseEntity.ok(products);
+        }
+
+        @Operation(summary = "Aggiorna lo stato attivo/inattivo di un prodotto")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Stato prodotto aggiornato con successo"),
+                        @ApiResponse(responseCode = "404", description = "Prodotto non trovato")
+        })
+        @PatchMapping("/{productId}/status")
+        public ResponseEntity<ProductResponseDto> updateProductStatus(
+                        @Parameter(description = "ID del prodotto") @PathVariable @Positive Long productId,
+                        @Parameter(description = "Nuovo stato attivo") @RequestParam @NotNull Boolean active) {
+                ProductResponseDto updatedProduct = productService.updateProductStatus(productId, active);
+                return ResponseEntity.ok(updatedProduct);
+        }
+
+        @Operation(summary = "Aggiorna la quantità di un prodotto")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Quantità prodotto aggiornata con successo"),
+                        @ApiResponse(responseCode = "404", description = "Prodotto non trovato")
+        })
+        @PatchMapping("/{productId}/quantity")
+        public ResponseEntity<ProductResponseDto> updateProductQuantity(
+                        @Parameter(description = "ID del prodotto") @PathVariable @Positive Long productId,
+                        @Parameter(description = "Nuova quantità") @RequestParam @Min(0) Integer quantity) {
+                ProductResponseDto updatedProduct = productService.updateProductQuantity(productId, quantity);
+                return ResponseEntity.ok(updatedProduct);
+        }
+
+        @Operation(summary = "Verifica se un prodotto esiste")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Verifica completata")
+        })
+        @GetMapping("/{productId}/exists")
+        public ResponseEntity<Boolean> existsById(
+                        @Parameter(description = "ID del prodotto") @PathVariable @Positive Long productId) {
+                boolean exists = productService.existsById(productId);
+                return ResponseEntity.ok(exists);
+        }
+
+        @Operation(summary = "Verifica se un SKU esiste")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Verifica completata")
+        })
+        @GetMapping("/sku/{sku}/exists")
+        public ResponseEntity<Boolean> existsBySku(
+                        @Parameter(description = "SKU del prodotto") @PathVariable @NotBlank String sku) {
+                boolean exists = productService.existsBySku(sku);
+                return ResponseEntity.ok(exists);
+        }
+
+        @Operation(summary = "Conta il numero totale di prodotti attivi")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Conteggio completato")
+        })
+        @GetMapping("/count/active")
+        public ResponseEntity<Long> countActiveProducts() {
+                long count = productService.countActiveProducts();
+                return ResponseEntity.ok(count);
         }
 }

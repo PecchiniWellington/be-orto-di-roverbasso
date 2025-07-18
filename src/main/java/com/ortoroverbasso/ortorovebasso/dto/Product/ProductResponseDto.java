@@ -93,7 +93,7 @@ public class ProductResponseDto {
     }
 
     public static class Builder {
-        private ProductResponseDto dto = new ProductResponseDto();
+        private final ProductResponseDto dto = new ProductResponseDto();
 
         public Builder id(Long id) {
             dto.id = id;
@@ -385,5 +385,17 @@ public class ProductResponseDto {
 
     public void setWhyChoose(List<ProductWhyChooseResponseNoProductIdDto> whyChoose) {
         this.whyChoose = whyChoose;
+    }
+
+    @Override
+    public String toString() {
+        return "ProductResponseDto{" +
+                "id=" + id +
+                ", sku='" + sku + '\'' +
+                ", retailPrice=" + retailPrice +
+                ", active=" + active +
+                ", productName='" + productName + '\'' +
+                ", categoryId=" + categoryId +
+                '}';
     }
 }

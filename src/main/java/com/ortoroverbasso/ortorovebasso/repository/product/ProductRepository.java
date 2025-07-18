@@ -11,13 +11,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.ortoroverbasso.ortorovebasso.dto.filters.product_filters.ProductFilterRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductFlatDto;
 import com.ortoroverbasso.ortorovebasso.entity.category.CategoryEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 
 @Repository
-public interface ProductRepository extends JpaRepository<ProductEntity, Long>, JpaSpecificationExecutor<ProductEntity>,
-                ProductRepositoryCustom {
+public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
+                JpaSpecificationExecutor<ProductEntity> {
+
+        // ========== BASIC QUERY METHODS ==========
 
         /**
          * Trova un prodotto per SKU
@@ -39,6 +42,19 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
          */
         @Query("SELECT p FROM ProductEntity p WHERE p.category.id = :categoryId")
         List<ProductEntity> findByCategoryId(@Param("categoryId") Long categoryId);
+
+        /**
+         * Conta prodotti attivi
+         */
+        long countByActiveTrue();
+
+        /**
+         * Conta prodotti per categoria
+         */
+        @Query("SELECT COUNT(p) FROM ProductEntity p WHERE p.category.id = :categoryId AND p.active = true")
+        long countActiveByCategoryId(@Param("categoryId") Long categoryId);
+
+        // ========== DETAILED FETCH QUERIES ==========
 
         /**
          * Trova un prodotto con tutti i dettagli caricati
@@ -81,25 +97,58 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
         List<ProductEntity> findAllActiveWithDetails();
 
         /**
-         * Query per ProductFlatDto (versione semplificata)
+         * Trova prodotti per categoria con fetch ottimizzato
          */
+        @Query("""
+                        SELECT p FROM ProductEntity p
+                        LEFT JOIN FETCH p.productImages
+                        LEFT JOIN FETCH p.productInformation
+                        WHERE p.category.id = :categoryId AND p.active = true
+                        ORDER BY p.id
+                        """)
+        List<ProductEntity> findActiveByCategoryIdWithDetails(@Param("categoryId") Long categoryId);
+
+        /**
+         * Trova prodotti per lista di categorie con dettagli
+         */
+        @Query("""
+                        SELECT p FROM ProductEntity p
+                        LEFT JOIN FETCH p.productImages
+                        LEFT JOIN FETCH p.productInformation
+                        LEFT JOIN FETCH p.category
+                        WHERE p.category.id IN :categoryIds AND p.active = true
+                        """)
+        List<ProductEntity> findAllActiveByCategoryIdsWithDetails(@Param("categoryIds") List<Long> categoryIds);
+
+        /**
+         * Trova prodotti per lista di IDs con prezzi
+         */
+        @Query("""
+                        SELECT DISTINCT p FROM ProductEntity p
+                        LEFT JOIN FETCH p.priceLargeQuantities
+                        WHERE p.id IN :ids
+                        """)
+        List<ProductEntity> findAllWithPriceLargeQuantitiesByIds(@Param("ids") List<Long> ids);
+
+        // ========== FLAT DTO QUERIES ==========
+
         /**
          * Query per ProductFlatDto (versione semplificata)
          */
         @Query("""
-                            SELECT new com.ortoroverbasso.ortorovebasso.dto.product.ProductFlatDto(
-                                p.id AS id,
-                                p.sku AS sku,
-                                p.reference AS reference,
-                                COALESCE(img.url, '') AS imageUrl,
-                                COALESCE(info.name, '') AS name,
-                                p.retailPrice AS retailPrice
-                            )
-                            FROM ProductEntity p
-                            LEFT JOIN p.productImages img WITH img.isCover = true
-                            LEFT JOIN p.productInformation info
-                            WHERE p.active = true
-                            ORDER BY p.id
+                        SELECT new com.ortoroverbasso.ortorovebasso.dto.product.ProductFlatDto(
+                            p.id AS id,
+                            p.sku AS sku,
+                            p.reference AS reference,
+                            COALESCE(img.url, '') AS imageUrl,
+                            COALESCE(info.name, '') AS name,
+                            p.retailPrice AS retailPrice
+                        )
+                        FROM ProductEntity p
+                        LEFT JOIN p.productImages img WITH img.isCover = true
+                        LEFT JOIN p.productInformation info
+                        WHERE p.active = true
+                        ORDER BY p.id
                         """)
         List<ProductFlatDto> findAllFlat();
 
@@ -107,21 +156,23 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
          * Query per ProductFlatDto paginata
          */
         @Query(value = """
-                            SELECT new com.ortoroverbasso.ortorovebasso.dto.product.ProductFlatDto(
-                                p.id AS id,
-                                p.sku AS sku,
-                                p.reference AS reference,
-                                COALESCE(img.url, '') AS imageUrl,
-                                COALESCE(info.name, '') AS name,
-                                p.retailPrice AS retailPrice
-                            )
-                            FROM ProductEntity p
-                            LEFT JOIN p.productImages img WITH img.isCover = true
-                            LEFT JOIN p.productInformation info
-                            WHERE p.active = true
-                            ORDER BY p.id
+                        SELECT new com.ortoroverbasso.ortorovebasso.dto.product.ProductFlatDto(
+                            p.id AS id,
+                            p.sku AS sku,
+                            p.reference AS reference,
+                            COALESCE(img.url, '') AS imageUrl,
+                            COALESCE(info.name, '') AS name,
+                            p.retailPrice AS retailPrice
+                        )
+                        FROM ProductEntity p
+                        LEFT JOIN p.productImages img WITH img.isCover = true
+                        LEFT JOIN p.productInformation info
+                        WHERE p.active = true
+                        ORDER BY p.id
                         """, countQuery = "SELECT COUNT(p) FROM ProductEntity p WHERE p.active = true")
         Page<ProductFlatDto> findAllFlatPaginated(Pageable pageable);
+
+        // ========== FILTERED QUERIES ==========
 
         /**
          * Trova prodotti per range di prezzo
@@ -139,39 +190,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
                         @Param("minPrice") Double minPrice,
                         @Param("maxPrice") Double maxPrice,
                         Pageable pageable);
-
-        /**
-         * Trova prodotti per categoria con fetch ottimizzato
-         */
-        @Query("""
-                        SELECT p FROM ProductEntity p
-                        LEFT JOIN FETCH p.productImages
-                        LEFT JOIN FETCH p.productInformation
-                        WHERE p.category.id = :categoryId AND p.active = true
-                        ORDER BY p.id
-                        """)
-        List<ProductEntity> findActiveByCategoryIdWithDetails(@Param("categoryId") Long categoryId);
-
-        /**
-         * Trova prodotti per lista di IDs con prezzi
-         */
-        @Query("""
-                        SELECT DISTINCT p FROM ProductEntity p
-                        LEFT JOIN FETCH p.priceLargeQuantities
-                        WHERE p.id IN :ids
-                        """)
-        List<ProductEntity> findAllWithPriceLargeQuantitiesByIds(@Param("ids") List<Long> ids);
-
-        /**
-         * Conta prodotti attivi
-         */
-        long countByActiveTrue();
-
-        /**
-         * Conta prodotti per categoria
-         */
-        @Query("SELECT COUNT(p) FROM ProductEntity p WHERE p.category.id = :categoryId AND p.active = true")
-        long countActiveByCategoryId(@Param("categoryId") Long categoryId);
 
         /**
          * Trova prodotti con quantità bassa
@@ -228,18 +246,32 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
          * Trova prodotti correlati per categoria (escludendo il prodotto corrente)
          */
         @Query("""
-                            SELECT p FROM ProductEntity p
-                            LEFT JOIN FETCH p.productImages img
-                            LEFT JOIN FETCH p.productInformation
-                            WHERE p.category.id = :categoryId
-                            AND p.id != :excludeProductId
-                            AND p.active = true
-                            ORDER BY p.id
+                        SELECT p FROM ProductEntity p
+                        LEFT JOIN FETCH p.productImages img
+                        LEFT JOIN FETCH p.productInformation
+                        WHERE p.category.id = :categoryId
+                        AND p.id != :excludeProductId
+                        AND p.active = true
+                        ORDER BY p.id
                         """)
         List<ProductEntity> findRelatedProducts(
                         @Param("categoryId") Long categoryId,
                         @Param("excludeProductId") Long excludeProductId,
                         Pageable pageable);
+
+        /**
+         * Trova gli ultimi prodotti aggiunti
+         */
+        @Query("""
+                        SELECT p FROM ProductEntity p
+                        LEFT JOIN FETCH p.productImages
+                        LEFT JOIN FETCH p.productInformation
+                        WHERE p.active = true
+                        ORDER BY p.dateAdd DESC
+                        """)
+        List<ProductEntity> findLatestProducts(Pageable pageable);
+
+        // ========== STATISTICS ==========
 
         /**
          * Statistiche sui prodotti
@@ -254,24 +286,10 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
                         """)
         Object[] getProductStatistics();
 
-        /**
-         * Trova gli ultimi prodotti aggiunti
-         */
-        @Query("""
-                        SELECT p FROM ProductEntity p
-                        LEFT JOIN FETCH p.productImages
-                        LEFT JOIN FETCH p.productInformation
-                        WHERE p.active = true
-                        ORDER BY p.dateAdd DESC
-                        """)
-        List<ProductEntity> findLatestProducts(Pageable pageable);
+        // ========== CUSTOM COMPLEX QUERY ==========
 
-        @Query("""
-                        SELECT p FROM ProductEntity p
-                        LEFT JOIN FETCH p.productImages
-                        LEFT JOIN FETCH p.productInformation
-                        LEFT JOIN FETCH p.category
-                        WHERE p.category.id IN :categoryIds AND p.active = true
-                        """)
-        List<ProductEntity> findAllActiveByCategoryIdsWithDetails(@Param("categoryIds") List<Long> categoryIds);
+        /**
+         * Trova prodotti filtrati - implementazione custom in ProductRepositoryImpl
+         */
+        Page<ProductEntity> findFilteredProducts(ProductFilterRequestDto filter, Pageable pageable);
 }

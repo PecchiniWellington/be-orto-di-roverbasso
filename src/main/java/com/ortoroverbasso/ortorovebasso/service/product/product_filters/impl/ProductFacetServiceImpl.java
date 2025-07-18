@@ -23,7 +23,7 @@ import com.ortoroverbasso.ortorovebasso.enums.ProductSortEnum;
 import com.ortoroverbasso.ortorovebasso.mapper.product.ProductMapper;
 import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.product_filters.IProductFacetService;
-import com.ortoroverbasso.ortorovebasso.specification.ProductSpecification;
+import com.ortoroverbasso.ortorovebasso.specification.product.ProductSpecification;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -49,99 +49,185 @@ public class ProductFacetServiceImpl implements IProductFacetService {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
         // MIN/MAX prezzo
-        {
-            CriteriaQuery<BigDecimal> minQuery = cb.createQuery(BigDecimal.class);
-            Root<ProductEntity> root = minQuery.from(ProductEntity.class);
-            minQuery.select(cb.min(root.get("retailPrice")));
-            Predicate predicate = spec.toPredicate(root, minQuery, cb);
-            if (predicate != null)
-                minQuery.where(predicate);
-            BigDecimal minPrice = entityManager.createQuery(minQuery).getSingleResult();
-            facet.setMinPrice(minPrice != null ? minPrice.doubleValue() : null);
-
-            CriteriaQuery<BigDecimal> maxQuery = cb.createQuery(BigDecimal.class);
-            root = maxQuery.from(ProductEntity.class);
-            maxQuery.select(cb.max(root.get("retailPrice")));
-            predicate = spec.toPredicate(root, maxQuery, cb);
-            if (predicate != null)
-                maxQuery.where(predicate);
-            BigDecimal maxPrice = entityManager.createQuery(maxQuery).getSingleResult();
-            facet.setMaxPrice(maxPrice != null ? maxPrice.doubleValue() : null);
-        }
+        calculatePriceRange(spec, facet, cb);
 
         // Fasce di prezzo con conteggio
         if (facet.getMinPrice() != null && facet.getMaxPrice() != null) {
-            List<PriceRangeResponseDto> ranges = new ArrayList<>();
-            double step = 20;
-            double start = Math.floor(facet.getMinPrice() / step) * step;
-            double end = Math.ceil(facet.getMaxPrice() / step) * step;
-
-            for (double i = start; i < end; i += step) {
-                CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-                Root<ProductEntity> root = countQuery.from(ProductEntity.class);
-                Predicate predicate = spec.toPredicate(root, countQuery, cb);
-                Predicate rangePredicate = cb.between(
-                        root.get("retailPrice"),
-                        BigDecimal.valueOf(i),
-                        BigDecimal.valueOf(i + step - 1));
-                countQuery.select(cb.count(root)).where(cb.and(predicate, rangePredicate));
-                Long count = entityManager.createQuery(countQuery).getSingleResult();
-                ranges.add(new PriceRangeResponseDto(i, i + step - 1, count));
-            }
-
-            facet.setPriceRanges(ranges);
+            calculatePriceRanges(spec, facet, cb);
         }
 
         // MIN/MAX peso
-        {
-            CriteriaQuery<BigDecimal> minW = cb.createQuery(BigDecimal.class);
-            Root<ProductEntity> root = minW.from(ProductEntity.class);
-            minW.select(cb.min(root.get("weight")));
-            Predicate pred = spec.toPredicate(root, minW, cb);
-            if (pred != null)
-                minW.where(pred);
-            BigDecimal minWeight = entityManager.createQuery(minW).getSingleResult();
-            facet.setMinWeight(minWeight != null ? minWeight.doubleValue() : null);
-
-            CriteriaQuery<BigDecimal> maxW = cb.createQuery(BigDecimal.class);
-            root = maxW.from(ProductEntity.class);
-            maxW.select(cb.max(root.get("weight")));
-            pred = spec.toPredicate(root, maxW, cb);
-            if (pred != null)
-                maxW.where(pred);
-            BigDecimal maxWeight = entityManager.createQuery(maxW).getSingleResult();
-            facet.setMaxWeight(maxWeight != null ? maxWeight.doubleValue() : null);
-        }
+        calculateWeightRange(spec, facet, cb);
 
         // Fasce di peso con conteggio
         if (facet.getMinWeight() != null && facet.getMaxWeight() != null) {
-            List<WeightRangeResponseDto> ranges = new ArrayList<>();
-            double step = 100;
-            double start = Math.floor(facet.getMinWeight() / step) * step;
-            double end = Math.ceil(facet.getMaxWeight() / step) * step;
-
-            for (double i = start; i < end; i += step) {
-                CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-                Root<ProductEntity> root = countQuery.from(ProductEntity.class);
-                Predicate predicate = spec.toPredicate(root, countQuery, cb);
-                Predicate rangePredicate = cb.between(
-                        root.get("weight"),
-                        BigDecimal.valueOf(i),
-                        BigDecimal.valueOf(i + step - 1));
-                countQuery.select(cb.count(root)).where(cb.and(predicate, rangePredicate));
-                Long count = entityManager.createQuery(countQuery).getSingleResult();
-                ranges.add(new WeightRangeResponseDto(i, i + step - 1, count));
-            }
-
-            facet.setWeightRanges(ranges);
+            calculateWeightRanges(spec, facet, cb);
         }
 
         return facet;
     }
 
+    private void calculatePriceRange(Specification<ProductEntity> spec, ProductFacetResponseDto facet,
+            CriteriaBuilder cb) {
+        // MIN prezzo
+        CriteriaQuery<BigDecimal> minQuery = cb.createQuery(BigDecimal.class);
+        Root<ProductEntity> root = minQuery.from(ProductEntity.class);
+        minQuery.select(cb.min(root.get("retailPrice")));
+        Predicate predicate = spec.toPredicate(root, minQuery, cb);
+        if (predicate != null) {
+            minQuery.where(predicate);
+        }
+        BigDecimal minPrice = entityManager.createQuery(minQuery).getSingleResult();
+        facet.setMinPrice(minPrice != null ? minPrice.doubleValue() : null);
+
+        // MAX prezzo
+        CriteriaQuery<BigDecimal> maxQuery = cb.createQuery(BigDecimal.class);
+        root = maxQuery.from(ProductEntity.class);
+        maxQuery.select(cb.max(root.get("retailPrice")));
+        predicate = spec.toPredicate(root, maxQuery, cb);
+        if (predicate != null) {
+            maxQuery.where(predicate);
+        }
+        BigDecimal maxPrice = entityManager.createQuery(maxQuery).getSingleResult();
+        facet.setMaxPrice(maxPrice != null ? maxPrice.doubleValue() : null);
+    }
+
+    private void calculatePriceRanges(Specification<ProductEntity> spec, ProductFacetResponseDto facet,
+            CriteriaBuilder cb) {
+        List<PriceRangeResponseDto> ranges = new ArrayList<>();
+        double step = 20;
+        double start = Math.floor(facet.getMinPrice() / step) * step;
+        double end = Math.ceil(facet.getMaxPrice() / step) * step;
+
+        for (double i = start; i < end; i += step) {
+            CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+            Root<ProductEntity> root = countQuery.from(ProductEntity.class);
+            Predicate predicate = spec.toPredicate(root, countQuery, cb);
+            Predicate rangePredicate = cb.between(
+                    root.get("retailPrice"),
+                    BigDecimal.valueOf(i),
+                    BigDecimal.valueOf(i + step - 1));
+
+            if (predicate != null) {
+                countQuery.select(cb.count(root)).where(cb.and(predicate, rangePredicate));
+            } else {
+                countQuery.select(cb.count(root)).where(rangePredicate);
+            }
+
+            Long count = entityManager.createQuery(countQuery).getSingleResult();
+            if (count > 0) {
+                ranges.add(new PriceRangeResponseDto(i, i + step - 1, count));
+            }
+        }
+
+        facet.setPriceRanges(ranges);
+    }
+
+    private void calculateWeightRange(Specification<ProductEntity> spec, ProductFacetResponseDto facet,
+            CriteriaBuilder cb) {
+        // MIN peso
+        CriteriaQuery<BigDecimal> minQuery = cb.createQuery(BigDecimal.class);
+        Root<ProductEntity> root = minQuery.from(ProductEntity.class);
+        minQuery.select(cb.min(root.get("weight")));
+        Predicate predicate = spec.toPredicate(root, minQuery, cb);
+        if (predicate != null) {
+            minQuery.where(predicate);
+        }
+        BigDecimal minWeight = entityManager.createQuery(minQuery).getSingleResult();
+        facet.setMinWeight(minWeight != null ? minWeight.doubleValue() : null);
+
+        // MAX peso
+        CriteriaQuery<BigDecimal> maxQuery = cb.createQuery(BigDecimal.class);
+        root = maxQuery.from(ProductEntity.class);
+        maxQuery.select(cb.max(root.get("weight")));
+        predicate = spec.toPredicate(root, maxQuery, cb);
+        if (predicate != null) {
+            maxQuery.where(predicate);
+        }
+        BigDecimal maxWeight = entityManager.createQuery(maxQuery).getSingleResult();
+        facet.setMaxWeight(maxWeight != null ? maxWeight.doubleValue() : null);
+    }
+
+    private void calculateWeightRanges(Specification<ProductEntity> spec, ProductFacetResponseDto facet,
+            CriteriaBuilder cb) {
+        List<WeightRangeResponseDto> ranges = new ArrayList<>();
+        double step = 100;
+        double start = Math.floor(facet.getMinWeight() / step) * step;
+        double end = Math.ceil(facet.getMaxWeight() / step) * step;
+
+        for (double i = start; i < end; i += step) {
+            CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+            Root<ProductEntity> root = countQuery.from(ProductEntity.class);
+            Predicate predicate = spec.toPredicate(root, countQuery, cb);
+            Predicate rangePredicate = cb.between(
+                    root.get("weight"),
+                    BigDecimal.valueOf(i),
+                    BigDecimal.valueOf(i + step - 1));
+
+            if (predicate != null) {
+                countQuery.select(cb.count(root)).where(cb.and(predicate, rangePredicate));
+            } else {
+                countQuery.select(cb.count(root)).where(rangePredicate);
+            }
+
+            Long count = entityManager.createQuery(countQuery).getSingleResult();
+            if (count > 0) {
+                ranges.add(new WeightRangeResponseDto(i, i + step - 1, count));
+            }
+        }
+
+        facet.setWeightRanges(ranges);
+    }
+
+    @Override
+    public PaginatedResponseDto<ProductResponseDto> getFilteredProducts(ProductFilterRequestDto filterDto,
+            Pageable pageable) {
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        // Applica sorting se presente
+        Pageable sortedPageable = applySorting(pageable, filterDto.getSort());
+
+        // Query per i risultati
+        CriteriaQuery<ProductEntity> query = cb.createQuery(ProductEntity.class);
+        Root<ProductEntity> root = query.from(ProductEntity.class);
+
+        // Fetch joins per evitare N+1 queries
+        root.fetch("productImages", JoinType.LEFT);
+        root.fetch("productInformation", JoinType.LEFT);
+        root.fetch("category", JoinType.LEFT);
+        query.distinct(true);
+
+        // Costruzione predicati
+        List<Predicate> predicates = ProductSpecification.buildPredicateList(filterDto, cb, root);
+        query.where(predicates.toArray(new Predicate[0]));
+
+        // Applicazione del sorting
+        applySortingToQuery(query, cb, root, filterDto.getSort());
+
+        // Esecuzione query con paginazione
+        List<ProductEntity> resultList = entityManager.createQuery(query)
+                .setFirstResult((int) sortedPageable.getOffset())
+                .setMaxResults(sortedPageable.getPageSize())
+                .getResultList();
+
+        // Query per il count
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<ProductEntity> countRoot = countQuery.from(ProductEntity.class);
+        List<Predicate> countPredicates = ProductSpecification.buildPredicateList(filterDto, cb, countRoot);
+        countQuery.select(cb.countDistinct(countRoot)).where(countPredicates.toArray(new Predicate[0]));
+        Long total = entityManager.createQuery(countQuery).getSingleResult();
+
+        // Conversione in DTO
+        List<ProductResponseDto> dtoList = ProductMapper.toResponseDtoList(resultList);
+
+        return PaginatedResponseDto.fromPage(new PageImpl<>(dtoList, sortedPageable, total));
+    }
+
     private Pageable applySorting(Pageable defaultPageable, ProductSortEnum sortOption) {
-        if (sortOption == null)
+        if (sortOption == null) {
             return defaultPageable;
+        }
 
         Sort sort = switch (sortOption) {
             case PRICE_ASC -> Sort.by(Sort.Direction.ASC, "retailPrice");
@@ -153,39 +239,19 @@ public class ProductFacetServiceImpl implements IProductFacetService {
         return PageRequest.of(defaultPageable.getPageNumber(), defaultPageable.getPageSize(), sort);
     }
 
-    @Override
-    public PaginatedResponseDto<ProductResponseDto> getFilteredProducts(ProductFilterRequestDto filterDto,
-            Pageable pageable) {
+    private void applySortingToQuery(CriteriaQuery<ProductEntity> query, CriteriaBuilder cb,
+            Root<ProductEntity> root, ProductSortEnum sortOption) {
+        if (sortOption == null) {
+            query.orderBy(cb.asc(root.get("id")));
+            return;
+        }
 
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-
-        CriteriaQuery<ProductEntity> query = cb.createQuery(ProductEntity.class);
-        Root<ProductEntity> root = query.from(ProductEntity.class);
-
-        root.fetch("productImages", JoinType.LEFT);
-        root.fetch("productInformation", JoinType.LEFT);
-        root.fetch("category", JoinType.LEFT);
-        query.distinct(true);
-
-        List<Predicate> predicates = ProductSpecification.buildPredicateList(filterDto, cb, root);
-        query.where(predicates.toArray(new Predicate[0]));
-        query.orderBy(cb.asc(root.get("id")));
-
-        List<ProductEntity> resultList = entityManager.createQuery(query)
-                .setFirstResult((int) pageable.getOffset())
-                .setMaxResults(pageable.getPageSize())
-                .getResultList();
-
-        // Count query
-        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-        Root<ProductEntity> countRoot = countQuery.from(ProductEntity.class);
-        List<Predicate> countPredicates = ProductSpecification.buildPredicateList(filterDto, cb, countRoot);
-        countQuery.select(cb.countDistinct(countRoot)).where(countPredicates.toArray(new Predicate[0]));
-        Long total = entityManager.createQuery(countQuery).getSingleResult();
-
-        List<ProductResponseDto> dtoList = ProductMapper.toResponseDtoList(resultList);
-
-        return PaginatedResponseDto.fromPage(new PageImpl<>(dtoList, pageable, total));
+        switch (sortOption) {
+            case PRICE_ASC -> query.orderBy(cb.asc(root.get("retailPrice")));
+            case PRICE_DESC -> query.orderBy(cb.desc(root.get("retailPrice")));
+            case NAME_ASC -> query.orderBy(cb.asc(root.get("productInformation").get("name")));
+            case NAME_DESC -> query.orderBy(cb.desc(root.get("productInformation").get("name")));
+            default -> query.orderBy(cb.asc(root.get("id")));
+        }
     }
-
 }
