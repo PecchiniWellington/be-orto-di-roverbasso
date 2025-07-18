@@ -23,28 +23,29 @@ public class ManufacturerServiceImpl implements IManufacturerService {
 
     @Autowired
     private ManufacturerRepository manufacturerRepository;
+
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private ManufacturerMapper manufacturerMapper;
 
     @Override
     public ManufacturerResponseDto createManufacturer(ManufacturerRequestDto dto) {
         try {
-            ManufacturerEntity manufacturer = ManufacturerMapper.toEntity(dto);
+            ManufacturerEntity manufacturer = manufacturerMapper.toEntity(dto);
+            ManufacturerEntity saved = manufacturerRepository.save(manufacturer);
+            ManufacturerResponseDto response = manufacturerMapper.toResponseDto(saved);
 
-            ManufacturerEntity manufacturerSaved = manufacturerRepository.save(manufacturer);
-
-            ManufacturerResponseDto manufacturerResponse = ManufacturerMapper.toResponseDto(manufacturerSaved);
-
-            if (manufacturerResponse.getProducts() == null) {
-                manufacturerResponse.setProducts(List.of());
+            if (response.getProducts() == null) {
+                response.setProducts(List.of());
             }
 
-            return manufacturerResponse;
-
+            return response;
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Data integrity violation while saving manufacturer: " + e.getMessage(), e);
+            throw new RuntimeException("Errore di integrità nei dati durante la creazione del produttore.", e);
         } catch (Exception e) {
-            throw new RuntimeException("An error occurred while creating manufacturer: " + e.getMessage(), e);
+            throw new RuntimeException("Errore durante la creazione del produttore.", e);
         }
     }
 
@@ -52,19 +53,11 @@ public class ManufacturerServiceImpl implements IManufacturerService {
     public List<ManufacturerResponseDto> getAllManufacturers() {
         try {
             List<ManufacturerEntity> manufacturers = manufacturerRepository.findAll();
-
-            List<ManufacturerResponseDto> manufacturerResponses = manufacturers.stream()
-                    .map(ManufacturerMapper::toResponseDto)
+            return manufacturers.stream()
+                    .map(manufacturerMapper::toResponseDto)
                     .toList();
-
-            return manufacturerResponses;
-
-        } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Data integrity violation while fetching manufacturers: " + e.getMessage(), e);
-
         } catch (Exception e) {
-            throw new RuntimeException("An error occurred while creating manufacturer: " + e.getMessage(), e);
-
+            throw new RuntimeException("Errore durante il recupero dei produttori.", e);
         }
     }
 
@@ -72,42 +65,27 @@ public class ManufacturerServiceImpl implements IManufacturerService {
     public ManufacturerResponseDto getManufacturerById(Long id) {
         try {
             ManufacturerEntity manufacturer = manufacturerRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Manufacturer not found"));
-
-            ManufacturerResponseDto manufacturerResponse = ManufacturerMapper.toResponseDto(manufacturer);
-
-            return manufacturerResponse;
-
-        } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Data integrity violation while fetching manufacturer: " + e.getMessage(), e);
-
+                    .orElseThrow(() -> new EntityNotFoundException("Produttore non trovato"));
+            return manufacturerMapper.toResponseDto(manufacturer);
         } catch (Exception e) {
-            throw new RuntimeException("An error occurred while creating manufacturer: " + e.getMessage(), e);
-
+            throw new RuntimeException("Errore durante il recupero del produttore.", e);
         }
     }
 
     @Override
     public ManufacturerResponseDto updateManufacturer(Long id, ManufacturerRequestDto dto) {
         try {
-            ManufacturerEntity manufacturer = manufacturerRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Manufacturer not found"));
+            ManufacturerEntity existing = manufacturerRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Produttore non trovato"));
 
-            ManufacturerEntity updatedManufacturer = ManufacturerMapper.toEntity(dto);
-            updatedManufacturer.setId(manufacturer.getId());
+            manufacturerMapper.updateEntityFromDto(dto, existing);
+            ManufacturerEntity saved = manufacturerRepository.save(existing);
 
-            ManufacturerEntity manufacturerSaved = manufacturerRepository.save(updatedManufacturer);
-
-            ManufacturerResponseDto manufacturerResponse = ManufacturerMapper.toResponseDto(manufacturerSaved);
-
-            return manufacturerResponse;
-
+            return manufacturerMapper.toResponseDto(saved);
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Data integrity violation while updating manufacturer: " + e.getMessage(), e);
-
+            throw new RuntimeException("Errore di integrità nei dati durante l'aggiornamento del produttore.", e);
         } catch (Exception e) {
-            throw new RuntimeException("An error occurred while creating manufacturer: " + e.getMessage(), e);
-
+            throw new RuntimeException("Errore durante l'aggiornamento del produttore.", e);
         }
     }
 
@@ -115,16 +93,10 @@ public class ManufacturerServiceImpl implements IManufacturerService {
     public void deleteManufacturer(Long id) {
         try {
             ManufacturerEntity manufacturer = manufacturerRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Manufacturer not found"));
-
+                    .orElseThrow(() -> new EntityNotFoundException("Produttore non trovato"));
             manufacturerRepository.delete(manufacturer);
-
-        } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Data integrity violation while deleting manufacturer: " + e.getMessage(), e);
-
         } catch (Exception e) {
-            throw new RuntimeException("An error occurred while creating manufacturer: " + e.getMessage(), e);
-
+            throw new RuntimeException("Errore durante l'eliminazione del produttore.", e);
         }
     }
 
@@ -132,44 +104,35 @@ public class ManufacturerServiceImpl implements IManufacturerService {
     public ManufacturerResponseDto getManufacturerProducts(Long id) {
         try {
             ManufacturerEntity manufacturer = manufacturerRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Manufacturer not found"));
+                    .orElseThrow(() -> new EntityNotFoundException("Produttore non trovato"));
 
-            ManufacturerResponseDto manufacturerResponse = ManufacturerMapper.toResponseDto(manufacturer);
+            ManufacturerResponseDto response = manufacturerMapper.toResponseDto(manufacturer);
 
-            if (manufacturerResponse.getProducts() == null) {
-                manufacturerResponse.setProducts(List.of());
+            if (response.getProducts() == null) {
+                response.setProducts(List.of());
             }
 
-            return manufacturerResponse;
-
-        } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException(
-                    "Data integrity violation while fetching manufacturer products: " + e.getMessage(), e);
-
+            return response;
         } catch (Exception e) {
-            throw new RuntimeException("An error occurred while creating manufacturer: " + e.getMessage(), e);
-
+            throw new RuntimeException("Errore durante il recupero dei prodotti del produttore.", e);
         }
     }
 
     @Override
     public void associateProductsToManufacturer(Long manufacturerId, List<Long> productIds) {
         ManufacturerEntity manufacturer = manufacturerRepository.findById(manufacturerId)
-                .orElseThrow(() -> new EntityNotFoundException("Manufacturer not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Produttore non trovato"));
 
         List<ProductEntity> products = productRepository.findAllById(productIds);
         if (products.size() != productIds.size()) {
-            throw new EntityNotFoundException("One or more products not found");
+            throw new EntityNotFoundException("Uno o più prodotti non trovati");
         }
 
         for (ProductEntity product : products) {
             if (product.getManufacturer() != null) {
-                throw new ConflictException(
-                        "Product with ID " + product.getId() + " is already associated with a manufacturer");
+                throw new ConflictException("Il prodotto con ID " + product.getId()
+                        + " è già associato a un produttore");
             }
-        }
-
-        for (ProductEntity product : products) {
             product.setManufacturer(manufacturer);
         }
 
@@ -179,22 +142,21 @@ public class ManufacturerServiceImpl implements IManufacturerService {
     @Override
     public void dissociateProductsFromManufacturer(Long manufacturerId, List<Long> productIds) {
         ManufacturerEntity manufacturer = manufacturerRepository.findById(manufacturerId)
-                .orElseThrow(() -> new EntityNotFoundException("Manufacturer not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Produttore non trovato"));
 
         List<ProductEntity> products = productRepository.findAllById(productIds);
         if (products.size() != productIds.size()) {
-            throw new EntityNotFoundException("One or more products not found");
+            throw new EntityNotFoundException("Uno o più prodotti non trovati");
         }
 
         for (ProductEntity product : products) {
-            if (product.getManufacturer() == null || !product.getManufacturer().equals(manufacturer)) {
-                throw new ConflictException(
-                        "Product with ID " + product.getId() + " is not associated with this manufacturer");
+            if (!manufacturer.equals(product.getManufacturer())) {
+                throw new ConflictException("Il prodotto con ID " + product.getId()
+                        + " non è associato a questo produttore");
             }
             product.setManufacturer(null);
         }
 
         productRepository.saveAll(products);
     }
-
 }

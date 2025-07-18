@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +35,7 @@ import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
 import com.ortoroverbasso.ortorovebasso.service.product.business.ProductBusinessLogic;
 import com.ortoroverbasso.ortorovebasso.service.product.product_filters.IProductFacetService;
+import com.ortoroverbasso.ortorovebasso.utils.pagination.PaginationUtils;
 
 @Service
 @Transactional
@@ -48,6 +48,7 @@ public class ProductServiceImpl implements IProductService {
         private final ManufacturerRepository manufacturerRepository;
         private final IProductFacetService productFacetService;
         private final ProductBusinessLogic productBusinessLogic;
+        private final ProductMapper productMapper;
 
         @Autowired
         public ProductServiceImpl(
@@ -55,12 +56,14 @@ public class ProductServiceImpl implements IProductService {
                         CategoryRepository categoryRepository,
                         ManufacturerRepository manufacturerRepository,
                         IProductFacetService productFacetService,
-                        ProductBusinessLogic productBusinessLogic) {
+                        ProductBusinessLogic productBusinessLogic,
+                        ProductMapper productMapper) {
                 this.productRepository = productRepository;
                 this.categoryRepository = categoryRepository;
                 this.manufacturerRepository = manufacturerRepository;
                 this.productFacetService = productFacetService;
                 this.productBusinessLogic = productBusinessLogic;
+                this.productMapper = productMapper;
         }
 
         @Override
@@ -89,8 +92,8 @@ public class ProductServiceImpl implements IProductService {
                                                                         + dto.getManufacturerId()));
                 }
 
-                // Crea entità
-                ProductEntity product = ProductMapper.toEntity(dto);
+                // Crea entità usando mapper
+                ProductEntity product = productMapper.toEntity(dto);
                 product.setCategory(category);
                 product.setManufacturer(manufacturer);
 
@@ -101,7 +104,7 @@ public class ProductServiceImpl implements IProductService {
                 ProductEntity savedProduct = productRepository.save(product);
 
                 logger.info(ProductConstants.PRODUCT_CREATED + savedProduct.getId());
-                return ProductMapper.toResponseDto(savedProduct);
+                return productMapper.toResponseDto(savedProduct);
         }
 
         @Override
@@ -112,10 +115,10 @@ public class ProductServiceImpl implements IProductService {
                                 pageable.getPageNumber(), pageable.getPageSize());
 
                 Page<ProductEntity> productsPage = productRepository.findAllWithDetails(pageable);
-                List<ProductResponseDto> productDtos = ProductMapper.toResponseDtoList(productsPage.getContent());
+                List<ProductResponseDto> productDtos = productMapper.toResponseDtoList(productsPage.getContent());
 
-                return PaginatedResponseDto.fromPage(
-                                new PageImpl<>(productDtos, pageable, productsPage.getTotalElements()));
+                // Usa PaginationUtils
+                return PaginationUtils.toPaginatedResponse(productDtos, pageable, productsPage.getTotalElements());
         }
 
         @Override
@@ -127,7 +130,7 @@ public class ProductServiceImpl implements IProductService {
                                 .orElseThrow(() -> new ProductNotFoundException(
                                                 ProductConstants.PRODUCT_NOT_FOUND + productId));
 
-                return ProductMapper.toResponseDto(product);
+                return productMapper.toResponseDto(product);
         }
 
         @Override
@@ -163,8 +166,8 @@ public class ProductServiceImpl implements IProductService {
                         existingProduct.setManufacturer(manufacturer);
                 }
 
-                // Aggiorna campi
-                ProductMapper.updateEntityFromDto(dto, existingProduct);
+                // Aggiorna campi usando mapper
+                productMapper.updateEntityFromDto(dto, existingProduct);
 
                 // Validazione business logic
                 productBusinessLogic.validateForUpdate(existingProduct);
@@ -172,7 +175,7 @@ public class ProductServiceImpl implements IProductService {
                 ProductEntity savedProduct = productRepository.save(existingProduct);
 
                 logger.info(ProductConstants.PRODUCT_UPDATED + savedProduct.getId());
-                return ProductMapper.toResponseDto(savedProduct);
+                return productMapper.toResponseDto(savedProduct);
         }
 
         @Override
@@ -201,7 +204,7 @@ public class ProductServiceImpl implements IProductService {
                                                 ProductConstants.CATEGORY_NOT_FOUND + categoryId));
 
                 List<ProductEntity> products = productRepository.findByCategory(category);
-                return ProductMapper.toResponseDtoList(products);
+                return productMapper.toResponseDtoList(products);
         }
 
         @Override
@@ -220,7 +223,7 @@ public class ProductServiceImpl implements IProductService {
                 // Un'unica query per ottenere tutti i prodotti delle categorie
                 List<ProductEntity> products = productRepository.findAllActiveByCategoryIdsWithDetails(categoryIds);
 
-                return ProductMapper.toResponseDtoList(products);
+                return productMapper.toResponseDtoList(products);
         }
 
         @Override
@@ -228,13 +231,12 @@ public class ProductServiceImpl implements IProductService {
         public List<ProductResponseDto> getProductsBySubCategorySlug(String slug) {
                 logger.debug("Retrieving products for subcategory slug: {}", slug);
 
-                // Per sottocategorie, recuperiamo solo i prodotti di quella specifica categoria
                 CategoryEntity subCategory = categoryRepository.findBySlug(slug)
                                 .orElseThrow(() -> new CategoryNotFoundException(
                                                 "Subcategory not found with slug: " + slug));
 
                 List<ProductEntity> products = productRepository.findByCategoryId(subCategory.getId());
-                return ProductMapper.toResponseDtoList(products);
+                return productMapper.toResponseDtoList(products);
         }
 
         @Override
@@ -243,17 +245,16 @@ public class ProductServiceImpl implements IProductService {
                         ProductFilterRequestDto filterDto, Pageable pageable) {
 
                 Page<ProductEntity> productsPage = productRepository.findFilteredProducts(filterDto, pageable);
-                List<ProductResponseDto> productDtos = ProductMapper.toResponseDtoList(productsPage.getContent());
+                List<ProductResponseDto> productDtos = productMapper.toResponseDtoList(productsPage.getContent());
 
-                return PaginatedResponseDto.fromPage(
-                                new PageImpl<>(productDtos, pageable, productsPage.getTotalElements()));
+                // Usa PaginationUtils
+                return PaginationUtils.toPaginatedResponse(productDtos, pageable, productsPage.getTotalElements());
         }
 
         @Override
         @Transactional(readOnly = true)
         public ProductFacetResponseDto getAvailableFilters(ProductFilterRequestDto filterDto) {
                 logger.debug("Retrieving available filters for criteria: {}", filterDto);
-
                 return productFacetService.getFacets(filterDto);
         }
 
@@ -300,10 +301,10 @@ public class ProductServiceImpl implements IProductService {
                 Page<ProductEntity> productsPage = productRepository.findByRetailPriceBetween(
                                 minPrice, maxPrice, pageable);
 
-                List<ProductResponseDto> productDtos = ProductMapper.toResponseDtoList(productsPage.getContent());
+                List<ProductResponseDto> productDtos = productMapper.toResponseDtoList(productsPage.getContent());
 
-                return PaginatedResponseDto.fromPage(
-                                new PageImpl<>(productDtos, pageable, productsPage.getTotalElements()));
+                // Usa PaginationUtils
+                return PaginationUtils.toPaginatedResponse(productDtos, pageable, productsPage.getTotalElements());
         }
 
         @Override
@@ -320,7 +321,7 @@ public class ProductServiceImpl implements IProductService {
                 ProductEntity savedProduct = productRepository.save(product);
 
                 logger.info(ProductConstants.PRODUCT_STATUS_UPDATED + productId);
-                return ProductMapper.toResponseDto(savedProduct);
+                return productMapper.toResponseDto(savedProduct);
         }
 
         @Override
@@ -337,7 +338,7 @@ public class ProductServiceImpl implements IProductService {
                 ProductEntity savedProduct = productRepository.save(product);
 
                 logger.info(ProductConstants.PRODUCT_QUANTITY_UPDATED + productId);
-                return ProductMapper.toResponseDto(savedProduct);
+                return productMapper.toResponseDto(savedProduct);
         }
 
         // Metodi helper privati

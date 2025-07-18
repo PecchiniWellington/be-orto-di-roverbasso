@@ -26,12 +26,18 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class OrderCustomServiceImpl implements IOrderCustomService {
 
+    private final OrderCustomRepository orderCustomRepository;
+    private final OrderCustomMapper orderCustomMapper;
+    private final UserRepository userRepository;
+
     @Autowired
-    private OrderCustomRepository orderCustomRepository;
-    @Autowired
-    private OrderCustomMapper orderCustomMapper;
-    @Autowired
-    private UserRepository userRepository;
+    public OrderCustomServiceImpl(OrderCustomRepository orderCustomRepository,
+            OrderCustomMapper orderCustomMapper,
+            UserRepository userRepository) {
+        this.orderCustomRepository = orderCustomRepository;
+        this.orderCustomMapper = orderCustomMapper;
+        this.userRepository = userRepository;
+    }
 
     @Override
     @Transactional
@@ -50,6 +56,7 @@ public class OrderCustomServiceImpl implements IOrderCustomService {
         if (cartItems.isEmpty() || cartItems.get(0).getCart() == null) {
             throw new IllegalArgumentException("Cart items vuoti o senza riferimento al cart");
         }
+
         OrderCustomEntity order = OrderCustomMapper.fromCart(cart, cartItems, savedPickup);
 
         order.setCart(cart);
@@ -57,14 +64,14 @@ public class OrderCustomServiceImpl implements IOrderCustomService {
 
         OrderCustomEntity savedOrder = orderCustomRepository.save(order);
 
-        return OrderCustomMapper.toDto(savedOrder);
+        return orderCustomMapper.toDto(savedOrder);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<OrderCustomResponseDto> getAllOrderCustoms() {
         return orderCustomRepository.findAllByOrderByIdDesc().stream()
-                .map(OrderCustomMapper::toDto)
+                .map(orderCustomMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -73,7 +80,7 @@ public class OrderCustomServiceImpl implements IOrderCustomService {
     public OrderCustomResponseDto getOrderCustomById(Long id) {
         OrderCustomEntity orderCustom = orderCustomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("OrderCustom not found with id: " + id));
-        return OrderCustomMapper.toDto(orderCustom);
+        return orderCustomMapper.toDto(orderCustom);
     }
 
     @Override
@@ -81,7 +88,7 @@ public class OrderCustomServiceImpl implements IOrderCustomService {
     public OrderCustomResponseDto getOrderCustomByToken(String token) {
         OrderCustomEntity orderCustom = orderCustomRepository.findByToken(token)
                 .orElseThrow(() -> new ResourceNotFoundException("OrderCustom not found with token: " + token));
-        return OrderCustomMapper.toDto(orderCustom);
+        return orderCustomMapper.toDto(orderCustom);
     }
 
     @Transactional
@@ -93,7 +100,7 @@ public class OrderCustomServiceImpl implements IOrderCustomService {
         OrderCustomEntity updated = orderCustomMapper.updateEntityFromDto(dto, existing);
         OrderCustomEntity saved = orderCustomRepository.save(updated);
 
-        return OrderCustomMapper.toDto(saved);
+        return orderCustomMapper.toDto(saved);
     }
 
     @Override
@@ -126,7 +133,7 @@ public class OrderCustomServiceImpl implements IOrderCustomService {
         }
 
         OrderCustomEntity saved = orderCustomRepository.save(order);
-        return OrderCustomMapper.toDto(saved);
+        return orderCustomMapper.toDto(saved);
     }
 
     @Override
@@ -134,8 +141,7 @@ public class OrderCustomServiceImpl implements IOrderCustomService {
         List<OrderCustomEntity> orders = orderCustomRepository.findByUser_Id(userId);
 
         return orders.stream()
-                .map(order -> OrderCustomMapper.toDto(order))
+                .map(orderCustomMapper::toDto)
                 .collect(Collectors.toList());
     }
-
 }

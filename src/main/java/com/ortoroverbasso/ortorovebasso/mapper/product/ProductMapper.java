@@ -11,51 +11,31 @@ import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_features.ProductFeaturesResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_images.ProductImagesShortDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_large_quantity_price.ProductLargeQuantityPriceResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.product_why_choose.ProductWhyChooseResponseNoProductIdDto;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
+import com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity;
+import com.ortoroverbasso.ortorovebasso.mapper.base.BaseMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_information.ProductInformationMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.product.product_why_choose.ProductWhyChooseMapper;
 
-/**
- * Mapper per la conversione tra ProductEntity e DTO
- */
 @Component
-public class ProductMapper {
+public class ProductMapper implements BaseMapper<ProductEntity, ProductRequestDto, ProductResponseDto> {
 
-        /**
-         * Converte un ProductRequestDto in ProductEntity
-         */
-        public static ProductEntity toEntity(ProductRequestDto dto) {
-                if (dto == null) {
+        @Override
+        public ProductEntity toEntity(ProductRequestDto dto) {
+                if (dto == null)
                         return null;
-                }
-
                 ProductEntity product = new ProductEntity();
                 mapBasicFields(dto, product);
                 return product;
         }
 
-        /**
-         * Converte una lista di ProductEntity in lista di ProductResponseDto
-         */
-        public static List<ProductResponseDto> toResponseDtoList(List<ProductEntity> products) {
-                if (products == null || products.isEmpty()) {
-                        return Collections.emptyList();
-                }
-
-                return products.stream()
-                                .map(ProductMapper::toResponseDto)
-                                .collect(Collectors.toList());
-        }
-
-        /**
-         * Converte un ProductEntity in ProductResponseDto con tutti i dettagli
-         */
-        public static ProductResponseDto toResponseDto(ProductEntity product) {
-                if (product == null) {
+        @Override
+        public ProductResponseDto toResponseDto(ProductEntity product) {
+                if (product == null)
                         return null;
-                }
 
                 return ProductResponseDto.builder()
                                 .id(product.getId())
@@ -83,38 +63,11 @@ public class ProductMapper {
                                 .build();
         }
 
-        /**
-         * Converte un ProductResponseDto in ProductEntity (per aggiornamenti)
-         */
-        public static ProductEntity fromResponseToEntity(ProductResponseDto dto) {
-                if (dto == null) {
-                        return null;
-                }
-
-                ProductEntity product = new ProductEntity();
-                product.setId(dto.getId());
-                product.setSku(dto.getSku());
-                product.setRetailPrice(dto.getRetailPrice());
-                product.setWeight(dto.getWeight());
-                product.setActive(dto.getActive());
-                product.setWholesalePrice(dto.getWholesalePrice());
-                product.setInShopsPrice(dto.getInShopsPrice());
-                product.setDiscount(dto.getDiscount());
-                product.setReference(dto.getReference());
-                product.setQuantity(dto.getQuantity());
-
-                return product;
-        }
-
-        /**
-         * Aggiorna un ProductEntity esistente con i dati da ProductRequestDto
-         */
-        public static void updateEntityFromDto(ProductRequestDto dto, ProductEntity entity) {
-                if (dto == null || entity == null) {
+        @Override
+        public void updateEntityFromDto(ProductRequestDto dto, ProductEntity entity) {
+                if (dto == null || entity == null)
                         return;
-                }
 
-                // Aggiorna solo i campi non null del DTO
                 Optional.ofNullable(dto.getSku()).ifPresent(entity::setSku);
                 Optional.ofNullable(dto.getRetailPrice()).ifPresent(entity::setRetailPrice);
                 Optional.ofNullable(dto.getWeight()).ifPresent(entity::setWeight);
@@ -126,13 +79,26 @@ public class ProductMapper {
                 Optional.ofNullable(dto.getQuantity()).ifPresent(entity::setQuantity);
         }
 
-        /**
-         * Metodo utility per creare un ProductResponseDto semplificato (per liste)
-         */
-        public static ProductResponseDto toSimpleResponseDto(ProductEntity product) {
-                if (product == null) {
+        public ProductEntity fromResponseToEntity(ProductResponseDto dto) {
+                if (dto == null)
                         return null;
-                }
+                ProductEntity product = new ProductEntity();
+                product.setId(dto.getId());
+                product.setSku(dto.getSku());
+                product.setRetailPrice(dto.getRetailPrice());
+                product.setWeight(dto.getWeight());
+                product.setActive(dto.getActive());
+                product.setWholesalePrice(dto.getWholesalePrice());
+                product.setInShopsPrice(dto.getInShopsPrice());
+                product.setDiscount(dto.getDiscount());
+                product.setReference(dto.getReference());
+                product.setQuantity(dto.getQuantity());
+                return product;
+        }
+
+        public ProductResponseDto toSimpleResponseDto(ProductEntity product) {
+                if (product == null)
+                        return null;
 
                 return ProductResponseDto.builder()
                                 .id(product.getId())
@@ -146,24 +112,18 @@ public class ProductMapper {
                                 .build();
         }
 
-        /**
-         * Metodo utility per convertire singolo ProductLargeQuantityPriceEntity
-         */
-        public static ProductLargeQuantityPriceResponseDto toLargeQuantityDto(
-                        com.ortoroverbasso.ortorovebasso.entity.product.product_large_quantities_price.ProductLargeQuantityPriceEntity entity) {
-                if (entity == null) {
+        public ProductLargeQuantityPriceResponseDto toLargeQuantityDto(ProductLargeQuantityPriceEntity entity) {
+                if (entity == null)
                         return null;
-                }
-
                 return new ProductLargeQuantityPriceResponseDto(
                                 entity.getId(),
                                 entity.getQuantity(),
                                 entity.getPrice());
         }
 
-        // Metodi helper privati
+        // Metodi privati di supporto
 
-        private static void mapBasicFields(ProductRequestDto dto, ProductEntity product) {
+        private void mapBasicFields(ProductRequestDto dto, ProductEntity product) {
                 product.setSku(dto.getSku());
                 product.setRetailPrice(dto.getRetailPrice());
                 product.setWeight(dto.getWeight());
@@ -175,38 +135,35 @@ public class ProductMapper {
                 product.setQuantity(dto.getQuantity());
         }
 
-        private static Long extractManufacturerId(ProductEntity product) {
+        private Long extractManufacturerId(ProductEntity product) {
                 return Optional.ofNullable(product.getManufacturer())
-                                .map(manufacturer -> manufacturer.getId())
+                                .map(m -> m.getId())
                                 .orElse(null);
         }
 
-        private static String extractProductName(ProductEntity product) {
+        private String extractProductName(ProductEntity product) {
                 return Optional.ofNullable(product.getProductInformation())
                                 .map(info -> info.getName())
                                 .orElse(null);
         }
 
-        private static Long extractCategoryId(ProductEntity product) {
+        private Long extractCategoryId(ProductEntity product) {
                 return Optional.ofNullable(product.getCategory())
-                                .map(category -> category.getId())
+                                .map(cat -> cat.getId())
                                 .orElse(null);
         }
 
-        private static List<ProductLargeQuantityPriceResponseDto> mapPriceLargeQuantities(ProductEntity product) {
+        private List<ProductLargeQuantityPriceResponseDto> mapPriceLargeQuantities(ProductEntity product) {
                 if (product.getPriceLargeQuantities() == null || product.getPriceLargeQuantities().isEmpty()) {
                         return Collections.emptyList();
                 }
 
                 return product.getPriceLargeQuantities().stream()
-                                .map(priceEntity -> new ProductLargeQuantityPriceResponseDto(
-                                                priceEntity.getId(),
-                                                priceEntity.getQuantity(),
-                                                priceEntity.getPrice()))
+                                .map(this::toLargeQuantityDto)
                                 .collect(Collectors.toList());
         }
 
-        private static List<ProductImagesShortDto> mapProductImages(ProductEntity product) {
+        private List<ProductImagesShortDto> mapProductImages(ProductEntity product) {
                 if (product.getProductImages() == null || product.getProductImages().isEmpty()) {
                         return Collections.emptyList();
                 }
@@ -219,14 +176,13 @@ public class ProductMapper {
                                 .collect(Collectors.toList());
         }
 
-        private static com.ortoroverbasso.ortorovebasso.dto.product.product_information.ProductInformationResponseDto mapProductInformation(
-                        ProductEntity product) {
+        private ProductInformationResponseDto mapProductInformation(ProductEntity product) {
                 return Optional.ofNullable(product.getProductInformation())
                                 .map(ProductInformationMapper::toResponseDto)
                                 .orElse(null);
         }
 
-        private static List<ProductFeaturesResponseDto> mapProductFeatures(ProductEntity product) {
+        private List<ProductFeaturesResponseDto> mapProductFeatures(ProductEntity product) {
                 if (product.getProductFeatures() == null || product.getProductFeatures().isEmpty()) {
                         return Collections.emptyList();
                 }
@@ -239,7 +195,7 @@ public class ProductMapper {
                                 .collect(Collectors.toList());
         }
 
-        private static List<ProductWhyChooseResponseNoProductIdDto> mapWhyChoose(ProductEntity product) {
+        private List<ProductWhyChooseResponseNoProductIdDto> mapWhyChoose(ProductEntity product) {
                 if (product.getWhyChoose() == null || product.getWhyChoose().isEmpty()) {
                         return Collections.emptyList();
                 }

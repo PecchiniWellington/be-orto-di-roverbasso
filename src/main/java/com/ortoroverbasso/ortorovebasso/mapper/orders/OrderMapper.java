@@ -2,26 +2,34 @@ package com.ortoroverbasso.ortorovebasso.mapper.orders;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.ortoroverbasso.ortorovebasso.dto.orders.OrderRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.orders.OrderResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.ProductQuantityDto;
+import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.dto.shipping.CarrierResponseDto;
+import com.ortoroverbasso.ortorovebasso.dto.user.shipping_address.ShippingAddressRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.user.shipping_address.ShippingAddressResponseDto;
 import com.ortoroverbasso.ortorovebasso.entity.order.OrderEntity;
 import com.ortoroverbasso.ortorovebasso.entity.product.ProductEntity;
 import com.ortoroverbasso.ortorovebasso.entity.shipping.CarriersEntity;
 import com.ortoroverbasso.ortorovebasso.entity.user.shipping_address.ShippingAddressEntity;
+import com.ortoroverbasso.ortorovebasso.mapper.base.BaseMapper;
 import com.ortoroverbasso.ortorovebasso.mapper.product.ProductMapper;
 
-public class OrderMapper {
+@Component
+public class OrderMapper implements BaseMapper<OrderEntity, OrderRequestDto, OrderResponseDto> {
 
-        /**
-         * Converte OrderRequestDto in OrderEntity
-         */
-        public static OrderEntity toEntity(OrderRequestDto dto) {
+        @Autowired
+        private ProductMapper productMapper;
+
+        @Override
+        public OrderEntity toEntity(OrderRequestDto dto) {
                 if (dto == null) {
                         return null;
                 }
@@ -35,24 +43,18 @@ public class OrderMapper {
                 entity.setTotalShippingTaxIncl(dto.getTotalShippingTaxIncl());
                 entity.setStatus(dto.getStatus());
 
-                // Mapping Shipping Address - usa mapper dedicato se esiste
                 if (dto.getShippingAddress() != null) {
                         ShippingAddressEntity shippingAddress = mapShippingAddress(dto.getShippingAddress());
                         entity.setShippingAddress(shippingAddress);
                 }
 
-                // Mapping Products - NOTA: Questo approccio potrebbe non essere corretto
-                // In un vero scenario, dovresti recuperare i ProductEntity esistenti dal
-                // database
-                // invece di crearne di nuovi con solo reference e quantity
                 if (dto.getProducts() != null) {
                         List<ProductEntity> products = dto.getProducts().stream()
-                                        .map(OrderMapper::createProductEntityForOrder)
+                                        .map(this::createProductEntityForOrder)
                                         .collect(Collectors.toList());
                         entity.setProducts(products);
                 }
 
-                // Mapping Carriers
                 if (dto.getCarriers() != null) {
                         List<CarriersEntity> carriers = dto.getCarriers().stream()
                                         .map(carrierDto -> createCarrierEntity(carrierDto.getName()))
@@ -63,10 +65,8 @@ public class OrderMapper {
                 return entity;
         }
 
-        /**
-         * Converte OrderEntity in OrderResponseDto
-         */
-        public static OrderResponseDto toResponse(OrderEntity entity) {
+        @Override
+        public OrderResponseDto toResponseDto(OrderEntity entity) {
                 if (entity == null) {
                         return null;
                 }
@@ -81,27 +81,22 @@ public class OrderMapper {
                 dto.setTotalShippingTaxIncl(entity.getTotalShippingTaxIncl());
                 dto.setStatus(entity.getStatus());
 
-                // Mapping Shipping Address
                 if (entity.getShippingAddress() != null) {
-                        ShippingAddressResponseDto shippingAddressDto = mapShippingAddressToDto(
-                                        entity.getShippingAddress());
-                        dto.setShippingAddress(shippingAddressDto);
+                        dto.setShippingAddress(mapShippingAddressToDto(entity.getShippingAddress()));
                 }
 
-                // Mapping Products - usa ProductMapper se disponibile
                 if (entity.getProducts() != null) {
                         List<ProductResponseDto> productDtos = entity.getProducts().stream()
-                                        .map(ProductMapper::toResponseDto)
+                                        .map(productMapper::toResponseDto)
                                         .collect(Collectors.toList());
                         dto.setProducts(productDtos);
                 } else {
                         dto.setProducts(Collections.emptyList());
                 }
 
-                // Mapping Carriers
                 if (entity.getCarriers() != null) {
                         List<CarrierResponseDto> carrierDtos = entity.getCarriers().stream()
-                                        .map(OrderMapper::mapCarrierToDto)
+                                        .map(this::mapCarrierToDto)
                                         .collect(Collectors.toList());
                         dto.setCarriers(carrierDtos);
                 } else {
@@ -111,24 +106,24 @@ public class OrderMapper {
                 return dto;
         }
 
-        /**
-         * Converte una lista di OrderEntity in lista di OrderResponseDto
-         */
-        public static List<OrderResponseDto> toResponseList(List<OrderEntity> entities) {
-                if (entities == null || entities.isEmpty()) {
-                        return Collections.emptyList();
-                }
+        @Override
+        public void updateEntityFromDto(OrderRequestDto dto, OrderEntity entity) {
+                if (dto == null || entity == null)
+                        return;
 
-                return entities.stream()
-                                .map(OrderMapper::toResponse)
-                                .collect(Collectors.toList());
+                entity.setInternalReference(dto.getInternalReference());
+                entity.setTotalPaidTaxIncl(dto.getTotalPaidTaxIncl());
+                entity.setTotalPaidTaxExcl(dto.getTotalPaidTaxExcl());
+                entity.setTotalShippingTaxExcl(dto.getTotalShippingTaxExcl());
+                entity.setTotalShippingTaxIncl(dto.getTotalShippingTaxIncl());
+                entity.setStatus(dto.getStatus());
         }
 
-        // Metodi helper privati
+        // ============================
+        // Metodi helper
+        // ============================
 
-        private static ShippingAddressEntity mapShippingAddress(
-                        com.ortoroverbasso.ortorovebasso.dto.user.shipping_address.ShippingAddressRequestDto shippingDto) {
-
+        private ShippingAddressEntity mapShippingAddress(ShippingAddressRequestDto shippingDto) {
                 if (shippingDto == null) {
                         return null;
                 }
@@ -145,14 +140,12 @@ public class OrderMapper {
                 shippingAddress.setVatNumber(shippingDto.getVatNumber());
                 shippingAddress.setCompanyName(shippingDto.getCompanyName());
                 shippingAddress.setComment(shippingDto.getComment());
-
                 return shippingAddress;
         }
 
-        private static ShippingAddressResponseDto mapShippingAddressToDto(ShippingAddressEntity entity) {
-                if (entity == null) {
+        private ShippingAddressResponseDto mapShippingAddressToDto(ShippingAddressEntity entity) {
+                if (entity == null)
                         return null;
-                }
 
                 ShippingAddressResponseDto dto = new ShippingAddressResponseDto();
                 dto.setFirstName(entity.getFirstName());
@@ -166,26 +159,17 @@ public class OrderMapper {
                 dto.setVatNumber(entity.getVatNumber());
                 dto.setCompanyName(entity.getCompanyName());
                 dto.setComment(entity.getComment());
-
                 return dto;
         }
 
-        /**
-         * ATTENZIONE: Questo metodo crea un ProductEntity minimale per l'ordine.
-         * In un vero scenario, dovresti recuperare l'entità dal database
-         * usando il ProductRepository.findByReference() o simile.
-         */
-        private static ProductEntity createProductEntityForOrder(Object productDto) {
-                if (productDto == null) {
+        private ProductEntity createProductEntityForOrder(Object productDto) {
+                if (productDto == null)
                         return null;
-                }
 
                 ProductEntity product = new ProductEntity();
 
-                // Gestisci diversi tipi di DTO prodotto
-                if (productDto instanceof com.ortoroverbasso.ortorovebasso.dto.product.ProductQuantityDto) {
-                        com.ortoroverbasso.ortorovebasso.dto.product.ProductQuantityDto quantityDto = (com.ortoroverbasso.ortorovebasso.dto.product.ProductQuantityDto) productDto;
-
+                if (productDto instanceof ProductQuantityDto) {
+                        ProductQuantityDto quantityDto = (ProductQuantityDto) productDto;
                         product.setQuantity(quantityDto.getQuantity());
                         if (quantityDto.getReference() != null) {
                                 product.setReference(quantityDto.getReference());
@@ -194,47 +178,40 @@ public class OrderMapper {
                                 product.setReference("PRODUCT-" + quantityDto.getProductId());
                                 product.setSku("ORDER-TEMP-" + quantityDto.getProductId());
                         }
-
-                } else if (productDto instanceof com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto) {
-                        com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto requestDto = (com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto) productDto;
-
+                } else if (productDto instanceof ProductRequestDto) {
+                        ProductRequestDto requestDto = (ProductRequestDto) productDto;
                         product.setQuantity(requestDto.getQuantity());
                         product.setReference(requestDto.getReference());
                         product.setSku(requestDto.getSku());
                         product.setRetailPrice(requestDto.getRetailPrice());
-
                 } else {
-                        // Fallback per tipi sconosciuti
                         product.setReference("UNKNOWN-PRODUCT");
                         product.setSku("ORDER-TEMP-UNKNOWN");
                         product.setQuantity(1);
                 }
 
-                // Imposta valori di default per campi obbligatori
                 if (product.getSku() == null) {
                         product.setSku("ORDER-TEMP-" + System.currentTimeMillis());
                 }
                 if (product.getRetailPrice() == null) {
                         product.setRetailPrice(java.math.BigDecimal.ZERO);
                 }
-                product.setActive(true);
 
+                product.setActive(true);
                 return product;
         }
 
-        private static CarriersEntity createCarrierEntity(String name) {
+        private CarriersEntity createCarrierEntity(String name) {
                 if (name == null || name.trim().isEmpty()) {
                         return null;
                 }
 
                 CarriersEntity carrier = new CarriersEntity();
                 carrier.setName(name);
-                // Imposta altri campi di default se necessario
-
                 return carrier;
         }
 
-        private static CarrierResponseDto mapCarrierToDto(CarriersEntity entity) {
+        private CarrierResponseDto mapCarrierToDto(CarriersEntity entity) {
                 if (entity == null) {
                         return null;
                 }
@@ -244,57 +221,4 @@ public class OrderMapper {
                                 entity.getName(),
                                 entity.getPrice());
         }
-
-        /**
-         * Metodo alternativo più sicuro per mappare prodotti in ordini.
-         * Questo dovrebbe essere usato quando hai accesso al ProductRepository.
-         */
-        public static OrderEntity toEntityWithProductLookup(
-                        OrderRequestDto dto,
-                        java.util.function.Function<Long, ProductEntity> productFinderById,
-                        java.util.function.Function<String, ProductEntity> productFinderByReference) {
-
-                if (dto == null) {
-                        return null;
-                }
-
-                OrderEntity entity = toEntity(dto);
-
-                // Recupera i veri prodotti dal DB
-                if (dto.getProducts() != null) {
-                        List<ProductEntity> realProducts = dto.getProducts().stream()
-                                        .map(quantityDto -> {
-                                                ProductEntity realProduct = null;
-
-                                                if (quantityDto.getProductId() != null && productFinderById != null) {
-                                                        realProduct = productFinderById
-                                                                        .apply(quantityDto.getProductId());
-                                                } else if (quantityDto.getReference() != null
-                                                                && productFinderByReference != null) {
-                                                        realProduct = productFinderByReference
-                                                                        .apply(quantityDto.getReference());
-                                                }
-
-                                                if (realProduct != null) {
-                                                        ProductEntity orderProduct = new ProductEntity();
-                                                        orderProduct.setId(realProduct.getId());
-                                                        orderProduct.setSku(realProduct.getSku());
-                                                        orderProduct.setReference(realProduct.getReference());
-                                                        orderProduct.setRetailPrice(realProduct.getRetailPrice());
-                                                        orderProduct.setActive(realProduct.getActive());
-                                                        orderProduct.setQuantity(quantityDto.getQuantity());
-                                                        return orderProduct;
-                                                }
-
-                                                return null;
-                                        })
-                                        .filter(Objects::nonNull)
-                                        .collect(Collectors.toList());
-
-                        entity.setProducts(realProducts);
-                }
-
-                return entity;
-        }
-
 }

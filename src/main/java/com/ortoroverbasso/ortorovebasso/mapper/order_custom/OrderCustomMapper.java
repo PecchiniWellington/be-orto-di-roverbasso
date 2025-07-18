@@ -22,10 +22,17 @@ import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 
 @Component
 public class OrderCustomMapper {
+
     @Autowired
     private ProductRepository productRepository;
 
-    public static OrderCustomResponseDto toDto(OrderCustomEntity entity) {
+    @Autowired
+    private ProductMapper productMapper;
+
+    @Autowired
+    private PickupMapper pickupMapper;
+
+    public OrderCustomResponseDto toDto(OrderCustomEntity entity) {
         if (entity == null)
             return null;
 
@@ -40,20 +47,22 @@ public class OrderCustomMapper {
         }
 
         if (entity.getPickupOrder() != null) {
-            dto.setPickupOrder(PickupMapper.toDto(entity.getPickupOrder()));
+            dto.setPickupOrder(pickupMapper.toDto(entity.getPickupOrder()));
         }
+
         if (entity.getUser() != null) {
             dto.setUserId(entity.getUser().getId());
         }
 
         if (entity.getOrderProducts() != null) {
-            List<OrderCustomProductDto> productDtos = entity.getOrderProducts().stream().map(orderProduct -> {
-                OrderCustomProductDto opDto = new OrderCustomProductDto();
-                opDto.setProduct(ProductMapper.toResponseDto(orderProduct.getProduct()));
-                opDto.setQuantity(orderProduct.getQuantity());
-                return opDto;
-            }).collect(Collectors.toList());
-
+            List<OrderCustomProductDto> productDtos = entity.getOrderProducts().stream()
+                    .map(orderProduct -> {
+                        OrderCustomProductDto opDto = new OrderCustomProductDto();
+                        opDto.setProduct(productMapper.toResponseDto(orderProduct.getProduct()));
+                        opDto.setQuantity(orderProduct.getQuantity());
+                        return opDto;
+                    })
+                    .collect(Collectors.toList());
             dto.setProducts(productDtos);
         }
 
@@ -65,7 +74,7 @@ public class OrderCustomMapper {
             return entity;
 
         if (dto.getPickupOrder() != null) {
-            entity.setPickupOrder(PickupMapper.toEntity(dto.getPickupOrder()));
+            entity.setPickupOrder(pickupMapper.toEntity(dto.getPickupOrder()));
         }
 
         if (dto.getProducts() != null && !dto.getProducts().isEmpty()) {
@@ -97,16 +106,17 @@ public class OrderCustomMapper {
         order.setPickupOrder(pickup);
         order.setCart(cart);
 
-        List<OrderCustomProductEntity> orderProducts = cartItems.stream().map(item -> {
-            OrderCustomProductEntity op = new OrderCustomProductEntity();
-            op.setOrder(order);
-            op.setProduct(item.getProduct());
-            op.setQuantity(item.getQuantity());
-            return op;
-        }).collect(Collectors.toList());
+        List<OrderCustomProductEntity> orderProducts = cartItems.stream()
+                .map(item -> {
+                    OrderCustomProductEntity op = new OrderCustomProductEntity();
+                    op.setOrder(order);
+                    op.setProduct(item.getProduct());
+                    op.setQuantity(item.getQuantity());
+                    return op;
+                })
+                .collect(Collectors.toList());
 
         order.setOrderProducts(orderProducts);
-
         return order;
     }
 }

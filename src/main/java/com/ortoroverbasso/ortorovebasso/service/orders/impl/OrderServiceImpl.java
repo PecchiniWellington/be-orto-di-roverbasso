@@ -13,53 +13,39 @@ import com.ortoroverbasso.ortorovebasso.service.orders.IOrderService;
 @Service
 public class OrderServiceImpl implements IOrderService {
 
+    private final OrderRepository orderRepository;
+    private final OrderMapper orderMapper;
+
     @Autowired
-    private OrderRepository orderRepository;
+    public OrderServiceImpl(OrderRepository orderRepository, OrderMapper orderMapper) {
+        this.orderRepository = orderRepository;
+        this.orderMapper = orderMapper;
+    }
 
     @Override
     public OrderResponseDto createOrder(OrderRequestDto orderRequestDto) {
-        // Mappiamo il DTO nella Entity
-        OrderEntity orderEntity = OrderMapper.toEntity(orderRequestDto);
-
-        // Salviamo l'ordine nel database
+        OrderEntity orderEntity = orderMapper.toEntity(orderRequestDto);
         OrderEntity savedOrder = orderRepository.save(orderEntity);
-
-        // Ritorniamo il DTO della risposta
-        return OrderMapper.toResponse(savedOrder);
+        return orderMapper.toResponseDto(savedOrder);
     }
 
     @Override
     public OrderResponseDto getOrderById(Long id) {
-        // Recuperiamo l'ordine dal database
         OrderEntity orderEntity = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
-
-        // Mappiamo l'entità alla risposta DTO
-        return OrderMapper.toResponse(orderEntity);
+        return orderMapper.toResponseDto(orderEntity);
     }
 
     @Override
     public void updateOrder(Long id, OrderRequestDto orderRequestDto) {
-        // Recuperiamo l'ordine dal database
         OrderEntity orderEntity = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
-
-        // Aggiorniamo l'ordine con i dati dal DTO
-        orderEntity.setInternalReference(orderRequestDto.getInternalReference());
-        orderEntity.setDateAdd(orderRequestDto.getDateAdd());
-        orderEntity.setTotalPaidTaxIncl(orderRequestDto.getTotalPaidTaxIncl());
-        orderEntity.setTotalPaidTaxExcl(orderRequestDto.getTotalPaidTaxExcl());
-        orderEntity.setTotalShippingTaxExcl(orderRequestDto.getTotalShippingTaxExcl());
-        orderEntity.setTotalShippingTaxIncl(orderRequestDto.getTotalShippingTaxIncl());
-        orderEntity.setStatus(orderRequestDto.getStatus());
-
-        // Salviamo i cambiamenti nel database
+        orderMapper.updateEntityFromDto(orderRequestDto, orderEntity);
         orderRepository.save(orderEntity);
     }
 
     @Override
     public void deleteOrder(Long id) {
-        // Eliminiamo l'ordine dal database
         orderRepository.deleteById(id);
     }
 }

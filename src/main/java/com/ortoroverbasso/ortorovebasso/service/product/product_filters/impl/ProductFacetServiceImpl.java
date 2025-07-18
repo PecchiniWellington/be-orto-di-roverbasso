@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,6 +24,8 @@ import com.ortoroverbasso.ortorovebasso.mapper.product.ProductMapper;
 import com.ortoroverbasso.ortorovebasso.repository.product.ProductRepository;
 import com.ortoroverbasso.ortorovebasso.service.product.product_filters.IProductFacetService;
 import com.ortoroverbasso.ortorovebasso.specification.product.ProductSpecification;
+import com.ortoroverbasso.ortorovebasso.utils.criteria.CriteriaBuilderUtils;
+import com.ortoroverbasso.ortorovebasso.utils.pagination.PaginationUtils;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -41,6 +43,9 @@ public class ProductFacetServiceImpl implements IProductFacetService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private ProductMapper productMapper;
 
     @Override
     public ProductFacetResponseDto getFacets(ProductFilterRequestDto filterDto) {
@@ -66,6 +71,52 @@ public class ProductFacetServiceImpl implements IProductFacetService {
 
         return facet;
     }
+
+    @Override
+    public PaginatedResponseDto<ProductResponseDto> getFilteredProducts(ProductFilterRequestDto filterDto,
+            Pageable pageable) {
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        // Applica sorting se presente
+        Pageable sortedPageable = applySorting(pageable, filterDto.getSort());
+
+        // Query per i risultati
+        CriteriaQuery<ProductEntity> query = cb.createQuery(ProductEntity.class);
+        Root<ProductEntity> root = query.from(ProductEntity.class);
+
+        // Fetch joins per evitare N+1 queries
+        root.fetch("productImages", JoinType.LEFT);
+        root.fetch("productInformation", JoinType.LEFT);
+        root.fetch("category", JoinType.LEFT);
+        query.distinct(true);
+
+        // Costruzione predicati usando utilities
+        List<Predicate> predicates = buildPredicates(filterDto, cb, root);
+        query.where(CriteriaBuilderUtils.combineWithAnd(cb, predicates));
+
+        // Applicazione del sorting
+        applySortingToQuery(query, cb, root, filterDto.getSort());
+
+        // Query per il count
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<ProductEntity> countRoot = countQuery.from(ProductEntity.class);
+        List<Predicate> countPredicates = buildPredicates(filterDto, cb, countRoot);
+        countQuery.select(cb.countDistinct(countRoot))
+                .where(CriteriaBuilderUtils.combineWithAnd(cb, countPredicates));
+
+        // Esecuzione usando utility
+        Page<ProductEntity> page = CriteriaBuilderUtils.executePagedQuery(
+                entityManager, query, countQuery, sortedPageable);
+
+        // Conversione in DTO
+        List<ProductResponseDto> dtoList = productMapper.toResponseDtoList(page.getContent());
+
+        // Usa PaginationUtils
+        return PaginationUtils.toPaginatedResponse(dtoList, sortedPageable, page.getTotalElements());
+    }
+
+    // Metodi helper privati
 
     private void calculatePriceRange(Specification<ProductEntity> spec, ProductFacetResponseDto facet,
             CriteriaBuilder cb) {
@@ -103,16 +154,18 @@ public class ProductFacetServiceImpl implements IProductFacetService {
             CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
             Root<ProductEntity> root = countQuery.from(ProductEntity.class);
             Predicate predicate = spec.toPredicate(root, countQuery, cb);
-            Predicate rangePredicate = cb.between(
-                    root.get("retailPrice"),
-                    BigDecimal.valueOf(i),
-                    BigDecimal.valueOf(i + step - 1));
 
+            // Usa CriteriaBuilderUtils per il range
+            Predicate rangePredicate = CriteriaBuilderUtils.createRangePredicate(cb, root, "retailPrice",
+                    BigDecimal.valueOf(i), BigDecimal.valueOf(i + step - 1));
+
+            List<Predicate> predicates = new ArrayList<>();
             if (predicate != null) {
-                countQuery.select(cb.count(root)).where(cb.and(predicate, rangePredicate));
-            } else {
-                countQuery.select(cb.count(root)).where(rangePredicate);
+                predicates.add(predicate);
             }
+            predicates.add(rangePredicate);
+
+            countQuery.select(cb.count(root)).where(CriteriaBuilderUtils.combineWithAnd(cb, predicates));
 
             Long count = entityManager.createQuery(countQuery).getSingleResult();
             if (count > 0) {
@@ -159,16 +212,18 @@ public class ProductFacetServiceImpl implements IProductFacetService {
             CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
             Root<ProductEntity> root = countQuery.from(ProductEntity.class);
             Predicate predicate = spec.toPredicate(root, countQuery, cb);
-            Predicate rangePredicate = cb.between(
-                    root.get("weight"),
-                    BigDecimal.valueOf(i),
-                    BigDecimal.valueOf(i + step - 1));
 
+            // Usa CriteriaBuilderUtils per il range
+            Predicate rangePredicate = CriteriaBuilderUtils.createRangePredicate(cb, root, "weight",
+                    BigDecimal.valueOf(i), BigDecimal.valueOf(i + step - 1));
+
+            List<Predicate> predicates = new ArrayList<>();
             if (predicate != null) {
-                countQuery.select(cb.count(root)).where(cb.and(predicate, rangePredicate));
-            } else {
-                countQuery.select(cb.count(root)).where(rangePredicate);
+                predicates.add(predicate);
             }
+            predicates.add(rangePredicate);
+
+            countQuery.select(cb.count(root)).where(CriteriaBuilderUtils.combineWithAnd(cb, predicates));
 
             Long count = entityManager.createQuery(countQuery).getSingleResult();
             if (count > 0) {
@@ -179,49 +234,35 @@ public class ProductFacetServiceImpl implements IProductFacetService {
         facet.setWeightRanges(ranges);
     }
 
-    @Override
-    public PaginatedResponseDto<ProductResponseDto> getFilteredProducts(ProductFilterRequestDto filterDto,
-            Pageable pageable) {
+    private List<Predicate> buildPredicates(ProductFilterRequestDto filterDto, CriteriaBuilder cb,
+            Root<ProductEntity> root) {
+        List<Predicate> predicates = new ArrayList<>();
 
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        // Sempre attivo
+        predicates.add(CriteriaBuilderUtils.createBooleanPredicate(cb, root, "active", true));
 
-        // Applica sorting se presente
-        Pageable sortedPageable = applySorting(pageable, filterDto.getSort());
+        if (filterDto == null) {
+            return predicates;
+        }
 
-        // Query per i risultati
-        CriteriaQuery<ProductEntity> query = cb.createQuery(ProductEntity.class);
-        Root<ProductEntity> root = query.from(ProductEntity.class);
+        // Range di prezzo
+        if (filterDto.getMinPrice() != null || filterDto.getMaxPrice() != null) {
+            predicates.add(CriteriaBuilderUtils.createRangePredicate(cb, root, "retailPrice",
+                    filterDto.getMinPrice(), filterDto.getMaxPrice()));
+        }
 
-        // Fetch joins per evitare N+1 queries
-        root.fetch("productImages", JoinType.LEFT);
-        root.fetch("productInformation", JoinType.LEFT);
-        root.fetch("category", JoinType.LEFT);
-        query.distinct(true);
+        // Ricerca testuale
+        if (filterDto.getSearch() != null) {
+            predicates.add(CriteriaBuilderUtils.createTextSearchPredicate(cb, root, filterDto.getSearch(),
+                    "sku", "reference", "productInformation.name"));
+        }
 
-        // Costruzione predicati
-        List<Predicate> predicates = ProductSpecification.buildPredicateList(filterDto, cb, root);
-        query.where(predicates.toArray(new Predicate[0]));
+        // Disponibilità
+        if (filterDto.getAvailable() != null && filterDto.getAvailable()) {
+            predicates.add(cb.greaterThan(root.get("quantity"), 0));
+        }
 
-        // Applicazione del sorting
-        applySortingToQuery(query, cb, root, filterDto.getSort());
-
-        // Esecuzione query con paginazione
-        List<ProductEntity> resultList = entityManager.createQuery(query)
-                .setFirstResult((int) sortedPageable.getOffset())
-                .setMaxResults(sortedPageable.getPageSize())
-                .getResultList();
-
-        // Query per il count
-        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-        Root<ProductEntity> countRoot = countQuery.from(ProductEntity.class);
-        List<Predicate> countPredicates = ProductSpecification.buildPredicateList(filterDto, cb, countRoot);
-        countQuery.select(cb.countDistinct(countRoot)).where(countPredicates.toArray(new Predicate[0]));
-        Long total = entityManager.createQuery(countQuery).getSingleResult();
-
-        // Conversione in DTO
-        List<ProductResponseDto> dtoList = ProductMapper.toResponseDtoList(resultList);
-
-        return PaginatedResponseDto.fromPage(new PageImpl<>(dtoList, sortedPageable, total));
+        return predicates;
     }
 
     private Pageable applySorting(Pageable defaultPageable, ProductSortEnum sortOption) {

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +28,7 @@ import com.ortoroverbasso.ortorovebasso.dto.product.ProductFlatDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductRequestDto;
 import com.ortoroverbasso.ortorovebasso.dto.product.ProductResponseDto;
 import com.ortoroverbasso.ortorovebasso.service.product.IProductService;
+import com.ortoroverbasso.ortorovebasso.utils.pagination.PaginationUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -77,7 +77,8 @@ public class ProductController {
                         @Parameter(description = "Numero di pagina (0-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
                         @Parameter(description = "Dimensione della pagina") @RequestParam(defaultValue = "10") @Min(1) @Max(ProductConstants.MAX_PAGE_SIZE) int size) {
 
-                Pageable pageable = PageRequest.of(page, size);
+                // Usa PaginationUtils per creare Pageable sicuro
+                Pageable pageable = PaginationUtils.createPageable(page, size);
                 PaginatedResponseDto<ProductResponseDto> products = productService.getAllProducts(pageable);
                 return ResponseEntity.ok(products);
         }
@@ -163,7 +164,17 @@ public class ProductController {
         @PostMapping("/filter")
         public ResponseEntity<PaginatedResponseDto<ProductResponseDto>> getFilteredProducts(
                         @Valid @RequestBody ProductFilterRequestDto filterDto,
-                        @Parameter(description = "Parametri di paginazione") Pageable pageable) {
+                        @Parameter(description = "Numero di pagina") @RequestParam(defaultValue = "0") @Min(0) int page,
+                        @Parameter(description = "Dimensione pagina") @RequestParam(defaultValue = "10") @Min(1) @Max(ProductConstants.MAX_PAGE_SIZE) int size,
+                        @Parameter(description = "Campo di ordinamento") @RequestParam(required = false) String sortBy,
+                        @Parameter(description = "Direzione ordinamento") @RequestParam(required = false) String sortDirection) {
+
+                // Usa PaginationUtils per creare Pageable con sorting
+                Pageable pageable = PaginationUtils.createPageable(page, size);
+                if (sortBy != null) {
+                        pageable = PaginationUtils.applySorting(pageable, sortBy, sortDirection);
+                }
+
                 PaginatedResponseDto<ProductResponseDto> filteredProducts = productService.getFilteredProducts(
                                 filterDto, pageable);
                 return ResponseEntity.ok(filteredProducts);
@@ -199,7 +210,8 @@ public class ProductController {
                         @Parameter(description = "Numero di pagina (0-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
                         @Parameter(description = "Dimensione della pagina") @RequestParam(defaultValue = "10") @Min(1) @Max(ProductConstants.MAX_PAGE_SIZE) int size) {
 
-                Pageable pageable = PageRequest.of(page, size);
+                // Usa PaginationUtils
+                Pageable pageable = PaginationUtils.createPageable(page, size);
                 Page<ProductFlatDto> products = productService.getFlatProductsPaginated(pageable);
                 return ResponseEntity.ok(products);
         }
@@ -215,7 +227,8 @@ public class ProductController {
                         @Parameter(description = "Numero di pagina (0-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
                         @Parameter(description = "Dimensione della pagina") @RequestParam(defaultValue = "10") @Min(1) @Max(ProductConstants.MAX_PAGE_SIZE) int size) {
 
-                Pageable pageable = PageRequest.of(page, size);
+                // Usa PaginationUtils
+                Pageable pageable = PaginationUtils.createPageable(page, size);
                 PaginatedResponseDto<ProductResponseDto> products = productService.getProductsByPriceRange(
                                 minPrice, maxPrice, pageable);
                 return ResponseEntity.ok(products);
